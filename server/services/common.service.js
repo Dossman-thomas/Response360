@@ -5,60 +5,12 @@ dotenv.config();
 const pubkey = process.env.pubkey; // Public key from .env file
 console.log("🔹 Loaded pubkey from .env:", pubkey);
 const parsedPubKey = CryptoJS.enc.Utf8.parse(pubkey);
-
 console.log("✅ Parsed public key:", parsedPubKey.toString());
 
 // Function to generate random IV
 const generateIV = () => CryptoJS.lib.WordArray.random(16);
 
 // Encrypt function
-// export const encryptService = (data) => {
-//   if (!data) return "";
-
-//   const uuid = CryptoJS.lib.WordArray.random(16)
-//     .toString(CryptoJS.enc.Hex)
-//     .replace(/-/g, "");
-//   const iv = generateIV(); // Generate IV only once
-
-//   // First level encryption (use the same IV)
-//   const firstEncrypt = CryptoJS.AES.encrypt(
-//     JSON.stringify(data),
-//     CryptoJS.enc.Utf8.parse(uuid),
-//     { iv: iv }
-//   ).toString();
-
-//   const combined = `${uuid}###${firstEncrypt}`;
-
-//   // Second level encryption (use the same IV)
-//   const finalEncrypt = CryptoJS.AES.encrypt(combined, parsedPubKey, {
-//     iv: iv,
-//   }).toString();
-
-//   return {
-//     encryptedData: finalEncrypt,
-//     iv: CryptoJS.enc.Base64.stringify(iv), // Send IV separately
-//   };
-// };
-
-// Decrypt function
-// export const decryptService = (encryptedText, ivBase64) => {
-//   if (!encryptedText) return "";
-
-//   const iv = CryptoJS.enc.Base64.parse(ivBase64); // Convert IV from Base64
-//   const decrypted = CryptoJS.AES.decrypt(encryptedText, parsedPubKey, {
-//     iv: iv,
-//   }).toString(CryptoJS.enc.Utf8);
-
-//   const [uuid, encryptedPayload] = decrypted.split("###");
-//   const firstKey = CryptoJS.enc.Utf8.parse(uuid);
-
-//   const decryptedPayload = CryptoJS.AES.decrypt(encryptedPayload, firstKey, {
-//     iv: iv,
-//   }).toString(CryptoJS.enc.Utf8);
-
-//   return JSON.parse(decryptedPayload);
-// };
-
 export const encryptService = (data) => {
   if (!data) {
     console.warn("⚠️ Warning: No data provided for encryption.");
