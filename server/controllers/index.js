@@ -1,0 +1,1 @@
+export { encryptController, decryptController } from "./common.controller.js";
