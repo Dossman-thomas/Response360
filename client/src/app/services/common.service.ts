@@ -7,60 +7,61 @@ import { environment } from '../shared/environments/environment';
   providedIn: 'root',
 })
 export class CommonService {
-  // getting pubkey from environment.ts file
   pkey: any = environment.pubkey.split('v1s');
-  // convert in utf8 format for encryption and decryption
   pubkey: any = crypto.enc.Utf8.parse(this.pkey[0]);
-  // ivarray:any = crypto.enc.Utf8.parse(environment.ivarray);
 
-  // Function to generate random ivarray (Initialization Vector)
+  // Generate random IV (16 bytes)
   generateIV() {
-    return crypto.lib.WordArray.random(16); // Generates random 16 bytes
+    return crypto.lib.WordArray.random(16);
   }
 
-  // Function is used for encrypt json
+  // Encrypt function
   Encrypt(text: any) {
     if (!text) {
       return '';
     }
-
-    // Generate unique id and remove hyphens
+  
     const uuid = uuidv4().replace(/-/g, '');
-    // dynamically generate a new IV for each encryption
-    const iv = this.generateIV();
-
-    // first level of encryption using a random IV
-    let firstEncrypt = crypto.AES.encrypt(
+    const iv = this.generateIV(); // Generate IV only once
+  
+    // First level encryption (use the same IV)
+    const firstEncrypt = crypto.AES.encrypt(
       JSON.stringify(text),
       crypto.enc.Utf8.parse(uuid),
-      { iv: iv }
+      { iv: iv } // Ensure IV is passed
     ).toString();
-
-    let connect = uuid + '###' + firstEncrypt;
-
-    return crypto.AES.encrypt(connect, this.pubkey, {
-      iv: iv,
+  
+    const combined = `${uuid}###${firstEncrypt}`;
+  
+    // Second level encryption (use the same IV)
+    const finalEncrypt = crypto.AES.encrypt(combined, this.pubkey, {
+      iv: iv, // SAME IV used here
     }).toString();
+  
+    return {
+      encryptedData: finalEncrypt,
+      iv: crypto.enc.Base64.stringify(iv), // Send IV separately
+    };
   }
+  
 
-  // Function is used for decrypt json
-  Decrypt(text: any) {
-    if (!text) {
+  // Decrypt function
+  Decrypt(encryptedData: string, ivBase64: string) {
+    if (!encryptedData) {
       return '';
     }
 
-    // We need to first decrypt using the public key (same IV is used)
-    let data = crypto.AES.decrypt(text, this.pubkey).toString(crypto.enc.Utf8);
-    let finalstr = data.split('###');
+    const iv = crypto.enc.Base64.parse(ivBase64); // Parse Base64 IV
 
-    // Decrypt again with the first IV used during encryption
-    const uuid = finalstr[0]; // Extract UUID used during encryption
-    const iv = crypto.enc.Utf8.parse(uuid); // Use the same UUID as the IV for decryption
+    // First decryption using public key
+    const decrypted = crypto.AES.decrypt(encryptedData, this.pubkey, { iv: iv }).toString(crypto.enc.Utf8);
+    const [uuid, encryptedPayload] = decrypted.split('###');
 
-    return JSON.parse(
-      crypto.AES.decrypt(finalstr[1], crypto.enc.Utf8.parse(uuid), {
-        iv: iv,
-      }).toString(crypto.enc.Utf8)
-    );
+    const firstKey = crypto.enc.Utf8.parse(uuid);
+
+    // Second decryption with extracted UUID key
+    const decryptedPayload = crypto.AES.decrypt(encryptedPayload, firstKey, { iv: iv }).toString(crypto.enc.Utf8);
+
+    return JSON.parse(decryptedPayload);
   }
 }
