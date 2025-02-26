@@ -19,15 +19,24 @@ export const encryptController = (req, res) => {
 // Decrypt Data
 export const decryptController = (req, res) => {
   try {
-    const { encryptedData, iv } = req.body;
-    if (!encryptedData || !iv) {
-      return res.status(400).json({ error: "Encrypted data or IV missing" });
+    const { encryptedText } = req.body;
+
+    if (!encryptedText) {
+      return res.status(400).json({ error: "Encrypted text missing" });
     }
-    const decrypted = decryptService(encryptedData, iv);
+
+    // Call the decryption service with the full encryptedText
+    const decrypted = decryptService(encryptedText);
+
+    if (!decrypted) {
+      return res.status(400).json({ error: "Decryption failed" });
+    }
+
     return res.json({ decrypted });
   } catch (error) {
     return res
       .status(500)
-      .json({ error: "Decryption failed", details: error.message });
+      .json({ error: "Decryption error", details: error.message });
   }
 };
+

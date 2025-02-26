@@ -15,9 +15,7 @@ export const encryptService = (data) => {
     return "";
   }
 
-  const uuid = CryptoJS.lib.WordArray.random(16)
-    .toString(CryptoJS.enc.Hex)
-    .replace(/-/g, "");
+  const uuid = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex).replace(/-/g, "");
 
   const iv = generateIV(); // Generate IV only once
 
@@ -25,64 +23,49 @@ export const encryptService = (data) => {
   const firstEncrypt = CryptoJS.AES.encrypt(
     JSON.stringify(data),
     CryptoJS.enc.Utf8.parse(uuid),
-    { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+    { iv: iv }
   ).toString();
 
   const combined = `${uuid}###${firstEncrypt}`;
 
   // Second level encryption
-  const finalEncrypt = CryptoJS.AES.encrypt(combined, parsedPubKey, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString();
+  const finalEncrypt = CryptoJS.AES.encrypt(combined, parsedPubKey, { iv: iv }).toString();
 
-  return {
-    encryptedData: finalEncrypt,
-    iv: CryptoJS.enc.Base64.stringify(iv), // Send IV separately
-  };
+  // Combine final encryption with IV
+  const encryptedString = `${finalEncrypt}:${CryptoJS.enc.Base64.stringify(iv)}`;
+
+  // Return encrypted text
+  return { encryptedText: encryptedString };
 };
 
 // Decrypt function
-export const decryptService = (encryptedText, ivBase64) => {
+export const decryptService = (encryptedText) => {
   if (!encryptedText) {
     console.error("❌ Error: No encrypted text provided for decryption.");
     return "";
   }
 
+  // Extract IV from the concatenated string
+  const [encryptedPayload, ivBase64] = encryptedText.split(":");
+
   if (!ivBase64) {
-    console.error("❌ Error: No IV provided for decryption.");
+    console.error("❌ Error: No IV found in encrypted text.");
     return "";
   }
 
   // Convert IV from Base64
   const iv = CryptoJS.enc.Base64.parse(ivBase64);
 
-  if (iv.sigBytes !== 16) {
-    console.error("❌ Error: IV length is invalid. Expected 16 bytes.");
-    return "";
-  }
-
   // First decryption attempt
-  const decrypted = CryptoJS.AES.decrypt(encryptedText, parsedPubKey, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString(CryptoJS.enc.Utf8);
+  const decrypted = CryptoJS.AES.decrypt(encryptedPayload, parsedPubKey, { iv: iv }).toString(CryptoJS.enc.Utf8);
 
-  const [uuid, encryptedPayload] = decrypted.split("###");
+  const [uuid, firstEncryptedData] = decrypted.split("###");
 
   // Convert UUID to key
   const firstKey = CryptoJS.enc.Utf8.parse(uuid);
 
   // Second decryption attempt
-  const decryptedPayload = CryptoJS.AES.decrypt(encryptedPayload, firstKey, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString(CryptoJS.enc.Utf8);
+  const decryptedPayload = CryptoJS.AES.decrypt(firstEncryptedData, firstKey, { iv: iv }).toString(CryptoJS.enc.Utf8);
 
-  const parsedData = JSON.parse(decryptedPayload);
-
-  return parsedData;
+  return JSON.parse(decryptedPayload);
 };
