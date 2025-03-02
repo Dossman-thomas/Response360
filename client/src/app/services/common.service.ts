@@ -7,7 +7,8 @@ import { environment } from '../shared/environments/environment';
   providedIn: 'root',
 })
 export class CommonService {
-  pkey: any = environment.pubkey.split('v1s');
+
+  pkey: any = environment.pubkey;
   pubkey: any = crypto.enc.Utf8.parse(this.pkey[0]);
 
   // Generate random IV (16 bytes)
