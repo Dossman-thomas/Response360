@@ -7,43 +7,41 @@ import { environment } from '../shared/environments/environment';
   providedIn: 'root',
 })
 export class CryptoService {
-  pkey: any = environment.pubkey;
-  pubkey: any = crypto.enc.Utf8.parse(this.pkey[0]);
+  private pkey: any = environment.Pub_key;
+  private pubkey: any = crypto.enc.Utf8.parse(this.pkey);
 
   // Generate random IV (16 bytes)
-  generateIV() {
+  private generateIV() {
     return crypto.lib.WordArray.random(16);
   }
 
   // Encrypt function
-  Encrypto(text: any) {
-    if (!text) {
-      console.warn("⚠️ Warning: No data provided for encryption.");
-      return '';
+  Encrypto(data: any) {
+    if (!data) {
+      console.warn('⚠️ Warning: No data provided for encryption.');
+      return { encryptedText: '' };
     }
 
-    const uuid = uuidv4().replace(/-/g, ''); 
-    const uuidKey = crypto.SHA256(uuid); 
+    const uuid = uuidv4().replace(/-/g, '');
+    const uuidKey = crypto.enc.Hex.parse(crypto.SHA256(uuid).toString());
     const iv = this.generateIV();
 
     // First level encryption
-    const firstEncrypt = crypto.AES.encrypt(
-      JSON.stringify(text),
-      uuidKey,
-      { iv: iv }
-    ).toString();
+    const firstEncrypt = crypto.AES.encrypt(JSON.stringify(data), uuidKey, {
+      iv: iv,
+    }).toString();
 
     const combined = `${uuid}###${firstEncrypt}`;
 
     // Second level encryption
-    const finalEncrypt = crypto.AES.encrypt(
-      combined,
-      this.pubkey,
-      { iv: iv }
-    ).toString();
+    const finalEncrypt = crypto.AES.encrypt(combined, this.pubkey, {
+      iv: iv,
+    }).toString();
 
     // Concatenate final encryption with IV
-    const encryptedString = `${finalEncrypt}:${crypto.enc.Base64.stringify(iv)}`;
+    const encryptedString = `${finalEncrypt}:${crypto.enc.Base64.stringify(
+      iv
+    )}`;
 
     return { encryptedText: encryptedString };
   }
@@ -51,34 +49,39 @@ export class CryptoService {
   // Decrypt function
   Decrypto(encryptedText: string) {
     if (!encryptedText) {
-      console.error("❌ Error: No encrypted text provided for decryption.");
+      console.error('❌ Error: No encrypted text provided for decryption.');
       return '';
     }
 
-    const [encryptedPayload, ivBase64] = encryptedText.split(":");
+    const [encryptedPayload, ivBase64] = encryptedText.split(':');
+
     if (!ivBase64) {
-      console.error("❌ Error: No IV found in encrypted text.");
+      console.error('❌ Error: No IV found in encrypted text.');
       return '';
     }
 
     const iv = crypto.enc.Base64.parse(ivBase64);
 
     // First decryption
-    const decrypted = crypto.AES.decrypt(
-      encryptedPayload,
-      this.pubkey,
-      { iv: iv }
-    ).toString(crypto.enc.Utf8);
+    const decrypted = crypto.AES.decrypt(encryptedPayload, this.pubkey, {
+      iv: iv,
+    }).toString(crypto.enc.Utf8);
 
-    const [uuid, firstEncryptedData] = decrypted.split("###");
-    const uuidKey = crypto.SHA256(uuid);
+    if (!decrypted.includes('###')) {
+      console.error(
+        '❌ Error: Decryption failed. Malformed first decryption output.'
+      );
+      return '';
+    }
+
+    const [uuid, firstEncryptedData] = decrypted.split('###');
+
+    const uuidKey = crypto.enc.Hex.parse(crypto.SHA256(uuid).toString());
 
     // Second decryption
-    const decryptedPayload = crypto.AES.decrypt(
-      firstEncryptedData,
-      uuidKey,
-      { iv: iv }
-    ).toString(crypto.enc.Utf8);
+    const decryptedPayload = crypto.AES.decrypt(firstEncryptedData, uuidKey, {
+      iv: iv,
+    }).toString(crypto.enc.Utf8);
 
     return JSON.parse(decryptedPayload);
   }
