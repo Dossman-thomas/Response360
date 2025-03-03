@@ -6,7 +6,7 @@ import { environment } from '../shared/environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class CommonService {
+export class CryptoService {
   pkey: any = environment.pubkey;
   pubkey: any = crypto.enc.Utf8.parse(this.pkey[0]);
 
