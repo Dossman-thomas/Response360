@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const pubkey = process.env.pubkey; // Public key from .env file
-const parsedPubKey = CryptoJS.enc.Utf8.parse(pubkey); // Parse key to WordArray
+const parsedPubKey = CryptoJS.SHA256(pubkey); // Parse key to always produce a 256-bit (32-bytes) key
 
 // Function to generate random IV
 const generateIV = () => CryptoJS.lib.WordArray.random(16);
