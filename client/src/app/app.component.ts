@@ -47,4 +47,23 @@ export class AppComponent {
       console.error('❌ Encryption failed, no data sent.');
     }
   }
+
+  testDecryption() {
+    // **STEP 1**: Manually paste the encrypted string from Postman here
+    const encryptedString = 'ax74J37rCa2b9q67Xd/ZWXbG4sR49n62oNFgz359aqCiXakoujkJ7hITtzcZuxo9EpS58H2h/mmEfHr6cLfEi50I1a588aY0irWsVqX/EFI=:fT9tGTM92A8Rftq/dfNUUA==';
+
+    if (!encryptedString) {
+      console.error('⚠️ No encrypted string provided.');
+      return;
+    }
+
+    try {
+      // **STEP 2**: Call the receiveEncryptedData method to decrypt
+      const decryptedData = this.cryptoApi.receiveEncryptedData(encryptedString);
+
+      console.log('🔑 Decryption Result:', decryptedData);
+    } catch (error) {
+      console.error('❌ Error during manual decryption test:', error);
+    }
+  }
 }

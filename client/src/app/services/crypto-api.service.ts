@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CryptoService } from './crypto.service';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CryptoApiService {
-  private apiUrl = 'http://localhost:5000/api/crypto/decrypt'; // Backend API URL
+  private apiBackendUrl = 'http://localhost:5000/api/crypto/decrypt'; // Backend API URL
+
+  private encryptedDataApiUrl = 'http://localhost:5000/api/crypto/encrypt'; // Frontend API URL
 
   constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
@@ -19,11 +21,31 @@ export class CryptoApiService {
     }
 
     // Send the encrypted data to the backend
-    return this.http.post(this.apiUrl, { encryptedText }).pipe(
+    return this.http.post(this.apiBackendUrl, { encryptedText }).pipe(
       catchError((error) => {
         console.error('❌ Error sending encrypted data:', error);
         return throwError(() => error);
       })
     );
   }
+
+  receiveEncryptedData(encryptedText: string): string {
+    if (!encryptedText) {
+      console.error('⚠️ No encrypted text provided.');
+      throw new Error('No encrypted text provided.');
+    }
+  
+    console.log('🛜 Manually Provided Encrypted Data:', encryptedText);
+  
+    try {
+      // Decrypt the received encrypted text
+      const decryptedData = this.cryptoService.Decrypto(encryptedText);
+      return decryptedData;
+    } catch (decryptionError) {
+      console.error('❌ Error decrypting provided data:', decryptionError);
+      throw new Error('Decryption failed.');
+    }
+  }
+  
+  
 }
