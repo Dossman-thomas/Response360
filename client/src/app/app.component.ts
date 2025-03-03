@@ -26,14 +26,16 @@ export class AppComponent {
   }
 
   testEncryption() {
-    const testData = { message: 'Hello Backend!' };
+    const testData = 'Hello, Backend! Front end calling!';
 
     // Encrypt the test data
     const encrypted = this.cryptoService.Encrypto(testData);
 
+    console.log('🔒 Encrypted:', encrypted);
+
     if (encrypted.encryptedText) {
       // Send encrypted data, ensuring cryptoApi is never null/undefined
-      this.cryptoApi!.sendEncryptedData(encrypted.encryptedText).subscribe(
+      this.cryptoApi.sendEncryptedData(encrypted.encryptedText).subscribe(
         (response) => {
           console.log('✅ Backend Response:', response);
         },
