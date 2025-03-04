@@ -10,8 +10,6 @@ import { catchError, map } from 'rxjs/operators';
 export class CryptoApiService {
   private apiBackendUrl = 'http://localhost:5000/api/crypto/decrypt'; // Backend API URL
 
-  private encryptedDataApiUrl = 'http://localhost:5000/api/crypto/encrypt'; // Frontend API URL
-
   constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
   sendEncryptedData(encryptedText: string): Observable<any> {
@@ -46,6 +44,5 @@ export class CryptoApiService {
       throw new Error('Decryption failed.');
     }
   }
-  
   
 }
