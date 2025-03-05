@@ -4,7 +4,7 @@ import { hashPassword } from "../../utils/index.js";
 import bcrypt from "bcrypt"; 
 
 export const UserModel = sequelize.define(
-  "Users",
+  "users",
   {
     user_id: {
       type: DataTypes.UUID,
