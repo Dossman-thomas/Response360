@@ -17,4 +17,7 @@ export const env = { // Environment configuration object
     port: process.env.SERVER_PORT,
     jwtSecret: process.env.JWT_SECRET, 
   },
+  encryption: {
+    pubkey: process.env.pubkey,
+  },
 };
