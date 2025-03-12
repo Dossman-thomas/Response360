@@ -1,41 +1,52 @@
 import * as crypto from 'crypto-js';
 import { Injectable } from '@angular/core';
-import { v4 as uuidv4 } from 'uuid';
 import { environment } from '../shared/environments/environment';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CryptoService {
-  private pkey: any = environment.Pub_key;
-  private pubkey: any = crypto.enc.Utf8.parse(this.pkey);
+  private pkey: string = environment.pubkey || '';
+  private pubkey: any;
 
-  // Generate random IV (16 bytes)
-  private generateIV() {
+  constructor() {
+    if (!this.pkey) {
+      throw new Error(
+        '❌ CryptoService: Public key is missing in environment variables.'
+      );
+    }
+    // Hash public key with SHA256 to match backend logic
+    this.pubkey = crypto.SHA256(this.pkey);
+  }
+
+  // Generate a secure random IV (16 bytes)
+  private generateIV(): crypto.lib.WordArray {
     return crypto.lib.WordArray.random(16);
   }
 
   // Encrypt function
-  Encrypto(data: any) {
+  Encrypt(data: any): { encryptedText: string } {
     if (!data) {
       console.warn('⚠️ Warning: No data provided for encryption.');
       return { encryptedText: '' };
     }
 
-    const uuid = uuidv4().replace(/-/g, '');
-    const uuidKey = crypto.enc.Hex.parse(crypto.SHA256(uuid).toString());
-    const iv = this.generateIV();
+    // Generate a 16-byte random UUID (same as backend)
+    const uuid = uuidv4().replace(/-/g, ''); // Removes hyphens
+    const iv = this.generateIV(); // Generate IV
 
-    // First level encryption
-    const firstEncrypt = crypto.AES.encrypt(JSON.stringify(data), uuidKey, {
-      iv: iv,
-    }).toString();
-
+    // First-level encryption (use UUID directly as key, no hashing)
+    const firstEncrypt = crypto.AES.encrypt(
+      JSON.stringify(data),
+      crypto.enc.Utf8.parse(uuid),
+      { iv }
+    ).toString();
     const combined = `${uuid}###${firstEncrypt}`;
 
-    // Second level encryption
+    // Second-level encryption with public key
     const finalEncrypt = crypto.AES.encrypt(combined, this.pubkey, {
-      iv: iv,
+      iv,
     }).toString();
 
     // Concatenate final encryption with IV
@@ -47,42 +58,46 @@ export class CryptoService {
   }
 
   // Decrypt function
-  Decrypto(encryptedText: string) {
+  Decrypt(encryptedText: string): any {
     if (!encryptedText) {
-      console.error('❌ Error: No encrypted text provided for decryption.');
-      return '';
+      throw new Error('❌ CryptoService: No encrypted text provided for decryption.');
     }
 
     const [encryptedPayload, ivBase64] = encryptedText.split(':');
 
     if (!ivBase64) {
-      console.error('❌ Error: No IV found in encrypted text.');
-      return '';
+      throw new Error('❌ CryptoService: No IV found in encrypted text.');
     }
 
     const iv = crypto.enc.Base64.parse(ivBase64);
 
-    // First decryption
-    const decrypted = crypto.AES.decrypt(encryptedPayload, this.pubkey, {
-      iv: iv,
-    }).toString(crypto.enc.Utf8);
+    // First decryption (decrypt using the public key)
+    let decrypted;
+    try {
+      decrypted = crypto.AES.decrypt(encryptedPayload, this.pubkey, { iv }).toString(crypto.enc.Utf8);
+    } catch (error) {
+      console.error('❌ CryptoService: Failed first decryption.', error);
+      return null;
+    }
 
     if (!decrypted.includes('###')) {
-      console.error(
-        '❌ Error: Decryption failed. Malformed first decryption output.'
-      );
-      return '';
+      console.error('❌ CryptoService: Malformed decrypted data.');
+      return null;
     }
 
     const [uuid, firstEncryptedData] = decrypted.split('###');
 
-    const uuidKey = crypto.enc.Hex.parse(crypto.SHA256(uuid).toString());
+    // Use UUID as the key
+    const firstKey = crypto.enc.Utf8.parse(uuid);
 
     // Second decryption
-    const decryptedPayload = crypto.AES.decrypt(firstEncryptedData, uuidKey, {
-      iv: iv,
-    }).toString(crypto.enc.Utf8);
-
-    return JSON.parse(decryptedPayload);
+    let decryptedPayload;
+    try {
+      decryptedPayload = crypto.AES.decrypt(firstEncryptedData, firstKey, { iv }).toString(crypto.enc.Utf8);
+      return JSON.parse(decryptedPayload);
+    } catch (error) {
+      console.error('❌ Error: Failed to parse decrypted data.', error);
+      return null;
+    }
   }
 }
