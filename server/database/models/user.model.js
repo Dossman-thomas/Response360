@@ -12,32 +12,31 @@ export const UserModel = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
     },
     first_name: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.TEXT, // Stored as BYTEA (encrypted externally)
       allowNull: false,
     },
     last_name: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     user_email: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.TEXT,
       allowNull: false,
       unique: true,
-      validate: { isEmail: true },
     },
     user_phone_number: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.TEXT,
     },
     user_role: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     org_id: {
       type: DataTypes.UUID,
-      references: { model: "Organizations", key: "org_id" },
+      references: { model: "organizations", key: "org_id" },
     },
     user_password: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.TEXT, // Hashed password (not encrypted, just hashed)
       allowNull: false,
     },
     user_created_by: {

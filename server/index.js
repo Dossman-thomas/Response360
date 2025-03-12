@@ -2,6 +2,7 @@ import { env } from './config/index.js';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import { sequelize } from "../server/config/index.js";
 
 import { routes } from './routes/router.js';
 import { response } from './utils/index.js';
