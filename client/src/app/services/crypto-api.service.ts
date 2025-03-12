@@ -37,7 +37,7 @@ export class CryptoApiService {
   
     try {
       // Decrypt the received encrypted text
-      const decryptedData = this.cryptoService.Decrypto(encryptedText);
+      const decryptedData = this.cryptoService.Decrypt(encryptedText);
       return decryptedData;
     } catch (decryptionError) {
       console.error('❌ Error decrypting provided data:', decryptionError);
