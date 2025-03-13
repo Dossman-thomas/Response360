@@ -26,10 +26,10 @@ export class CryptoService {
   }
 
   // Encrypt function
-  Encrypt(data: any): { encryptedText: string } {
+  Encrypt(data: any) {
     if (!data) {
       console.warn('⚠️ Warning: No data provided for encryption.');
-      return { encryptedText: '' };
+      return { payload: '' };
     }
 
     // Generate a 16-byte random UUID (same as backend)
@@ -54,16 +54,16 @@ export class CryptoService {
       iv
     )}`;
 
-    return { encryptedText: encryptedString };
+    return encryptedString;
   }
 
   // Decrypt function
-  Decrypt(encryptedText: string): any {
-    if (!encryptedText) {
+  Decrypt(payload: string): any {
+    if (!payload) {
       throw new Error('❌ CryptoService: No encrypted text provided for decryption.');
     }
 
-    const [encryptedPayload, ivBase64] = encryptedText.split(':');
+    const [encryptedPayload, ivBase64] = payload.split(':');
 
     if (!ivBase64) {
       throw new Error('❌ CryptoService: No IV found in encrypted text.');

@@ -15,9 +15,12 @@ export class AuthService {
       user_password,
     });
 
+    console.log('Payload:', encryptedPayload); // Log to check payload
+
     return this.http.post(`http://localhost:5000/api/auth/super-admin/login`, {
-      encryptedData: encryptedPayload,
+      payload: encryptedPayload,
     });
   }
 }
 
+// In the above code, we have imported the CryptoService and injected it into the AuthService constructor. We then use the Encrypt method of the CryptoService to encrypt the user's email and password before sending it to the server.
