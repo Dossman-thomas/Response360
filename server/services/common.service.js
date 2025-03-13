@@ -40,17 +40,17 @@ export const encryptService = (data) => {
   )}`;
 
   // Return encrypted text
-  return { encryptedText: encryptedString };
+  return encryptedString;
 };
 
 // Decrypt function
-export const decryptService = (encryptedText) => {
-  if (!encryptedText) {
+export const decryptService = (payload) => {
+  if (!payload) {
     console.error("❌ Error: No encrypted text provided for decryption.");
     return null;
   }
 
-  const [encryptedPayload, ivBase64] = encryptedText.split(":");
+  const [encryptedPayload, ivBase64] = payload.split(":");
 
   if (!ivBase64) {
     console.error("❌ Error: No IV found in encrypted text.");
