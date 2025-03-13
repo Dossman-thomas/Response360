@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../database/models/index.js";
 import dotenv from "dotenv";
-import { Sequelize, QueryTypes } from "sequelize";
+import { QueryTypes } from "sequelize";
 
 dotenv.config();
 const pubkey = process.env.pubkey;
