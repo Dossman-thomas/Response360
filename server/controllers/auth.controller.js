@@ -4,31 +4,28 @@ import { messages } from "../messages/index.js";
 import jwt from "jsonwebtoken";
 
 export const loginSuperAdminController = async (req, res) => {
-  const { user_email, user_password } = req.body;
+  const { payload } = req.body;
 
   try {
-    if (!user_email || !user_password) {
+    if (!payload) {
       return response(res, {
         statusCode: 400,
-        message: messages.auth.MISSING_CREDENTIALS || "Email and password are required.",
+        message: "Controller: Encrypted payload string is required.",
       });
     }
 
     // Authenticate super admin
-    const user = await loginSuperAdminService(user_email, user_password);
+    const user = await loginSuperAdminService(payload);
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user.user_id, email: user.user_email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    // Send success response
+    // Send success response with the token and user details
     return response(res, {
       statusCode: 200,
-      message: messages.auth.LOGIN_SUCCESS || "Super Admin login successful.",
-      data: { user, token }, // Send user details and token
+      message: user.message,
+      data: {
+        token: user.token,  // Include the JWT token in the response
+        user_id: user.foundUser.user_id, 
+        user_email: user.foundUser.decrypted_email,
+      },
     });
   } catch (error) {
     console.error(error);

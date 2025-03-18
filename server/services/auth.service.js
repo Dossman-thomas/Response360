@@ -1,22 +1,32 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { UserModel } from "../database/models/index.js";
 import dotenv from "dotenv";
 import { QueryTypes } from "sequelize";
+import { decryptService } from "../services/index.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 const pubkey = process.env.pubkey;
 
-export const loginSuperAdminService = async (user_email, user_password) => {
+export const loginSuperAdminService = async (payload) => {
   try {
-    // Retrieve the sequelize instance from UserModel
-    const sequelize = UserModel.sequelize;
+    // Step 1: Decrypt the payload first (decryptService should return { user_email, user_password })
+    const decryptedData = await decryptService(payload);
 
-    // Decrypt the email and check if the user exists
+    if (!decryptedData.user_email || !decryptedData.user_password) {
+      throw new Error("Service: Decryption failed or missing credentials.");
+    }
+
+    const { user_email, user_password } = decryptedData;
+
+    // Step 2: Query the database to find a matching user
+    const sequelize = UserModel.sequelize;
     const user = await sequelize.query(
-      `SELECT user_id, first_name, last_name, 
-              PGP_SYM_DECRYPT(user_email::bytea, :pubkey) as decrypted_email, 
-              user_password, user_role, is_super_admin
+      `SELECT user_id, 
+              first_name, 
+              last_name, 
+              PGP_SYM_DECRYPT(user_email::bytea, :pubkey) as decrypted_email,
+              user_password
        FROM users 
        WHERE PGP_SYM_DECRYPT(user_email::bytea, :pubkey) = :email`,
       {
@@ -26,40 +36,37 @@ export const loginSuperAdminService = async (user_email, user_password) => {
     );
 
     if (!user || user.length === 0) {
-      throw new Error("Invalid credentials. Please check your email and password.");
+      throw new Error("No user found with this email.");
     }
 
-    const foundUser = user[0]; // Expecting one user
+    const foundUser = user[0]; // extract user from array
 
-    // Check if the user is a super admin
-    if (!foundUser.is_super_admin) {
-      throw new Error("Access denied. Only Super Admins can log in.");
-    }
-
-    // Compare the provided password with the hashed password
-    const isPasswordValid = await bcrypt.compare(user_password, foundUser.user_password);
-    if (!isPasswordValid) {
-      throw new Error("Invalid credentials. Please check your email and password.");
-    }
-
-    // Prepare the user response object without the password
-    const userResponse = {
-      user_id: foundUser.user_id,
-      first_name: foundUser.first_name,
-      last_name: foundUser.last_name,
-      user_email: foundUser.decrypted_email, // Return decrypted email
-      user_role: foundUser.user_role,
-      is_super_admin: foundUser.is_super_admin,
-    };
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { user_id: foundUser.user_id, user_email: foundUser.decrypted_email, is_super_admin: foundUser.is_super_admin },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+    // Step 3: Compare the decrypted password with the hashed password in the db
+    const isPasswordValid = await bcrypt.compare(
+      user_password,
+      foundUser.user_password
     );
 
-    return { token, user: userResponse };
+    // console.log("user_password: ", user_password);
+    // console.log("foundUser.user_password: ", foundUser.user_password);
+
+    if (!isPasswordValid) {
+      throw new Error("auth.service.js: Invalid password provided.");
+    }
+
+    // Step 4: Generate JWT token if authentication is successful
+    const token = jwt.sign(
+      { id: foundUser.user_id, email: foundUser.decrypted_email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" } // expires in 1 hour
+    );
+
+    //  Step 5: Return success message along with the token and user details
+    return {
+      message: "Success! Email and password verified!",
+      token,  // Return the generated token
+      foundUser,  // Return the full user details
+    };
   } catch (error) {
     throw error;
   }

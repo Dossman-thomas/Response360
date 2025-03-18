@@ -12,13 +12,14 @@ export class TestLoginComponent {
   constructor(private authService: AuthService, private toastr: ToastrService) { }
 
   testLogin(): void {
-    const encryptedUsername = 'testuser'; // Replace with the encrypted username
-    const encryptedPassword = 'testpassword'; // Replace with the encrypted password
+    // Test user email and password
+    const user_email = 'johndoe@example.com'; 
+    const user_password = 'Admin@123!';
 
-    this.authService.login(encryptedUsername, encryptedPassword)
+    this.authService.login(user_email, user_password)
       .subscribe(
         (res: any) => {
-          if (res?.Status === 1) {
+          if (res?.statusCode === 200) {
             // this.toastr.success(res.Message, 'Success');
             console.log(res); 
           } else {
