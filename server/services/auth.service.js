@@ -17,7 +17,7 @@ export const loginSuperAdminService = async (payload) => {
       throw new Error("Service: Decryption failed or missing credentials.");
     }
 
-    const { user_email, user_password } = decryptedData;
+    const { user_email, user_password, rememberMe } = decryptedData;
 
     // Step 2: Query the database to find a matching user
     const sequelize = UserModel.sequelize;
@@ -54,11 +54,14 @@ export const loginSuperAdminService = async (payload) => {
       throw new Error("auth.service.js: Invalid password provided.");
     }
 
-    // Step 4: Generate JWT token if authentication is successful
+    // Step 4: Set token expiration based on "Remember Me" flag
+    const tokenExpiry = rememberMe ? "90d" : "1h"; // Use 90 days for "Remember Me", else 1 hour
+
+    // Generate JWT token if authentication is successful
     const token = jwt.sign(
       { id: foundUser.user_id, email: foundUser.decrypted_email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" } // expires in 1 hour
+      { expiresIn: tokenExpiry } // expires based on "Remember Me"
     );
 
     //  Step 5: Return success message along with the token and user details

@@ -1,47 +1,28 @@
-// import { Component } from '@angular/core';
-// import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-// import { AuthService } from '../../services/auth.service';
-// import { ToastrService } from 'ngx-toastr';
+import { Component } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
-// @Component({
-//   selector: 'app-login',
-//   templateUrl: './login.component.html',
-//   styleUrls: ['./login.component.scss']
-// })
-// export class LoginComponent {
-//   loginForm: FormGroup;
-//   isSubmitted = false;
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
+})
+export class LoginComponent {
+  email: string = '';
+  password: string = '';
+  rememberMe: boolean = false;
+  showPassword: boolean = false;
 
-//   constructor(
-//     private fb: FormBuilder,
-//     private authService: AuthService,
-//     private toastr: ToastrService
-//   ) {
-//     this.loginForm = this.fb.group({
-//       UserName: ['', Validators.required],
-//       Password: ['', Validators.required]
-//     });
-//   }
+  constructor(private authService: AuthService, private router: Router) {}
 
-//   onSubmit() {
-//     this.isSubmitted = true;
-//     if (this.loginForm.invalid) {
-//       return;
-//     }
+  onSubmit() {
+    // Call login from the AuthService
+    this.authService.login(this.email, this.password, this.rememberMe);
+  }
 
-//     this.authService.login(
-//       this.loginForm.controls.UserName.value,
-//       this.loginForm.controls.Password.value
-//     ).subscribe(
-//       (res: any) => {
-//         if (res?.Status == 1) {
-//           this.toastr.success(res.Message, 'Success');
-//           // Store user information in local storage
-//         }
-//       },
-//       (error) => {
-//         this.toastr.error('Login failed', 'Error');
-//       }
-//     );
-//   }
-// }
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  passwordPattern = '^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$'; // Regex for password
+}
