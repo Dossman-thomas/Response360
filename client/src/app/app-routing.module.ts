@@ -1,11 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { TestLoginComponent } from './pages/test-login/test-login.component'; // Adjust this path if needed
+import { TestLoginComponent } from './pages/test-login/test-login.component'; 
+import { LoginComponent } from './pages/login/login.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 const routes: Routes = [
-  { path: 'test-login', component: TestLoginComponent },
+  { path: '/super-admin-login', component: LoginComponent },
   // You can add more routes here
-  { path: '', redirectTo: '/test-login', pathMatch: 'full' }
+  { path: '', redirectTo: '/super-admin-login', pathMatch: 'full' },
+  { path: '/dashboard', component: DashboardComponent },
 ];
 
 @NgModule({

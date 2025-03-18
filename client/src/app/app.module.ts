@@ -14,13 +14,15 @@ import { CryptoApiService } from './services/crypto-api.service';
 import { AppComponent } from './app.component';
 import { TestLoginComponent } from './pages/test-login/test-login.component';
 import { LoginComponent } from './pages/login/login.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     TestLoginComponent,
-    LoginComponent
+    LoginComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,
