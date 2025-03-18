@@ -42,6 +42,8 @@ export class AuthService {
     }).subscribe({
       next: (response) => {
         const { token, user } = response.data;
+
+        console.log('Login response:', response.data); 
         
         // Store the token and user in localStorage
         localStorage.setItem('token', token);
