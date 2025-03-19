@@ -24,7 +24,7 @@ export class AuthInterceptor implements HttpInterceptor {
           // Token is invalid or expired, so log the user out
           localStorage.removeItem('token');
           localStorage.removeItem('currentUser');
-          this.router.navigate(['/login']); // Redirect to login page
+          this.router.navigate(['/super-admin-login']); // Redirect to login page
         }
         return throwError(() => error); // Update to use a factory function
       })

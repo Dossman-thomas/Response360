@@ -20,6 +20,7 @@ export class AuthService {
     private cookieService: CookieService,
   ) {
     this.checkInitialAuthState();
+    window.addEventListener('popstate', this.handlePopStateEvent.bind(this));
   }
 
   private checkInitialAuthState() {
