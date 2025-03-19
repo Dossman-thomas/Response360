@@ -21,6 +21,7 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Check if the user is already authenticated and redirect to the dashboard if true
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
       return;
@@ -31,10 +32,6 @@ export class LoginComponent implements OnInit {
     const storedEmail = this.cookieService.get('email');
     const storedPassword = this.cookieService.get('password');
     const storedRememberMe = this.cookieService.get('rememberMe');
-
-    console.log('Stored Email:', storedEmail);
-    console.log('Stored Password:', storedPassword);
-    console.log('Remember Me:', this.rememberMe);
 
     if (storedEmail) {
       this.email = storedEmail;

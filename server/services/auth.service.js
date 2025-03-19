@@ -36,7 +36,9 @@ export const loginSuperAdminService = async (payload) => {
     );
 
     if (!user || user.length === 0) {
-      throw new Error("No user found with this email.");
+      const error = new Error('Invalid credentials. Please check your email and password, then try again.');
+      error.status = 404;
+      throw error;
     }
 
     const foundUser = user[0]; // extract user from array
@@ -51,7 +53,9 @@ export const loginSuperAdminService = async (payload) => {
     // console.log("foundUser.user_password: ", foundUser.user_password);
 
     if (!isPasswordValid) {
-      throw new Error("auth.service.js: Invalid password provided.");
+      const error = new Error('Invalid credentials. Please check your email and password, then try again.');
+      error.status = 404;
+      throw error;
     }
 
     // Step 4: Set token expiration based on "Remember Me" flag
