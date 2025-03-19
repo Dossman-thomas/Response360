@@ -83,16 +83,13 @@ export class AuthService {
     // Clear localStorage and cookies
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
-    this.cookieService.delete('email');
-    this.cookieService.delete('password');
-    this.cookieService.delete('rememberMe');
 
     // Update authentication state
     this.isLoggedInSubject.next(false);
     // this.toastr.info('Logged out successfully!');
 
     // Navigate to login page after logout
-    this.router.navigate(['/login']);
+    this.router.navigate(['/super-admin-login']);
   }
 
   isAuthenticated(): boolean {
