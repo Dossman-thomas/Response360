@@ -27,6 +27,14 @@ export class AuthService {
     this.isLoggedInSubject.next(!!token);
   }
 
+  private handlePopStateEvent() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.isLoggedInSubject.next(false); // Update the subject if the token is missing
+      this.router.navigate(['/super-admin-login']);
+    }
+  }
+
   login(user_email: string, user_password: string, rememberMe: boolean) {
     // Encrypt the user's email, password, and rememberMe before sending it to the server
     const encryptedPayload = this.cryptoService.Encrypt({
