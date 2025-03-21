@@ -12,7 +12,7 @@ export const UserModel = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
     },
     first_name: {
-      type: DataTypes.TEXT, // Stored as BYTEA (encrypted externally)
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     last_name: {

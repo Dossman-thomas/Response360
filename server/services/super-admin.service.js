@@ -20,6 +20,8 @@ export const createSuperAdminService = async (superAdminData) => {
     // Hash the password
     const hashedPassword = await hashPassword(user_password);
 
+    console.log("Hashed Password: ", hashedPassword);
+
     // Create Super Admin in DB
     const newSuperAdmin = await UserModel.create({
       user_id: uuidv4(),
