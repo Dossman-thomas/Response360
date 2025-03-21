@@ -36,12 +36,17 @@ export const loginSuperAdminService = async (payload) => {
     );
 
     if (!user || user.length === 0) {
-      const error = new Error('Invalid credentials. Please check your email and password, then try again.');
+      const error = new Error(
+        "Invalid credentials. Please check your email and password, then try again."
+      );
       error.status = 404;
       throw error;
     }
 
     const foundUser = user[0]; // extract user from array
+
+    console.log("user_password: ", user_password);
+    console.log("foundUser.user_password: ", foundUser.user_password);
 
     // Step 3: Compare the decrypted password with the hashed password in the db
     const isPasswordValid = await bcrypt.compare(
@@ -49,11 +54,12 @@ export const loginSuperAdminService = async (payload) => {
       foundUser.user_password
     );
 
-    // console.log("user_password: ", user_password);
-    // console.log("foundUser.user_password: ", foundUser.user_password);
+    console.log("isPasswordValid: ", isPasswordValid);
 
     if (!isPasswordValid) {
-      const error = new Error('Invalid credentials. Please check your email and password, then try again.');
+      const error = new Error(
+        "Invalid credentials. Please check your email and password, then try again."
+      );
       error.status = 404;
       throw error;
     }
@@ -71,8 +77,8 @@ export const loginSuperAdminService = async (payload) => {
     //  Step 5: Return success message along with the token and user details
     return {
       message: "Success! Email and password verified!",
-      token,  // Return the generated token
-      foundUser,  // Return the full user details
+      token, // Return the generated token
+      foundUser, // Return the full user details
     };
   } catch (error) {
     throw error;
