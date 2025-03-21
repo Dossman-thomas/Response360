@@ -1,7 +1,7 @@
 import { UserModel } from "../database/models/index.js";
 import dotenv from "dotenv";
 import { QueryTypes } from "sequelize";
-import { decryptService } from "../services/index.js";
+import { encryptService, decryptService } from "../services/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -74,11 +74,12 @@ export const loginSuperAdminService = async (payload) => {
       { expiresIn: tokenExpiry } // expires based on "Remember Me"
     );
 
+    const encryptedToken = encryptService(token);
+
     //  Step 5: Return success message along with the token and user details
     return {
       message: "Success! Email and password verified!",
-      token, // Return the generated token
-      foundUser, // Return the full user details
+      encryptedToken, // Return the encrypted token
     };
   } catch (error) {
     throw error;
