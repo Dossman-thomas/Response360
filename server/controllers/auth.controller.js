@@ -22,9 +22,7 @@ export const loginSuperAdminController = async (req, res) => {
       statusCode: 200,
       message: user.message,
       data: {
-        token: user.token,  // Include the JWT token in the response
-        user_id: user.foundUser.user_id, 
-        user_email: user.foundUser.decrypted_email,
+        token: user.encryptedToken,
       },
     });
   } catch (error) {

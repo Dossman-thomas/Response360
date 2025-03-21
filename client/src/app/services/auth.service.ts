@@ -50,13 +50,11 @@ export class AuthService {
       payload: encryptedPayload,
     }).subscribe({
       next: (response) => {
-        const { token, user } = response.data;
-
-        console.log('Login response:', response.data); 
+        const { token } = response.data;
         
         // Store the token and user in localStorage
         localStorage.setItem('token', token);
-        localStorage.setItem('currentUser', JSON.stringify(user));
+        // localStorage.setItem('currentUser', JSON.stringify(user));
 
         // Handle "Remember Me" functionality
         if (rememberMe) {
@@ -91,7 +89,7 @@ export class AuthService {
   logout() {
     // Clear localStorage and cookies
     localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
+    // localStorage.removeItem('currentUser');
 
     // Update authentication state
     this.isLoggedInSubject.next(false);
