@@ -4,4 +4,7 @@ export { createSuperAdminController } from "./super-admin.controller.js";
 
 export { loginSuperAdminController } from "./auth.controller.js";
 
-export { createOrganizationController } from "./organization.controller.js";
+export {
+  createOrganizationController,
+  updateOrganizationController,
+} from "./organization.controller.js";
