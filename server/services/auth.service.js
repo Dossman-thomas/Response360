@@ -1,6 +1,5 @@
 import { UserModel } from "../database/models/index.js";
 import dotenv from "dotenv";
-import { QueryTypes } from "sequelize";
 import { encryptService, decryptService } from "../services/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
