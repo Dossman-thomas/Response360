@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import { hashPassword } from "../utils/index.js";
 import { UserModel } from "../database/models/index.js";
 import { Sequelize } from "sequelize";
 import { env } from "../config/index.js";
@@ -17,11 +16,6 @@ export const createSuperAdminService = async (superAdminData) => {
       user_created_by, // Optional
     } = superAdminData;
 
-    // Hash the password
-    const hashedPassword = await hashPassword(user_password);
-
-    console.log("Hashed Password: ", hashedPassword);
-
     // Create Super Admin in DB
     const newSuperAdmin = await UserModel.create({
       user_id: uuidv4(),
@@ -33,7 +27,7 @@ export const createSuperAdminService = async (superAdminData) => {
         user_phone_number,
         pubkey
       ),
-      user_password: hashedPassword,
+      user_password: user_password,
       user_role: "Super Admin", // Role set explicitly
       org_id: null,
       user_created_by: user_created_by || null,
