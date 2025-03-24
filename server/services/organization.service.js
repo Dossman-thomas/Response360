@@ -31,7 +31,6 @@ export const createOrganizationService = async (payload) => {
     //     jurisdiction: orgData.jurisdictionSize,
     //     website: orgData.website,
     //   });
-      
 
     // Step 2: Encrypt sensitive data using PGP_SYM_ENCRYPT
     const encryptedOrgName = Sequelize.literal(
@@ -99,58 +98,89 @@ export const createOrganizationService = async (payload) => {
 
 // Read Organization Service
 
-
-
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
-    const transaction = await sequelize.transaction();
+  try {
+    // Step 1: Decrypt the incoming data
+    const orgData = await decryptService(payload);
+
+    if (!orgData) {
+      throw new Error(
+        "Service: Decryption failed or missing organization data."
+      );
+    }
+
+    // Step 2: Encrypt sensitive data
+    const encryptedOrgName = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
+    );
+    const encryptedOrgAddress = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
+    );
+
+    // Step 3: Update the organization
+    const updatedOrganization = await OrganizationModel.update(
+      {
+        org_name: encryptedOrgName,
+        org_type: orgData.orgType,
+        jurisdiction: orgData.jurisdictionSize,
+        org_address: encryptedOrgAddress,
+        website: orgData.website,
+        org_status: orgData.status,
+      },
+      { where: { org_id: orgId } }
+    );
+
+    // If no organization was found
+    if (updatedOrganization[0] === 0) {
+      throw new Error("Organization not found.");
+    }
+
+    return {
+      statusCode: 200,
+      message: "Organization updated successfully",
+    };
+  } catch (error) {
+    console.error("Error in updateOrganizationService:", error);
+    throw error;
+  }
+};
+
+// Delete Organization Service
+export const deleteOrganizationService = async (orgId) => {
     try {
-      // Step 1: Decrypt the incoming data
-      const orgData = await decryptService(payload);
-  
-      if (!orgData) {
-        throw new Error(
-          "Service: Decryption failed or missing organization data."
-        );
-      }
-  
-      // Step 2: Encrypt sensitive data
-      const encryptedOrgName = Sequelize.literal(
-        `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
-      );
-      const encryptedOrgAddress = Sequelize.literal(
-        `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
-      );
-  
-      // Step 3: Update the organization
-      const updatedOrganization = await OrganizationModel.update(
+      // Step 1: Update org_status to false
+      const [updated] = await OrganizationModel.update(
         {
-          org_name: encryptedOrgName,
-          org_type: orgData.orgType,
-          jurisdiction: orgData.jurisdictionSize,
-          org_address: encryptedOrgAddress,
-          website: orgData.website,
-          org_status: orgData.status,
+          org_status: false,
         },
-        { where: { org_id: orgId }, transaction }
+        {
+          where: { org_id: orgId },
+        }
       );
   
-      // If no organization was found
-      if (updatedOrganization[0] === 0) {
+      // If no organization was found to update
+      if (updated === 0) {
         throw new Error("Organization not found.");
       }
   
-      await transaction.commit();
+      // Step 2: Perform the soft delete using destroy method (this will automatically set deletedAt because paranoid is true)
+      const deletedOrganization = await OrganizationModel.destroy({
+        where: { org_id: orgId },
+      });
+  
+      // If no organization was found to delete (this could be redundant, but for safety)
+      if (deletedOrganization === 0) {
+        throw new Error("Organization not found for deletion.");
+      }
+  
       return {
         statusCode: 200,
-        message: "Organization updated successfully",
+        message: "Organization soft-deleted successfully",
       };
     } catch (error) {
-      console.error("Error in updateOrganizationService:", error);
-      await transaction.rollback();
+      console.error("Error in deleteOrganizationService:", error);
       throw error;
     }
   };
-
-
-// Delete Organization Service
+  

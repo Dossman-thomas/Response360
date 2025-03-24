@@ -7,6 +7,7 @@ export const OrganizationModel = sequelize.define(
     org_id: {
       type: DataTypes.UUID,
       primaryKey: true,
+      allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
     org_name: {
