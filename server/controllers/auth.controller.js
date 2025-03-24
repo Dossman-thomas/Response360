@@ -1,7 +1,6 @@
 import { response } from "../utils/index.js";
 import { loginSuperAdminService } from "../services/index.js";
 import { messages } from "../messages/index.js";
-import jwt from "jsonwebtoken";
 
 export const loginSuperAdminController = async (req, res) => {
   const { payload } = req.body;
@@ -17,7 +16,7 @@ export const loginSuperAdminController = async (req, res) => {
     // Authenticate super admin
     const user = await loginSuperAdminService(payload);
 
-    // Send success response with the token and user details
+    // Send success response with the encrypted token
     return response(res, {
       statusCode: 200,
       message: user.message,

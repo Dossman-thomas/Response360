@@ -15,7 +15,6 @@ export const OrganizationModel = sequelize.define(
     },
     org_email: {
       type: DataTypes.TEXT, // Encrypted
-      allowNull: false,
     },
     org_phone_number: {
       type: DataTypes.TEXT, // Encrypted
@@ -34,10 +33,10 @@ export const OrganizationModel = sequelize.define(
       type: DataTypes.UUID,
     },
     org_type: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.TEXT,
     },
     jurisdiction: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.TEXT,
       validate: {
         isIn: [['Global', 'National', 'State', 'District']], // ENUM constraint
       },
