@@ -21,9 +21,7 @@ export const loginSuperAdminController = async (req, res) => {
     return response(res, {
       statusCode: 200,
       message: user.message,
-      data: {
         token: user.encryptedToken,
-      },
     });
   } catch (error) {
     console.error(error);
