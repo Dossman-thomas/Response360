@@ -21,20 +21,23 @@ export const loginSuperAdminService = async (payload) => {
 
     // Step 2: Query the database to find a matching user
     const sequelize = UserModel.sequelize;
-    const user = await sequelize.query(
-      `SELECT user_id, 
-              first_name, 
-              last_name, 
-              PGP_SYM_DECRYPT(user_email::bytea, :pubkey) as decrypted_email,
-              user_password
-       FROM users 
-       WHERE PGP_SYM_DECRYPT(user_email::bytea, :pubkey) = :email`,
-      {
-        replacements: { pubkey, email: user_email },
-        type: QueryTypes.SELECT,
-      }
-    );
+    const user = await UserModel.findOne({
+      attributes: [
+        "user_id",
+        [
+          sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
+          "decrypted_email",
+        ],
+        "user_password",
+      ],
+      where: sequelize.where(
+        sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
+        user_email
+      ),
+    });
 
+    // console.log("user: ", user);
+    
     if (!user || user.length === 0) {
       const error = new Error(
         "Invalid credentials. Please check your email and password, then try again."
@@ -43,15 +46,13 @@ export const loginSuperAdminService = async (payload) => {
       throw error;
     }
 
-    const foundUser = user[0]; // extract user from array
-
     console.log("user_password: ", user_password);
-    console.log("foundUser.user_password: ", foundUser.user_password);
+    console.log("foundUser.user_password: ", user.user_password);
 
     // Step 3: Compare the decrypted password with the hashed password in the db
     const isPasswordValid = await bcrypt.compare(
       user_password,
-      foundUser.user_password
+      user.user_password
     );
 
     console.log("isPasswordValid: ", isPasswordValid);
@@ -69,7 +70,7 @@ export const loginSuperAdminService = async (payload) => {
 
     // Generate JWT token if authentication is successful
     const token = jwt.sign(
-      { id: foundUser.user_id, email: foundUser.decrypted_email },
+      { id: user.user_id, email: user.decrypted_email },
       process.env.JWT_SECRET,
       { expiresIn: tokenExpiry } // expires based on "Remember Me"
     );
