@@ -11,21 +11,21 @@ export const UserModel = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    first_name: {
-      type: DataTypes.TEXT,
+    first_name: { 
+      type: DataTypes.TEXT, // encrypted
       allowNull: false,
     },
     last_name: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT, // encrypted
       allowNull: false,
     },
     user_email: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT, // encrypted
       allowNull: false,
       unique: true,
     },
     user_phone_number: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT, // encrypted
     },
     user_role: {
       type: DataTypes.TEXT,

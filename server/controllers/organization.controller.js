@@ -1,5 +1,6 @@
-// organization.controller.js
-import { createOrganizationService } from "../services/organization.service";
+import { createOrganizationService } from "../services/index.js";
+import { response } from "../utils/index.js";
+import { messages } from "../messages/index.js";
 
 // Controller to handle the creation of an organization
 export const createOrganizationController = async (req, res) => {
@@ -15,12 +16,12 @@ export const createOrganizationController = async (req, res) => {
     }
 
     // Step 2: Call the createOrganizationService to handle the creation logic
-    const response = await createOrganizationService(payload);
+    const newOrg = await createOrganizationService(payload);
 
     // Step 3: Return the successful response
-    return res.status(response.status).json({
-      status: response.status,
-      message: response.message,
+    return response(res, {
+      statusCode: 201,
+      message: newOrg.message,
     });
 } catch (error) {
     console.error(error);

@@ -1,10 +1,10 @@
 // Organization Service - Create Function
-import { OrganizationModel } from "../database/models/organization.model";
-import { UserModel } from "../database/models/user.model";
-import { sequelize } from "../config/index";
-import { env } from "../config/index";
+import { OrganizationModel } from "../database/models/index.js";
+import { UserModel } from "../database/models/index.js";
+import { sequelize } from "../config/index.js";
+import { env } from "../config/index.js";
 import { Sequelize } from "sequelize";
-import { decryptService } from "../services/index";
+import { decryptService } from "../services/index.js";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 dotenv.config();
@@ -23,31 +23,28 @@ export const createOrganizationService = async (payload) => {
       );
     }
 
+    // console.log("Decrypted data:", orgData);
+
+    // console.log("Before encryption:", {
+    //     orgType: orgData.orgType,
+    //     jurisdiction: orgData.jurisdictionSize,
+    //     website: orgData.website,
+    //   });
+      
+
     // Step 2: Encrypt sensitive data using PGP_SYM_ENCRYPT
     const encryptedOrgName = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
     );
-    const encryptedOrgEmail = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.adminEmail}', '${pubkey}')`
+    const encryptedOrgAddress = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
     );
-    const encryptedOrgPhone = orgData.adminPhone
-      ? Sequelize.literal(
-          `PGP_SYM_ENCRYPT('${orgData.adminPhone}', '${pubkey}')`
-        )
-      : null;
-    const encryptedOrgAddress = orgData.registeredAddress
-      ? Sequelize.literal(
-          `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
-        )
-      : null;
 
     // Create the organization
     const organization = await OrganizationModel.create(
       {
         org_id: uuidv4(),
         org_name: encryptedOrgName,
-        org_email: encryptedOrgEmail,
-        org_phone_number: encryptedOrgPhone,
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
@@ -67,11 +64,9 @@ export const createOrganizationService = async (payload) => {
     const encryptedUserEmail = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.adminEmail}', '${pubkey}')`
     );
-    const encryptedUserPhone = orgData.adminPhone
-      ? Sequelize.literal(
-          `PGP_SYM_ENCRYPT('${orgData.adminPhone}', '${pubkey}')`
-        )
-      : null;
+    const encryptedUserPhone = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.adminPhone}', '${pubkey}')`
+    );
 
     // Create the admin user
     await UserModel.create(
@@ -91,10 +86,11 @@ export const createOrganizationService = async (payload) => {
 
     await transaction.commit();
     return {
-      status: 200,
+      statusCode: 201,
       message: "Organization and Admin created successfully",
     };
   } catch (error) {
+    console.error("Error in createOrganizationService:", error);
     await transaction.rollback();
     throw error;
   }
