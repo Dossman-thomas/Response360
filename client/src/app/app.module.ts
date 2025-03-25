@@ -18,9 +18,11 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ManageOrganizationsComponent } from './pages/manage-organizations/manage-organizations.component';
 import { OrganizationDetailsComponent } from './pages/organization-details/organization-details.component';
+import { SidebarComponent } from './pages/layout/sidebar/sidebar.component';
+import { HeaderComponent } from './pages/layout/header/header.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, DashboardComponent, ManageOrganizationsComponent, OrganizationDetailsComponent],
+  declarations: [AppComponent, LoginComponent, DashboardComponent, ManageOrganizationsComponent, OrganizationDetailsComponent, SidebarComponent, HeaderComponent],
   imports: [
     BrowserModule,
     FormsModule,
