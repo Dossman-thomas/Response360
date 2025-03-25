@@ -16,9 +16,11 @@ import { CryptoApiService } from './services/crypto-api.service';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { ManageOrganizationsComponent } from './pages/manage-organizations/manage-organizations.component';
+import { OrganizationDetailsComponent } from './pages/organization-details/organization-details.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, DashboardComponent],
+  declarations: [AppComponent, LoginComponent, DashboardComponent, ManageOrganizationsComponent, OrganizationDetailsComponent],
   imports: [
     BrowserModule,
     FormsModule,
