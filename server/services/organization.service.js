@@ -25,14 +25,6 @@ export const createOrganizationService = async (payload) => {
       );
     }
 
-    // console.log("Decrypted data:", orgData);
-
-    // console.log("Before encryption:", {
-    //     orgType: orgData.orgType,
-    //     jurisdiction: orgData.jurisdictionSize,
-    //     website: orgData.website,
-    //   });
-
     // Step 2: Encrypt sensitive data using PGP_SYM_ENCRYPT
     const encryptedOrgName = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
