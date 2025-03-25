@@ -20,9 +20,10 @@ import { ManageOrganizationsComponent } from './pages/manage-organizations/manag
 import { OrganizationDetailsComponent } from './pages/organization-details/organization-details.component';
 import { SidebarComponent } from './pages/layout/sidebar/sidebar.component';
 import { HeaderComponent } from './pages/layout/header/header.component';
+import { LayoutComponent } from './pages/layout/layout/layout.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, DashboardComponent, ManageOrganizationsComponent, OrganizationDetailsComponent, SidebarComponent, HeaderComponent],
+  declarations: [AppComponent, LoginComponent, DashboardComponent, ManageOrganizationsComponent, OrganizationDetailsComponent, SidebarComponent, HeaderComponent, LayoutComponent],
   imports: [
     BrowserModule,
     FormsModule,
