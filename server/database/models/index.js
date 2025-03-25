@@ -10,7 +10,7 @@ OrganizationModel.hasMany(UserModel, {
 
 UserModel.belongsTo(OrganizationModel, {
   foreignKey: 'org_id',
-  as: 'organizations',
+  as: 'organizations', 
 });
 
 export { UserModel, OrganizationModel };

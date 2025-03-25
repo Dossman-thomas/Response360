@@ -62,10 +62,4 @@ const OrganizationModel = sequelize.define(
   }
 );
 
-// Define relationships
-// OrganizationModel.hasMany(UserModel, {
-//   foreignKey: "org_id",
-//   onDelete: "CASCADE",
-// });
-
 export default OrganizationModel;

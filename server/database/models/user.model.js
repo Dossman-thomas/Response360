@@ -67,11 +67,6 @@ const UserModel = sequelize.define(
   }
 );
 
-// Associations
-// UserModel.belongsTo(OrganizationModel, {
-//   foreignKey: "org_id",
-// });
-
 // Hash password before saving
 UserModel.beforeCreate(async (user) => {
   user.user_password = await hashPassword(user.user_password);
