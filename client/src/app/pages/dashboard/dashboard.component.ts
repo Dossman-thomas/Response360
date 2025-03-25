@@ -15,4 +15,8 @@ export class DashboardComponent {
     this.authService.logout();
     this.router.navigate(['/super-admin-login']); // Redirect to login page after logout
   }
+
+  goToManageOrganizations() {
+    this.router.navigate(['/manage-organizations']);
+  }
 }
