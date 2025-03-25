@@ -6,6 +6,7 @@ export { loginSuperAdminService } from "./auth.service.js";
 
 export {
   createOrganizationService,
+  getAllOrganizationsService,
   updateOrganizationService,
   deleteOrganizationService,
 } from "./organization.service.js";

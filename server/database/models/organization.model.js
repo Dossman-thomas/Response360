@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/index.js";
 
-export const OrganizationModel = sequelize.define(
+const OrganizationModel = sequelize.define(
   "organizations",
   {
     org_id: {
@@ -61,3 +61,11 @@ export const OrganizationModel = sequelize.define(
     paranoid: true, // Soft deletes
   }
 );
+
+// Define relationships
+// OrganizationModel.hasMany(UserModel, {
+//   foreignKey: "org_id",
+//   onDelete: "CASCADE",
+// });
+
+export default OrganizationModel;
