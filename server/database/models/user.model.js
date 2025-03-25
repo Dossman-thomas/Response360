@@ -3,7 +3,7 @@ import { sequelize } from "../../config/index.js";
 import { hashPassword } from "../../utils/index.js";
 import bcrypt from "bcrypt";
 
-export const UserModel = sequelize.define(
+const UserModel = sequelize.define(
   "users",
   {
     user_id: {
@@ -67,6 +67,11 @@ export const UserModel = sequelize.define(
   }
 );
 
+// Associations
+// UserModel.belongsTo(OrganizationModel, {
+//   foreignKey: "org_id",
+// });
+
 // Hash password before saving
 UserModel.beforeCreate(async (user) => {
   user.user_password = await hashPassword(user.user_password);
@@ -89,3 +94,5 @@ UserModel.beforeDestroy(async (user) => {
 UserModel.prototype.verifyPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.user_password);
 };
+
+export default UserModel;

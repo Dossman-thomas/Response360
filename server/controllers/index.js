@@ -6,6 +6,7 @@ export { loginSuperAdminController } from "./auth.controller.js";
 
 export {
   createOrganizationController,
+  getAllOrganizationsController,
   updateOrganizationController,
   deleteOrganizationController,
 } from "./organization.controller.js";
