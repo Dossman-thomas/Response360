@@ -23,7 +23,16 @@ import { HeaderComponent } from './pages/layout/header/header.component';
 import { LayoutComponent } from './pages/layout/layout/layout.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, DashboardComponent, ManageOrganizationsComponent, OrganizationDetailsComponent, SidebarComponent, HeaderComponent, LayoutComponent],
+  declarations: [
+    AppComponent,
+    LoginComponent,
+    DashboardComponent,
+    ManageOrganizationsComponent,
+    OrganizationDetailsComponent,
+    SidebarComponent,
+    HeaderComponent,
+    LayoutComponent,
+  ],
   imports: [
     BrowserModule,
     FormsModule,
