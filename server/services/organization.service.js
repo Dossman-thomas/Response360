@@ -91,137 +91,131 @@ export const createOrganizationService = async (payload) => {
 
 // Read Organization Service
 export const getAllOrganizationsService = async ({
-    page,
-    limit,
-    sorts,
-    filters,
-    searchQuery = "",
-  }) => {
-    try {
-      const order =
-        sorts && sorts.length > 0
-          ? sorts
-              .filter((sort) => sort.dir)
-              .map((sort) => [
-                sort.field.includes("user_") ? UserModel : OrganizationModel,
-                sort.field,
-                sort.dir.toUpperCase(),
-              ])
-          : [[OrganizationModel, "createdAt", "DESC"]];
-  
-      const operatorMapping = {
-        contains: Op.iLike,
-        doesnotcontain: Op.notiLike,
-        eq: Op.eq,
-        neq: Op.ne,
-        startswith: Op.startsWith,
-        endswith: Op.endsWith,
-        greaterThan: Op.gt,
-        lessThan: Op.lt,
-        greaterThanOrEquals: Op.gte,
-        lessThanOrEquals: Op.lte,
-      };
-  
-      const where = {
-        [Op.and]: [
-          ...(filters?.length
-            ? filters.map((filter) => {
-                const operator = operatorMapping[filter.operator] || Op.eq;
-                const value =
-                  filter.operator === "contains" ||
-                  filter.operator === "doesnotcontain"
-                    ? `%${filter.value}%`
-                    : filter.value;
-  
-                if (filter.field.startsWith("user_")) {
-                  return {
-                    [`$UserModel.${filter.field.replace("user_", "")}$`]: {
+  page,
+  limit,
+  sorts,
+  filters,
+  searchQuery = "",
+}) => {
+  try {
+    const order =
+      sorts && sorts.length > 0
+        ? sorts
+            .filter((sort) => sort.dir)
+            .map((sort) => [
+              sort.field.includes("user_") ? UserModel : OrganizationModel,
+              sort.field,
+              sort.dir.toUpperCase(),
+            ])
+        : [[OrganizationModel, "createdAt", "DESC"]];
+
+    const operatorMapping = {
+      contains: Op.iLike,
+      doesnotcontain: Op.notiLike,
+      eq: Op.eq,
+      neq: Op.ne,
+      startswith: Op.startsWith,
+      endswith: Op.endsWith,
+      greaterThan: Op.gt,
+      lessThan: Op.lt,
+      greaterThanOrEquals: Op.gte,
+      lessThanOrEquals: Op.lte,
+    };
+
+    const where = {
+      [Op.and]: [
+        ...(filters?.length
+          ? filters.map((filter) => {
+              const operator = operatorMapping[filter.operator] || Op.eq;
+              const value =
+                filter.operator === "contains" ||
+                filter.operator === "doesnotcontain"
+                  ? `%${filter.value}%`
+                  : filter.value;
+
+              return filter.field.startsWith("user_")
+                ? {
+                    [`$users.${filter.field.replace("user_", "")}$`]: {
                       [operator]: value,
                     },
-                  };
-                } else {
-                  return {
-                    [filter.field]: { [operator]: value },
-                  };
-                }
-              })
-            : []),
-          searchQuery
-            ? {
-                [Op.or]: [
-                  Sequelize.where(
-                    Sequelize.fn(
-                      "PGP_SYM_DECRYPT",
-                      Sequelize.col("org_name"),
-                      pubkey
-                    ),
-                    { [Op.iLike]: `%${searchQuery}%` }
+                  }
+                : { [filter.field]: { [operator]: value } };
+            })
+          : []),
+        searchQuery
+          ? {
+              [Op.or]: [
+                Sequelize.where(
+                  Sequelize.fn(
+                    "PGP_SYM_DECRYPT",
+                    Sequelize.col("org_name"),
+                    pubkey
                   ),
-                  Sequelize.where(
-                    Sequelize.fn(
-                      "PGP_SYM_DECRYPT",
-                      Sequelize.col("UserModel.user_email"),
-                      pubkey
-                    ),
-                    { [Op.iLike]: `%${searchQuery}%` }
+                  { [Op.iLike]: `%${searchQuery}%` }
+                ),
+                Sequelize.where(
+                  Sequelize.fn(
+                    "PGP_SYM_DECRYPT",
+                    Sequelize.col("users.user_email"),
+                    pubkey
                   ),
-                ],
-              }
-            : {},
-        ],
-      };
-  
-      const organizations = await OrganizationModel.findAndCountAll({
-        where,
-        include: [
-          {
-            model: UserModel,
-            as: "users",
-            attributes: [
-              [
-                Sequelize.fn(
-                  "PGP_SYM_DECRYPT",
-                  Sequelize.col("UserModel.user_email"),
-                  pubkey
+                  { [Op.iLike]: `%${searchQuery}%` }
                 ),
-                "user_email",
               ],
-              [
-                Sequelize.fn(
-                  "PGP_SYM_DECRYPT",
-                  Sequelize.col("UserModel.user_phone_number"),
-                  pubkey
-                ),
-                "user_phone_number",
-              ],
+            }
+          : {},
+      ],
+    };
+
+    console.log(OrganizationModel.tableName);
+    console.log(UserModel.tableName);
+
+    const organizationData = await OrganizationModel.findAndCountAll({
+      where,
+      include: [
+        {
+          model: UserModel,
+          as: "users",
+          attributes: [
+            [
+              Sequelize.fn(
+                "PGP_SYM_DECRYPT",
+                Sequelize.col("users.user_email"),
+                pubkey
+              ),
+              "user_email",
             ],
-          },
-        ],
-        attributes: [
-          "org_id",
-          [
-            Sequelize.fn(
-              "PGP_SYM_DECRYPT",
-              Sequelize.col("org_name"),
-              pubkey
-            ),
-            "org_name",
+            [
+              Sequelize.fn(
+                "PGP_SYM_DECRYPT",
+                Sequelize.col("users.user_phone_number"),
+                pubkey
+              ),
+              "user_phone_number",
+            ],
           ],
-          "org_status",
-          "createdAt",
-          "updatedAt",
+        },
+      ],
+      attributes: [
+        "org_id",
+        [
+          Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.col("org_name"), pubkey),
+          "org_name",
         ],
-        order,
-        ...pagination({ page, limit }),
-      });
-  
-      return organizations;
-    } catch (error) {
-      console.error("Error in getAllOrganizationsService:", error);
-      throw error;
-    }
-  };
-  
+        "org_status",
+        "createdAt",
+        "updatedAt",
+      ],
+      order,
+      ...pagination({ page, limit }),
+    });
+
+    return organizationData;
+  } catch (error) {
+    console.error("Error in getAllOrganizationsService:", error);
+    throw error;
+  }
+};
 
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
