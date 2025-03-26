@@ -2,11 +2,13 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { ToastrModule } from 'ngx-toastr';
 import { AppRoutingModule } from './app-routing.module';
 import { FormsModule } from '@angular/forms';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { GridModule } from '@progress/kendo-angular-grid';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
 
 // Services
 import { CryptoService } from './services/crypto.service';
@@ -21,6 +23,7 @@ import { OrganizationDetailsComponent } from './pages/organization-details/organ
 import { SidebarComponent } from './pages/layout/sidebar/sidebar.component';
 import { HeaderComponent } from './pages/layout/header/header.component';
 import { LayoutComponent } from './pages/layout/layout/layout.component';
+
 
 @NgModule({
   declarations: [
@@ -43,6 +46,8 @@ import { LayoutComponent } from './pages/layout/layout/layout.component';
       positionClass: 'toast-top-right',
       preventDuplicates: true,
     }),
+    GridModule,
+    BrowserAnimationsModule,
   ],
   providers: [
     CryptoService,
