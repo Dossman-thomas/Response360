@@ -10,11 +10,6 @@ export class ManageOrganizationsComponent {
 
   constructor(private router: Router) {}
 
-  // Navigate to the dashboard
-  goToDashboard() {
-    this.router.navigate(['/dashboard']);
-  }
-
   // Navigate to the organization details page
   goToOrganizationDetails() {
     this.router.navigate(['/organization-details']);

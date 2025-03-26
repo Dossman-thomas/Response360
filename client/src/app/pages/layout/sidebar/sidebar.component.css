@@ -34,7 +34,8 @@
     border-left: none;
     border-right: none;
     border-bottom: none;
-    /* color: #4B49AC; */
+    border-color: white;;
+    color: #ffffff;
     /* text-align: center; */
     width: 100%;
     padding: 15px;
@@ -51,7 +52,7 @@
   
   .menu-items button.active {
     /* background-color: #4B49AC; */
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
   }
 
   .menu-items button:hover {
