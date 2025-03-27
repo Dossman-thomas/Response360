@@ -209,7 +209,7 @@ export const getAllOrganizationsService = async ({
       ...pagination({ page, limit }),
     });
 
-    return organizationData;
+    return organizationData; // needs to be encrypted
   } catch (error) {
     console.error("Error in getAllOrganizationsService:", error);
     throw error;
