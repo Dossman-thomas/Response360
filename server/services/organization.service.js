@@ -148,7 +148,7 @@ export const getAllOrganizationsService = async ({
                 Sequelize.where(
                   Sequelize.fn(
                     "PGP_SYM_DECRYPT",
-                    Sequelize.col("org_name"),
+                    Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
                     pubkey
                   ),
                   { [Op.iLike]: `%${searchQuery}%` }
@@ -156,7 +156,7 @@ export const getAllOrganizationsService = async ({
                 Sequelize.where(
                   Sequelize.fn(
                     "PGP_SYM_DECRYPT",
-                    Sequelize.col("users.user_email"),
+                    Sequelize.cast(Sequelize.col("users.user_email"),'bytea'),
                     pubkey
                   ),
                   { [Op.iLike]: `%${searchQuery}%` }
@@ -180,7 +180,7 @@ export const getAllOrganizationsService = async ({
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.col("users.user_email"),
+                Sequelize.cast(Sequelize.col("users.user_email"),'bytea'),
                 pubkey
               ),
               "user_email",
@@ -188,7 +188,7 @@ export const getAllOrganizationsService = async ({
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.col("users.user_phone_number"),
+               Sequelize.cast(Sequelize.col("users.user_phone_number"),'bytea'),
                 pubkey
               ),
               "user_phone_number",
@@ -199,14 +199,13 @@ export const getAllOrganizationsService = async ({
       attributes: [
         "org_id",
         [
-          Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.col("org_name"), pubkey),
+          Sequelize.fn("PGP_SYM_DECRYPT",  Sequelize.cast(Sequelize.col('org_name'), 'bytea'), pubkey),
           "org_name",
         ],
         "org_status",
-        "createdAt",
-        "updatedAt",
+        "org_created_at",
+        "org_updated_at",
       ],
-      order,
       ...pagination({ page, limit }),
     });
 
