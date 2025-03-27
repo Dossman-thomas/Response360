@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../../config/index.js";
 import { hashPassword } from "../../utils/index.js";
+
 import bcrypt from "bcrypt";
 
 const UserModel = sequelize.define(
@@ -89,5 +90,6 @@ UserModel.beforeDestroy(async (user) => {
 UserModel.prototype.verifyPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.user_password);
 };
+
 
 export default UserModel;
