@@ -1,11 +1,13 @@
 import {
   createOrganizationService,
   getAllOrganizationsService,
+  getOrganizationByIdService,
   updateOrganizationService,
   deleteOrganizationService,
 } from "../services/index.js";
 import { response } from "../utils/index.js";
 import { messages } from "../messages/index.js";
+import { validate as validateUuid } from "uuid";
 
 // Controller to handle the creation of an organization
 export const createOrganizationController = async (req, res) => {
@@ -53,6 +55,33 @@ export const getAllOrganizationsController = async (req, res) => {
     return response(res, {
       statusCode: 200,
       data: results,
+    });
+  } catch (error) {
+    console.error(error);
+    return response(res, {
+      statusCode: error.status || 500,
+      message: error.message || messages.general.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
+// Controller to handle the reading of an organization by ID
+export const getOrganizationByIdController = async (req, res) => {
+  try {
+    const { orgId } = req.params;
+
+    if (!orgId || !validateUuid(orgId)) {  // Ensure orgId is provided and valid
+      return res.status(400).json({
+        status: 400,
+        message: "Invalid or missing organization ID in the request",
+      });
+    }
+
+    const encryptedOrgData = await getOrganizationByIdService(orgId);
+
+    return response(res, {
+      statusCode: 200,
+      data: encryptedOrgData,
     });
   } catch (error) {
     console.error(error);

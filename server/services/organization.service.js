@@ -1,11 +1,9 @@
-// Organization Service - Create Function
 import { OrganizationModel, UserModel } from "../database/models/index.js";
-// import { UserModel } from "../database/models/index.js";
 import { sequelize } from "../config/index.js";
 import { env } from "../config/index.js";
 import { Sequelize, Op } from "sequelize";
 import { pagination } from "../utils/index.js";
-import { decryptService } from "../services/index.js";
+import { encryptService, decryptService } from "../services/index.js";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 dotenv.config();
@@ -215,6 +213,108 @@ export const getAllOrganizationsService = async ({
     throw error;
   }
 };
+
+// Get Organization By ID Service
+export const getOrganizationByIdService = async (orgId) => {
+  try {
+    const foundOrg = await OrganizationModel.findOne({
+      where: { org_id: orgId },
+      include: [
+        {
+          model: UserModel,
+          as: "users",
+          where: { user_role: "Admin" },  // Only fetch the admin user associated with this organization
+          attributes: [
+            [
+              Sequelize.fn(
+                "PGP_SYM_DECRYPT",
+                Sequelize.cast(Sequelize.col("users.first_name"), 'bytea'),
+                pubkey
+              ),
+              "first_name",
+            ],
+            [
+              Sequelize.fn(
+                "PGP_SYM_DECRYPT",
+                Sequelize.cast(Sequelize.col("users.last_name"), 'bytea'),
+                pubkey
+              ),
+              "last_name",
+            ],
+            [
+              Sequelize.fn(
+                "PGP_SYM_DECRYPT",
+                Sequelize.cast(Sequelize.col("users.user_email"), 'bytea'),
+                pubkey
+              ),
+              "user_email",
+            ],
+            [
+              Sequelize.fn(
+                "PGP_SYM_DECRYPT",
+                Sequelize.cast(Sequelize.col("users.user_phone_number"), 'bytea'),
+                pubkey
+              ),
+              "user_phone_number",
+            ],
+          ],
+        },
+      ],
+      attributes: [
+        "org_id",
+        [
+          Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.cast(Sequelize.col('org_name'), 'bytea'), pubkey),
+          "org_name",
+        ],
+        [
+          Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.cast(Sequelize.col('org_address'), 'bytea'), pubkey),
+          "org_address",
+        ],
+        "org_type", 
+        "jurisdiction",  
+        "website",  
+        "org_status",
+        "org_created_at",
+        "org_updated_at",
+      ],
+    });
+
+    // Check if organization exists
+    if (!foundOrg) {
+      throw new Error("Organization not found.");
+    }
+
+    // Prepare the data object for encryption
+    const orgData = {
+      orgId: foundOrg.org_id,  // Ensuring consistency with camelCase naming
+      orgName: foundOrg.org_name,
+      orgType: foundOrg.org_type,
+      jurisdictionSize: foundOrg.jurisdiction,
+      registeredAddress: foundOrg.org_address,
+      website: foundOrg.website,
+      status: foundOrg.org_status,
+      // Ensure that we handle only the first admin user, just in case there are multiple users
+      adminUser: foundOrg.users.length ? {
+        firstName: foundOrg.users[0].first_name,
+        lastName: foundOrg.users[0].last_name,
+        userEmail: foundOrg.users[0].user_email,
+        userPhoneNumber: foundOrg.users[0].user_phone_number,
+      } : null, // In case no admin user is found
+    };
+
+    // Encrypt the organization data
+    const encryptedOrgData = encryptService(orgData);
+
+    return encryptedOrgData; 
+  } catch (error) {
+    console.error("Error in getOrganizationByIdService:", error);
+    throw error;
+  }
+};
+
+
+
+
 
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
