@@ -1,10 +1,10 @@
 // organization.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { CryptoService } from './crypto.service';
 import { Router } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -58,6 +58,26 @@ export class OrganizationService {
           console.error('Failed to create organization:', err);
         },
       });
+  }
+
+  // Read all organizations
+  getAllOrganizations(body: any): Observable<any> {
+    return this.http
+      .post<any>(`${this.apiUrl}/read`, body) // Send the body to the backend
+      .pipe(
+        map((res) => {
+          // Decrypt the encrypted data in the response
+          const decryptedData = this.cryptoService.Decrypt(res.data);
+
+          // Return the decrypted data
+          return decryptedData;
+        }),
+        catchError((error) => {
+          // Handle the error and return a user-friendly error message or rethrow
+          console.error('Error occurred:', error);
+          return throwError(() => new Error('Failed to fetch organizations'));
+        })
+      );
   }
 
   // Read a single organization by ID
