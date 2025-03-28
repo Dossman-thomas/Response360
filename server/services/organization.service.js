@@ -6,6 +6,7 @@ import { pagination } from "../utils/index.js";
 import { encryptService, decryptService } from "../services/index.js";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const pubkey = env.encryption.pubkey;
@@ -207,7 +208,10 @@ export const getAllOrganizationsService = async ({
       ...pagination({ page, limit }),
     });
 
-    return organizationData; // needs to be encrypted
+    const encryptedOrgData = encryptService(organizationData);
+
+    return encryptedOrgData;
+    
   } catch (error) {
     console.error("Error in getAllOrganizationsService:", error);
     throw error;

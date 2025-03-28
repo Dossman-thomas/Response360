@@ -44,7 +44,7 @@ export const getAllOrganizationsController = async (req, res) => {
   try {
     const { page, limit, sorts, filters, searchQuery } = req.body;
 
-    const results = await getAllOrganizationsService({
+    const encryptedOrgData = await getAllOrganizationsService({
       page,
       limit,
       sorts,
@@ -54,7 +54,7 @@ export const getAllOrganizationsController = async (req, res) => {
 
     return response(res, {
       statusCode: 200,
-      data: results,
+      data: encryptedOrgData,
     });
   } catch (error) {
     console.error(error);
