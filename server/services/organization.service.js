@@ -312,10 +312,6 @@ export const getOrganizationByIdService = async (orgId) => {
   }
 };
 
-
-
-
-
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
   try {

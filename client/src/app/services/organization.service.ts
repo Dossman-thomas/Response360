@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CryptoService } from './crypto.service';
 import { Router } from '@angular/router';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class OrganizationService {
     private router: Router
   ) {}
 
+  // Create a new organization
   createOrganization(
     orgName: string,
     registeredAddress: string,
@@ -56,6 +58,19 @@ export class OrganizationService {
           console.error('Failed to create organization:', err);
         },
       });
+  }
+
+  // Read a single organization by ID
+  getOrganizationById(orgId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/get/${orgId}`).pipe(
+      map((response) => {
+        // Assuming the encrypted data is in response.data
+        const decryptedData = this.cryptoService.Decrypt(response.data);
+
+        // Now return the decrypted data
+        return decryptedData;
+      })
+    );
   }
 
   // Update an organization
