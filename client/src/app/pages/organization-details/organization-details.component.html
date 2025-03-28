@@ -1,89 +1,155 @@
 <div class="container py-4">
-    <!-- Centered card container -->
-    <div class="row">
-      <!-- Make the card larger by increasing the width on larger screens -->
-      <div class="col-md-12 col-lg-12 col-xl-12 px-4">
-        <h6>Manage Organizations > Organization Details</h6>
-        <div class="card shadow-sm mt-3">
-          <div class="card-body px-4 pt-4 pb-5">
-            <!-- Title -->
-            <h6 class="card-title mb-4">Organization Details</h6>
-  
-            <!-- Flexbox container for logo and text fields -->
+  <div class="row">
+    <div class="col-md-12 col-lg-12 col-xl-12 px-4">
+      <h6>Manage Organizations > Organization Details</h6>
+      <div class="card shadow-sm mt-3">
+        <div class="card-body px-4 pt-4 pb-5">
+          <h6 class="card-title mb-4">Organization Details</h6>
+
+          <form [formGroup]="organizationForm" (ngSubmit)="onSubmit()">
             <div class="row">
-              <!-- Left column with logo and text fields -->
               <div class="col-md-3">
-                <!-- Logo placeholder -->
                 <div
                   class="d-flex justify-content-center align-items-center mb-2 bg-light border-0"
-                  style="height: 200px; width: 200px;"
+                  style="height: 200px; width: 200px"
                 >
                   <span>Logo</span>
                 </div>
-  
-                <!-- Text fields below logo (not editable) -->
+              </div>
+
+              <!-- Display these fields only if mode is 'update' -->
+              <div *ngIf="mode === 'update'" class="col-md-9">
                 <div class="d-flex align-items-center">
                   <label class="me-2">Created:</label>
-                  <p class="form-control-plaintext">2023-01-01</p>
+                  <p class="form-control-plaintext">
+                    {{ org_created_at || "N/A" }}
+                  </p>
                 </div>
-  
+
                 <div class="d-flex align-items-center text-nowrap">
                   <label class="me-2">Last Modified:</label>
-                  <p class="form-control-plaintext">2023-02-01</p>
+                  <p class="form-control-plaintext">
+                    {{ org_updated_at || "N/A" }}
+                  </p>
                 </div>
-  
+
                 <div class="d-flex align-items-center">
                   <label class="text-success me-2">Status:</label>
-                  <p class="form-control-plaintext text-success">Enabled</p>
+                  <p
+                    class="form-control-plaintext"
+                    [class.text-success]="org_status === 'Enabled'"
+                    [class.text-danger]="org_status === 'Disabled'"
+                  >
+                    {{ org_status || "N/A" }}
+                  </p>
                 </div>
               </div>
-  
-              <!-- Right columns with form fields -->
+
               <div class="col-md-8">
                 <div class="row">
-                  <!-- First column of form fields -->
                   <div class="col-md-6">
                     <div class="mb-3">
-                      <label for="admin_first_name" class="form-label">Admin First Name</label>
-                      <input type="text" class="form-control" id="admin_first_name" />
+                      <label class="form-label">Admin First Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="admin_first_name"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('admin_first_name')?.invalid &&
+                          organizationForm.get('admin_first_name')?.touched
+                        "
+                        >{{ getErrorMessage("admin_first_name") }}</small
+                      >
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="org_name" class="form-label">Organization Name</label>
-                      <input type="text" class="form-control" id="org_name" />
+                      <label class="form-label">Organization Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="org_name"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('org_name')?.invalid &&
+                          organizationForm.get('org_name')?.touched
+                        "
+                        >{{ getErrorMessage("org_name") }}</small
+                      >
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="admin_email" class="form-label">Admin Email</label>
-                      <input type="email" class="form-control" id="admin_email" />
+                      <label class="form-label">Admin Email</label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        formControlName="admin_email"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('admin_email')?.invalid &&
+                          organizationForm.get('admin_email')?.touched
+                        "
+                        >{{ getErrorMessage("admin_email") }}</small
+                      >
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="admin_phone" class="form-label">Admin Phone</label>
-                      <input type="text" class="form-control" id="admin_phone" />
+                      <label class="form-label">Admin Phone</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="admin_phone"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('admin_phone')?.invalid &&
+                          organizationForm.get('admin_phone')?.touched
+                        "
+                        >{{ getErrorMessage("admin_phone") }}</small
+                      >
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="org_status_select" class="form-label">Status</label>
-                      <select class="form-select" id="org_status_select">
+                      <label class="form-label">Status</label>
+                      <select class="form-select" formControlName="org_status">
                         <option value="Enabled">Enabled</option>
                         <option value="Disabled">Disabled</option>
                       </select>
                     </div>
                   </div>
-  
-                  <!-- Second column of form fields -->
+
                   <div class="col-md-6">
                     <div class="mb-3">
-                      <label for="admin_last_name" class="form-label">Admin Last Name</label>
-                      <input type="text" class="form-control" id="admin_last_name" />
+                      <label class="form-label">Admin Last Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="admin_last_name"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('admin_last_name')?.invalid &&
+                          organizationForm.get('admin_last_name')?.touched
+                        "
+                        >{{ getErrorMessage("admin_last_name") }}</small
+                      >
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="org_type" class="form-label">Organization Type</label>
-                      <select class="form-select" id="org_type">
-                        <option value="" selected disabled>Organization Type</option>
-                        <option value="Emergency Management">Emergency Management</option>
+                      <label class="form-label">Organization Type</label>
+                      <select class="form-select" formControlName="org_type">
+                        <option value="" disabled>Organization Type</option>
+                        <option value="Emergency Management">
+                          Emergency Management
+                        </option>
                         <option value="Fire/EMS">Fire/EMS</option>
                         <option value="Law Enforcement">Law Enforcement</option>
                         <option value="Business">Business</option>
@@ -92,38 +158,49 @@
                         <option value="NGOs">NGOs</option>
                       </select>
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="jurisdiction_size" class="form-label">Jurisdiction Size</label>
-                      <select class="form-select" id="jurisdiction_size">
+                      <label class="form-label">Jurisdiction Size</label>
+                      <select
+                        class="form-select"
+                        formControlName="jurisdiction_size"
+                      >
                         <option value="Global">Global</option>
                         <option value="National">National</option>
                         <option value="State">State</option>
                         <option value="District">District</option>
                       </select>
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="org_address" class="form-label">Registered Address</label>
-                      <input type="text" class="form-control" id="org_address" />
+                      <label class="form-label">Registered Address</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="org_address"
+                      />
                     </div>
-  
+
                     <div class="mb-3">
-                      <label for="org_website" class="form-label">Website</label>
-                      <input type="text" class="form-control" id="org_website" />
+                      <label class="form-label">Website</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="org_website"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-  
-            <!-- Update Button -->
+
+            <!-- Submit Button -->
             <div class="text-center mt-4">
-              <button class="btn btn-primary">Update</button>
+              <button class="btn btn-primary" type="submit">Create</button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
