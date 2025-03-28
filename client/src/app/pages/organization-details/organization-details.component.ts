@@ -1,20 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CryptoService } from '../../services/crypto.service';
+import { OrganizationService } from '../../services/organization.service';
 
 @Component({
   selector: 'app-organization-details',
   templateUrl: './organization-details.component.html',
-  styleUrls: ['./organization-details.component.css']
+  styleUrls: ['./organization-details.component.css'],
 })
 export class OrganizationDetailsComponent implements OnInit {
   organizationForm!: FormGroup;
-  mode: 'create' | 'view' = 'create';
+  mode: 'create' | 'update' = 'create';
+
+  org_created_at?: string;
+  org_updated_at?: string;
+  org_status?: string;
+
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cryptoService: CryptoService,
+    private organizationService: OrganizationService
   ) {}
 
   ngOnInit(): void {
@@ -28,25 +37,41 @@ export class OrganizationDetailsComponent implements OnInit {
       admin_first_name: ['', Validators.required],
       admin_last_name: ['', Validators.required],
       admin_email: ['', [Validators.required, Validators.email]],
-      admin_phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      admin_phone: ['', [Validators.required, Validators.pattern(/^\+?1?\s?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}$/)
+      ]],
       org_name: ['', Validators.required],
       org_status: ['Enabled', Validators.required],
       org_type: ['', Validators.required],
       jurisdiction_size: ['Global', Validators.required],
       org_address: ['', Validators.required],
-      org_website: ['', Validators.pattern(/^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(\S*)?$/)]
+      org_website: [
+        '',
+        Validators.pattern(/^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(\S*)?$/),
+      ],
     });
   }
 
   // Determine mode (create or view)
   checkMode(): void {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
-    if (modeParam === 'create') {
-      this.mode = 'create';
+    if (modeParam === 'update') {
+      this.mode = 'update';
+      this.fetchOrganizationDetails();
     } else {
-      this.mode = 'view';
-      this.organizationForm.disable(); // Disable form for view mode
+      this.mode = 'create';
     }
+  }
+  
+  fetchOrganizationDetails(): void {
+    const orgId = this.route.snapshot.queryParamMap.get('orgId');
+    // if (orgId) {
+    //   this.organizationService.getOrganizationById(orgId).subscribe((data) => {
+    //     this.organizationForm.patchValue(data);
+    //     this.org_created_at = data.org_created_at;
+    //     this.org_updated_at = data.org_updated_at;
+    //     this.org_status = data.org_status;
+    //   });
+    // }
   }
 
   // Display error messages
@@ -58,25 +83,25 @@ export class OrganizationDetailsComponent implements OnInit {
     return '';
   }
 
-  // Encrypt the form data
-  encryptData(data: any): string {
-    // Your encryption logic here
-    return JSON.stringify(data); // Placeholder for your actual encryption
-  }
-
   // Submit form data
   onSubmit(): void {
     if (this.organizationForm.valid) {
-      const encryptedPayload = this.encryptData(this.organizationForm.value);
-      console.log('Encrypted Data:', encryptedPayload);
-      // Call your API service here
+      const formValues = this.organizationForm.value;
+
+      this.organizationService.createOrganization(
+        formValues.org_name,
+        formValues.org_address,
+        formValues.org_type,
+        formValues.jurisdiction_size,
+        formValues.org_website,
+        formValues.admin_first_name,
+        formValues.admin_last_name,
+        formValues.admin_email,
+        formValues.admin_phone
+      );
     } else {
       console.log('Form is invalid');
+      alert('Please fill in all required fields.');
     }
-  }
-
-  // Navigate back to manage organizations
-  onCancel(): void {
-    this.router.navigate(['/manage-organizations']);
   }
 }

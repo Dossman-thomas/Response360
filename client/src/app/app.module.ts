@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { GridModule } from '@progress/kendo-angular-grid';
@@ -41,13 +42,16 @@ import { LayoutComponent } from './pages/layout/layout/layout.component';
     FormsModule,
     AppRoutingModule,
     HttpClientModule,
+    GridModule,
+    BrowserAnimationsModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
     ToastrModule.forRoot({
       timeOut: 1500, // 1.5 seconds
       positionClass: 'toast-top-right',
       preventDuplicates: true,
     }),
-    GridModule,
-    BrowserAnimationsModule,
+
   ],
   providers: [
     CryptoService,

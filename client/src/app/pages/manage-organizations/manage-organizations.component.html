@@ -8,11 +8,11 @@
     <input type="text" class="form-control w-25" placeholder="Search" />
 
     <!-- New Organization Button -->
-    <button class="btn btn-secondary" (click)="goToOrganizationDetails()">New</button>
+    <button class="btn btn-secondary" (click)="onNewOrganization()">New</button>
   </div>
 
   <!-- Kendo Grid Placeholder -->
-  <kendo-grid [height]="400"> -->
+  <kendo-grid [height]="400">
     <!-- Column Definitions -->
     <kendo-grid-column field="org_name" title="Name"></kendo-grid-column>
     <kendo-grid-column field="admin_email" title="Admin Email"></kendo-grid-column>
