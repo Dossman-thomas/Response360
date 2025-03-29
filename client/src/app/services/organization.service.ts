@@ -69,7 +69,7 @@ export class OrganizationService {
           // Decrypt the encrypted data in the response
           const decryptedData = this.cryptoService.Decrypt(res.data);
 
-          console.log('Decrypted data: ', decryptedData);
+          // console.log('Decrypted data: ', decryptedData);
 
           // Return the decrypted data
           return decryptedData;
