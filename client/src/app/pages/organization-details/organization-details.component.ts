@@ -56,7 +56,7 @@ export class OrganizationDetailsComponent implements OnInit {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
     if (modeParam === 'update') {
       this.mode = 'update';
-      this.fetchOrganizationDetails();
+      // this.fetchOrganizationDetails();
     } else {
       this.mode = 'create';
     }
@@ -64,14 +64,14 @@ export class OrganizationDetailsComponent implements OnInit {
   
   fetchOrganizationDetails(): void {
     const orgId = this.route.snapshot.queryParamMap.get('orgId');
-    // if (orgId) {
-    //   this.organizationService.getOrganizationById(orgId).subscribe((data) => {
-    //     this.organizationForm.patchValue(data);
-    //     this.org_created_at = data.org_created_at;
-    //     this.org_updated_at = data.org_updated_at;
-    //     this.org_status = data.org_status;
-    //   });
-    // }
+    if (orgId) {
+      this.organizationService.getOrganizationById(orgId).subscribe((data) => {
+        this.organizationForm.patchValue(data);
+        this.org_created_at = data.org_created_at;
+        this.org_updated_at = data.org_updated_at;
+        this.org_status = data.org_status;
+      });
+    }
   }
 
   // Display error messages
