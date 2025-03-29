@@ -22,9 +22,8 @@
     [sort]="state.sort"
     filterable="menu"
     [filter]="state.filter"
-    [pageable]="{ buttonCount: 5, pageSizes: [5, 10, 25, 50, 100] }"
+    [pageable]="{ buttonCount: 5, pageSizes: [5, 10, 25, 50] }"
     (dataStateChange)="dataStateChange($event)"
-    [height]="400"
   >
     <!-- Column Definitions -->
     <kendo-grid-column field="org_name" title="Name"></kendo-grid-column>

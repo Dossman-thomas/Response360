@@ -67,7 +67,7 @@ export class ManageOrganizationsComponent implements OnInit {
   private loadOrgDetails(): void {
     this.organizationService.getAllOrganizations(this.body).subscribe({
       next: (response: any) => {
-        console.log('response: ', response);
+        // console.log('response: ', response);
 
         if (Array.isArray(response.rows)) {
           // Flatten user data 
@@ -82,7 +82,7 @@ export class ManageOrganizationsComponent implements OnInit {
             total: response.count || response.rows.length,
           }; 
         
-          console.log('Organization details:', this.gridData);
+          // console.log('Organization details:', this.gridData);
         } else {
           console.error('Failed to fetch organization details:', response);
         }
