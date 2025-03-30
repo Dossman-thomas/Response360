@@ -323,7 +323,8 @@ export const getOrganizationByIdService = async (orgId) => {
       registeredAddress: foundOrg.org_address,
       website: foundOrg.website,
       status: foundOrg.org_status,
-      // Ensure that we handle only the first admin user, just in case there are multiple users
+      orgCreatedAt: foundOrg.org_created_at,
+      orgUpdatedAt: foundOrg.org_updated_at,
       adminUser: foundOrg.users.length
         ? {
             firstName: foundOrg.users[0].first_name,
