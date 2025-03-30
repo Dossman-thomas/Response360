@@ -17,7 +17,7 @@ export class OrganizationDetailsComponent implements OnInit {
   org_created_at?: string;
   org_updated_at?: string;
   org_status?: string;
-  adminEmail!: string;
+  // adminEmail!: string;
 
   constructor(
     private fb: FormBuilder,
@@ -77,7 +77,6 @@ export class OrganizationDetailsComponent implements OnInit {
       // Patch organization data
       this.organizationForm.patchValue({
         org_name: data.orgName,
-        org_status: data.status ? 'Enabled' : 'Disabled', // Assuming true = Enabled, false = Disabled
         org_type: data.orgType,
         jurisdiction_size: data.jurisdictionSize,
         org_address: data.registeredAddress,
@@ -95,10 +94,14 @@ export class OrganizationDetailsComponent implements OnInit {
       }
   
       // Set other fields
-      this.org_created_at = data.createdAt;
-      this.org_updated_at = data.updatedAt;
+
+      // Format date fields to display in a user-friendly format
+      const formatOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+
+      this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString('en-GB', formatOptions);
+      this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString('en-GB', formatOptions);
       this.org_status = data.status ? 'Enabled' : 'Disabled';
-      this.adminEmail = data.adminUser.userEmail;
+      // this.adminEmail = data.adminUser.userEmail;
     });
   }
   
