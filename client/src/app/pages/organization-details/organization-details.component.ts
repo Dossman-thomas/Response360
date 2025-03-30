@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+// import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CryptoService } from '../../services/crypto.service';
@@ -16,7 +17,7 @@ export class OrganizationDetailsComponent implements OnInit {
   org_created_at?: string;
   org_updated_at?: string;
   org_status?: string;
-
+  adminEmail!: string;
 
   constructor(
     private fb: FormBuilder,
@@ -37,8 +38,15 @@ export class OrganizationDetailsComponent implements OnInit {
       admin_first_name: ['', Validators.required],
       admin_last_name: ['', Validators.required],
       admin_email: ['', [Validators.required, Validators.email]],
-      admin_phone: ['', [Validators.required, Validators.pattern(/^\+?1?\s?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}$/)
-      ]],
+      admin_phone: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(
+            /^\+?1?\s?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}$/
+          ),
+        ],
+      ],
       org_name: ['', Validators.required],
       org_status: ['Enabled', Validators.required],
       org_type: ['', Validators.required],
@@ -55,7 +63,7 @@ export class OrganizationDetailsComponent implements OnInit {
   checkMode(): void {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
     const orgIdParam = this.route.snapshot.queryParamMap.get('orgId');
-  
+
     if (modeParam === 'update' && orgIdParam) {
       this.mode = 'update';
       this.fetchOrganizationDetails(orgIdParam);
@@ -63,26 +71,37 @@ export class OrganizationDetailsComponent implements OnInit {
       this.mode = 'create';
     }
   }
-  
+
   fetchOrganizationDetails(orgId: string): void {
     this.organizationService.getOrganizationById(orgId).subscribe((data) => {
+      // Patch organization data
       this.organizationForm.patchValue({
-        org_name: data.org_name,
-        admin_first_name: data.admin_first_name,
-        admin_last_name: data.admin_last_name,
-        admin_email: data.admin_email,
-        admin_phone: data.admin_phone,
-        org_status: data.org_status,
-        org_type: data.org_type,
-        jurisdiction_size: data.jurisdiction_size,
-        org_address: data.org_address,
-        org_website: data.org_website,
+        org_name: data.orgName,
+        org_status: data.status ? 'Enabled' : 'Disabled', // Assuming true = Enabled, false = Disabled
+        org_type: data.orgType,
+        jurisdiction_size: data.jurisdictionSize,
+        org_address: data.registeredAddress,
+        org_website: data.website,
       });
-      this.org_created_at = data.org_created_at;
-      this.org_updated_at = data.org_updated_at;
-      this.org_status = data.org_status;
+  
+      // Patch admin user data
+      if (data.adminUser) {
+        this.organizationForm.patchValue({
+          admin_first_name: data.adminUser.firstName,
+          admin_last_name: data.adminUser.lastName,
+          admin_email: data.adminUser.userEmail,
+          admin_phone: data.adminUser.userPhoneNumber,
+        });
+      }
+  
+      // Set other fields
+      this.org_created_at = data.createdAt;
+      this.org_updated_at = data.updatedAt;
+      this.org_status = data.status ? 'Enabled' : 'Disabled';
+      this.adminEmail = data.adminUser.userEmail;
     });
   }
+  
 
   // Display error messages
   getErrorMessage(controlName: string): string {
@@ -98,22 +117,55 @@ export class OrganizationDetailsComponent implements OnInit {
     if (this.organizationForm.valid) {
       const formValues = this.organizationForm.value;
 
-      this.organizationService.createOrganization(
-        formValues.org_name,
-        formValues.org_address,
-        formValues.org_type,
-        formValues.jurisdiction_size,
-        formValues.org_website,
-        formValues.admin_first_name,
-        formValues.admin_last_name,
-        formValues.admin_email,
-        formValues.admin_phone
-      );
+      const orgId = this.route.snapshot.queryParamMap.get('orgId'); // Get orgId for update mode
+
+      if (this.mode === 'update' && orgId) {
+        // Update organization logic
+        this.organizationService
+          .updateOrganization(
+            orgId, // Pass the orgId for the update
+            formValues.org_name,
+            formValues.org_address,
+            formValues.org_type,
+            formValues.jurisdiction_size,
+            formValues.org_website,
+            formValues.status // Pass the status for update
+          )
+          .subscribe({
+            next: (response) => {
+              console.log('Organization updated successfully:', response);
+              this.router.navigate(['/manage-organizations']);
+            },
+            error: (err) => {
+              console.error('Failed to update organization:', err);
+            },
+          });
+      } else {
+        // Create new organization logic
+        this.organizationService
+          .createOrganization(
+            formValues.org_name,
+            formValues.org_address,
+            formValues.org_type,
+            formValues.jurisdiction_size,
+            formValues.org_website,
+            formValues.admin_first_name,
+            formValues.admin_last_name,
+            formValues.admin_email,
+            formValues.admin_phone
+          )
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/manage-organizations']);
+            },
+            error: (err) => {
+              console.error('Failed to create organization:', err);
+            },
+          });
+      }
     } else {
       console.log('Form is invalid');
       alert('Please fill in all required fields.');
     }
   }
-
-
 }

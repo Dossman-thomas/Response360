@@ -19,6 +19,47 @@ export class OrganizationService {
   ) {}
 
   // Create a new organization
+  // createOrganization(
+  //   orgName: string,
+  //   registeredAddress: string,
+  //   orgType: string,
+  //   jurisdictionSize: string,
+  //   website: string,
+  //   adminFirstName: string,
+  //   adminLastName: string,
+  //   adminEmail: string,
+  //   adminPhone: string
+  // ) {
+  //   // Encrypt the form data into a single payload
+  //   const encryptedPayload = this.cryptoService.Encrypt({
+  //     orgName,
+  //     registeredAddress,
+  //     orgType,
+  //     jurisdictionSize,
+  //     website,
+  //     adminFirstName,
+  //     adminLastName,
+  //     adminEmail,
+  //     adminPhone,
+  //   });
+
+  //   // Send the encrypted payload to the backend
+  //   return this.http
+  //     .post<any>(`${this.apiUrl}/create`, {
+  //       payload: encryptedPayload,
+  //     })
+  //     .subscribe({
+  //       next: (response) => {
+  //         console.log('Organization created successfully:', response);
+
+  //         this.router.navigate(['/manage-organizations']);
+  //       },
+  //       error: (err) => {
+  //         console.error('Failed to create organization:', err);
+  //       },
+  //     });
+  // }
+
   createOrganization(
     orgName: string,
     registeredAddress: string,
@@ -42,23 +83,13 @@ export class OrganizationService {
       adminEmail,
       adminPhone,
     });
-
+  
     // Send the encrypted payload to the backend
-    return this.http
-      .post<any>(`${this.apiUrl}/create`, {
-        payload: encryptedPayload,
-      })
-      .subscribe({
-        next: (response) => {
-          console.log('Organization created successfully:', response);
-
-          this.router.navigate(['/manage-organizations']);
-        },
-        error: (err) => {
-          console.error('Failed to create organization:', err);
-        },
-      });
+    return this.http.post<any>(`${this.apiUrl}/create`, {
+      payload: encryptedPayload,
+    });
   }
+  
 
   // Read all organizations
   getAllOrganizations(body: any): Observable<any> {
@@ -96,6 +127,42 @@ export class OrganizationService {
   }
 
   // Update an organization
+  // updateOrganization(
+  //   orgId: string,
+  //   orgName: string,
+  //   registeredAddress: string,
+  //   orgType: string,
+  //   jurisdictionSize: string,
+  //   website: string,
+  //   status: string
+  // ) {
+  //   // Encrypt the form data into a single payload
+  //   const encryptedPayload = this.cryptoService.Encrypt({
+  //     orgName,
+  //     registeredAddress,
+  //     orgType,
+  //     jurisdictionSize,
+  //     website,
+  //     status,
+  //   });
+
+  //   // Send the encrypted payload to the backend
+  //   return this.http
+  //     .put<any>(`${this.apiUrl}/update/${orgId}`, {
+  //       payload: encryptedPayload,
+  //     })
+  //     .subscribe({
+  //       next: (response) => {
+  //         console.log('Organization updated successfully:', response);
+
+  //         this.router.navigate(['/manage-organizations']);
+  //       },
+  //       error: (err) => {
+  //         console.error('Failed to update organization:', err);
+  //       },
+  //     });
+  // }
+
   updateOrganization(
     orgId: string,
     orgName: string,
@@ -114,23 +181,13 @@ export class OrganizationService {
       website,
       status,
     });
-
-    // Send the encrypted payload to the backend
-    return this.http
-      .put<any>(`${this.apiUrl}/update/${orgId}`, {
-        payload: encryptedPayload,
-      })
-      .subscribe({
-        next: (response) => {
-          console.log('Organization updated successfully:', response);
-
-          this.router.navigate(['/manage-organizations']);
-        },
-        error: (err) => {
-          console.error('Failed to update organization:', err);
-        },
-      });
+  
+    // Send the encrypted payload to the backend and return the observable
+    return this.http.put<any>(`${this.apiUrl}/update/${orgId}`, {
+      payload: encryptedPayload,
+    });
   }
+  
 
   // Delete an organization (soft delete)
   deleteOrganization(orgId: string) {
