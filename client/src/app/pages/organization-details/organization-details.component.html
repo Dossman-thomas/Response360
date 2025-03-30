@@ -53,6 +53,7 @@
                         type="text"
                         class="form-control"
                         formControlName="admin_first_name"
+                        [readonly]="mode === 'update'"
                       />
                       <small
                         class="text-danger"
@@ -87,7 +88,7 @@
                         type="email"
                         class="form-control"
                         formControlName="admin_email"
-                        [disabled]="mode === 'update'"
+                        [readonly]="mode === 'update'"
                       />
                       <small
                         class="text-danger"
@@ -105,6 +106,7 @@
                         type="text"
                         class="form-control"
                         formControlName="admin_phone"
+                        [readonly]="mode === 'update'"
                       />
                       <small
                         class="text-danger"
@@ -132,6 +134,7 @@
                         type="text"
                         class="form-control"
                         formControlName="admin_last_name"
+                        [readonly]="mode === 'update'"
                       />
                       <small
                         class="text-danger"
