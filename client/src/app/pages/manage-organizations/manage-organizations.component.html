@@ -40,7 +40,12 @@
     <!-- Action Buttons -->
     <kendo-grid-column title="Action" [width]="150">
       <ng-template kendoGridCellTemplate let-dataItem>
-        <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
+        <button
+          class="btn btn-sm btn-outline-primary me-2"
+          (click)="onEditOrganization(dataItem.org_id)"
+        >
+          Edit
+        </button>
         <button class="btn btn-sm btn-outline-danger">Delete</button>
       </ng-template>
     </kendo-grid-column>

@@ -54,24 +54,34 @@ export class OrganizationDetailsComponent implements OnInit {
   // Determine mode (create or view)
   checkMode(): void {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
-    if (modeParam === 'update') {
+    const orgIdParam = this.route.snapshot.queryParamMap.get('orgId');
+  
+    if (modeParam === 'update' && orgIdParam) {
       this.mode = 'update';
-      // this.fetchOrganizationDetails();
+      this.fetchOrganizationDetails(orgIdParam);
     } else {
       this.mode = 'create';
     }
   }
   
-  fetchOrganizationDetails(): void {
-    const orgId = this.route.snapshot.queryParamMap.get('orgId');
-    if (orgId) {
-      this.organizationService.getOrganizationById(orgId).subscribe((data) => {
-        this.organizationForm.patchValue(data);
-        this.org_created_at = data.org_created_at;
-        this.org_updated_at = data.org_updated_at;
-        this.org_status = data.org_status;
+  fetchOrganizationDetails(orgId: string): void {
+    this.organizationService.getOrganizationById(orgId).subscribe((data) => {
+      this.organizationForm.patchValue({
+        org_name: data.org_name,
+        admin_first_name: data.admin_first_name,
+        admin_last_name: data.admin_last_name,
+        admin_email: data.admin_email,
+        admin_phone: data.admin_phone,
+        org_status: data.org_status,
+        org_type: data.org_type,
+        jurisdiction_size: data.jurisdiction_size,
+        org_address: data.org_address,
+        org_website: data.org_website,
       });
-    }
+      this.org_created_at = data.org_created_at;
+      this.org_updated_at = data.org_updated_at;
+      this.org_status = data.org_status;
+    });
   }
 
   // Display error messages
@@ -104,4 +114,6 @@ export class OrganizationDetailsComponent implements OnInit {
       alert('Please fill in all required fields.');
     }
   }
+
+
 }
