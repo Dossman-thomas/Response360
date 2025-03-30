@@ -84,7 +84,7 @@ export class OrganizationService {
 
   // Read a single organization by ID
   getOrganizationById(orgId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/get/${orgId}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/read/${orgId}`).pipe(
       map((response) => {
         // Assuming the encrypted data is in response.data
         const decryptedData = this.cryptoService.Decrypt(response.data);

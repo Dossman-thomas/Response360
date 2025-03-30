@@ -46,17 +46,21 @@ export class ManageOrganizationsComponent implements OnInit {
     this.body.limit = state.take; // Items per page
 
     // Sort
-    this.body.sorts = state.sort?.map((sortElement) => ({
-      field: sortElement.field,
-      dir: sortElement.dir,
-    })) || null;  
+    this.body.sorts =
+      state.sort?.map((sortElement) => ({
+        field: sortElement.field,
+        dir: sortElement.dir,
+      })) || null;
 
     // Filter
-    this.body.filters = state.filter?.filters?.flatMap((item:any) => item.filters || []).map((filter:any) => ({
-      field: filter.field,
-      operator: filter.operator || 'contains', // Default operator
-      value: filter.value
-    })) || null;
+    this.body.filters =
+      state.filter?.filters
+        ?.flatMap((item: any) => item.filters || [])
+        .map((filter: any) => ({
+          field: filter.field,
+          operator: filter.operator || 'contains', // Default operator
+          value: filter.value,
+        })) || null;
 
     console.log('request payload: ', this.body);
 
@@ -70,7 +74,7 @@ export class ManageOrganizationsComponent implements OnInit {
         // console.log('response: ', response);
 
         if (Array.isArray(response.rows)) {
-          // Flatten user data 
+          // Flatten user data
           const formattedData = response.rows.map((org: any) => ({
             ...org,
             user_email: org.users?.[0]?.user_email || 'N/A',
@@ -78,10 +82,10 @@ export class ManageOrganizationsComponent implements OnInit {
           }));
 
           this.gridData = {
-            data: formattedData, 
+            data: formattedData,
             total: response.count || response.rows.length,
-          }; 
-        
+          };
+
           // console.log('Organization details:', this.gridData);
         } else {
           console.error('Failed to fetch organization details:', response);
@@ -89,7 +93,7 @@ export class ManageOrganizationsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to fetch organization details: ', err);
-        console.log( 'Error: ', err.message); 
+        console.log('Error: ', err.message);
 
         if (err.message === 'Failed to fetch organizations') {
           console.log('Error: Failed to fetch organizations: ', err.message);
@@ -110,10 +114,11 @@ export class ManageOrganizationsComponent implements OnInit {
     });
   }
 
-  // For "Edit" button (pass the organization ID)
+  // Edit organization (get org_id from row data)
   onEditOrganization(orgId: string): void {
+    console.log('Edit organization clicked. Org ID:', orgId);
     this.router.navigate(['/organization-details'], {
-      queryParams: { mode: 'update', id: orgId },
+      queryParams: { mode: 'update', orgId: orgId }, // Pass orgId in query params
     });
   }
 }

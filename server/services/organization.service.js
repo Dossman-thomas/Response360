@@ -97,16 +97,24 @@ export const getAllOrganizationsService = async ({
   searchQuery = "",
 }) => {
   try {
+
     const order =
       sorts && sorts.length > 0
         ? sorts
-            .filter((sort) => sort.dir)
-            .map((sort) => [
-              sort.field.includes("user_") ? UserModel : OrganizationModel,
-              sort.field,
-              sort.dir.toUpperCase(),
-            ])
-        : [[OrganizationModel, "createdAt", "DESC"]];
+            .filter((sort) => sort.dir && sort.field)
+            .map((sort) => {
+              // Check if the field is from the 'users' table (i.e., starts with 'user_')
+              if (sort.field.startsWith("user_")) {
+                return [
+                  Sequelize.literal(
+                    `"users"."${sort.field.replace("user_", "")}"`
+                  ),
+                  sort.dir.toUpperCase(),
+                ];
+              }
+              return [sort.field, sort.dir.toUpperCase()];
+            })
+        : [["org_created_at", "DESC"]]; // Default order if no sorts provided
 
     const operatorMapping = {
       contains: Op.iLike,
@@ -147,7 +155,7 @@ export const getAllOrganizationsService = async ({
                 Sequelize.where(
                   Sequelize.fn(
                     "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
+                    Sequelize.cast(Sequelize.col("org_name"), "bytea"),
                     pubkey
                   ),
                   { [Op.iLike]: `%${searchQuery}%` }
@@ -155,7 +163,7 @@ export const getAllOrganizationsService = async ({
                 Sequelize.where(
                   Sequelize.fn(
                     "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col("users.user_email"),'bytea'),
+                    Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
                     pubkey
                   ),
                   { [Op.iLike]: `%${searchQuery}%` }
@@ -171,6 +179,7 @@ export const getAllOrganizationsService = async ({
 
     const organizationData = await OrganizationModel.findAndCountAll({
       where,
+      order,
       include: [
         {
           model: UserModel,
@@ -179,7 +188,7 @@ export const getAllOrganizationsService = async ({
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.user_email"),'bytea'),
+                Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
                 pubkey
               ),
               "user_email",
@@ -187,7 +196,10 @@ export const getAllOrganizationsService = async ({
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-               Sequelize.cast(Sequelize.col("users.user_phone_number"),'bytea'),
+                Sequelize.cast(
+                  Sequelize.col("users.user_phone_number"),
+                  "bytea"
+                ),
                 pubkey
               ),
               "user_phone_number",
@@ -198,7 +210,11 @@ export const getAllOrganizationsService = async ({
       attributes: [
         "org_id",
         [
-          Sequelize.fn("PGP_SYM_DECRYPT",  Sequelize.cast(Sequelize.col('org_name'), 'bytea'), pubkey),
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+            pubkey
+          ),
           "org_name",
         ],
         "org_status",
@@ -211,7 +227,6 @@ export const getAllOrganizationsService = async ({
     const encryptedOrgData = encryptService(organizationData);
 
     return encryptedOrgData;
-    
   } catch (error) {
     console.error("Error in getAllOrganizationsService:", error);
     throw error;
@@ -227,12 +242,12 @@ export const getOrganizationByIdService = async (orgId) => {
         {
           model: UserModel,
           as: "users",
-          where: { user_role: "Admin" },  // Only fetch the admin user associated with this organization
+          where: { user_role: "Admin" }, // Only fetch the admin user associated with this organization
           attributes: [
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.first_name"), 'bytea'),
+                Sequelize.cast(Sequelize.col("users.first_name"), "bytea"),
                 pubkey
               ),
               "first_name",
@@ -240,7 +255,7 @@ export const getOrganizationByIdService = async (orgId) => {
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.last_name"), 'bytea'),
+                Sequelize.cast(Sequelize.col("users.last_name"), "bytea"),
                 pubkey
               ),
               "last_name",
@@ -248,7 +263,7 @@ export const getOrganizationByIdService = async (orgId) => {
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.user_email"), 'bytea'),
+                Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
                 pubkey
               ),
               "user_email",
@@ -256,7 +271,10 @@ export const getOrganizationByIdService = async (orgId) => {
             [
               Sequelize.fn(
                 "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.user_phone_number"), 'bytea'),
+                Sequelize.cast(
+                  Sequelize.col("users.user_phone_number"),
+                  "bytea"
+                ),
                 pubkey
               ),
               "user_phone_number",
@@ -267,16 +285,24 @@ export const getOrganizationByIdService = async (orgId) => {
       attributes: [
         "org_id",
         [
-          Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.cast(Sequelize.col('org_name'), 'bytea'), pubkey),
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+            pubkey
+          ),
           "org_name",
         ],
         [
-          Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.cast(Sequelize.col('org_address'), 'bytea'), pubkey),
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_address"), "bytea"),
+            pubkey
+          ),
           "org_address",
         ],
-        "org_type", 
-        "jurisdiction",  
-        "website",  
+        "org_type",
+        "jurisdiction",
+        "website",
         "org_status",
         "org_created_at",
         "org_updated_at",
@@ -290,7 +316,7 @@ export const getOrganizationByIdService = async (orgId) => {
 
     // Prepare the data object for encryption
     const orgData = {
-      orgId: foundOrg.org_id,  // Ensuring consistency with camelCase naming
+      orgId: foundOrg.org_id, // Ensuring consistency with camelCase naming
       orgName: foundOrg.org_name,
       orgType: foundOrg.org_type,
       jurisdictionSize: foundOrg.jurisdiction,
@@ -298,18 +324,20 @@ export const getOrganizationByIdService = async (orgId) => {
       website: foundOrg.website,
       status: foundOrg.org_status,
       // Ensure that we handle only the first admin user, just in case there are multiple users
-      adminUser: foundOrg.users.length ? {
-        firstName: foundOrg.users[0].first_name,
-        lastName: foundOrg.users[0].last_name,
-        userEmail: foundOrg.users[0].user_email,
-        userPhoneNumber: foundOrg.users[0].user_phone_number,
-      } : null, // In case no admin user is found
+      adminUser: foundOrg.users.length
+        ? {
+            firstName: foundOrg.users[0].first_name,
+            lastName: foundOrg.users[0].last_name,
+            userEmail: foundOrg.users[0].user_email,
+            userPhoneNumber: foundOrg.users[0].user_phone_number,
+          }
+        : null, // In case no admin user is found
     };
 
     // Encrypt the organization data
     const encryptedOrgData = encryptService(orgData);
 
-    return encryptedOrgData; 
+    return encryptedOrgData;
   } catch (error) {
     console.error("Error in getOrganizationByIdService:", error);
     throw error;
