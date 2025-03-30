@@ -373,7 +373,8 @@ export const updateOrganizationService = async (orgId, payload) => {
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
         website: orgData.website,
-        org_status: orgData.status,
+        org_status: orgData.status === 'Disabled' ? false : true,
+        org_updated_at: new Date(),
       },
       { where: { org_id: orgId } }
     );

@@ -81,6 +81,7 @@ export class OrganizationDetailsComponent implements OnInit {
         jurisdiction_size: data.jurisdictionSize,
         org_address: data.registeredAddress,
         org_website: data.website,
+        org_status: data.status ? 'Enabled' : 'Disabled',
       });
   
       // Patch admin user data
@@ -96,7 +97,7 @@ export class OrganizationDetailsComponent implements OnInit {
       // Set other fields
 
       // Format date fields to display in a user-friendly format
-      const formatOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      const formatOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
 
       this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString('en-GB', formatOptions);
       this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString('en-GB', formatOptions);
@@ -122,6 +123,8 @@ export class OrganizationDetailsComponent implements OnInit {
 
       const orgId = this.route.snapshot.queryParamMap.get('orgId'); // Get orgId for update mode
 
+      console.log('Form values:', formValues);
+
       if (this.mode === 'update' && orgId) {
         // Update organization logic
         this.organizationService
@@ -132,7 +135,7 @@ export class OrganizationDetailsComponent implements OnInit {
             formValues.org_type,
             formValues.jurisdiction_size,
             formValues.org_website,
-            formValues.status // Pass the status for update
+            formValues.org_status
           )
           .subscribe({
             next: (response) => {
