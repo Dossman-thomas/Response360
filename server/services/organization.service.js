@@ -258,7 +258,7 @@ export const getAllOrganizationsService = async ({
 
     const operatorMapping = {
       contains: Op.iLike,
-      doesnotcontain: Op.notiLike,
+      doesnotcontain: Op.notLike,
       eq: Op.eq,
       neq: Op.ne,
       startswith: Op.startsWith,
@@ -294,6 +294,11 @@ export const getAllOrganizationsService = async ({
                     filter.operator === "doesnotcontain"
                       ? `%${filter.value}%`
                       : filter.value;
+
+                  // Debugging: log the values to check
+                  console.log(
+                    `Operator: ${filter.operator}, Decrypted Value: ${filter.value}, Filtered Value: ${value}`
+                  );
 
                   return Sequelize.where(
                     Sequelize.fn(
