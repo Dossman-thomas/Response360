@@ -102,7 +102,7 @@ export class OrganizationDetailsComponent implements OnInit {
       this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString('en-GB', formatOptions);
       this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString('en-GB', formatOptions);
       this.org_status = data.status ? 'Enabled' : 'Disabled';
-      // this.adminEmail = data.adminUser.userEmail;
+
     });
   }
   
