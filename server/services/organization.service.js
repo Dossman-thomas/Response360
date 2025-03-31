@@ -241,8 +241,6 @@ export const getAllOrganizationsService = async ({
   searchQuery = "",
 }) => {
   try {
-    console.log("Received Filters:", filters);
-
     const order =
       sorts && sorts.length > 0
         ? sorts
@@ -257,8 +255,6 @@ export const getAllOrganizationsService = async ({
               return [sort.field, sort.dir.toUpperCase()];
             })
         : [["org_created_at", "DESC"]];
-
-    console.log("Generated order:", JSON.stringify(order, null, 2));
 
     const operatorMapping = {
       contains: Op.iLike,
@@ -279,22 +275,37 @@ export const getAllOrganizationsService = async ({
           ? filters
               .filter((filter) => filter.field.startsWith("org_"))
               .map((filter) => {
-                const operator = operatorMapping[filter.operator] || Op.eq; // Default to 'equals' if no match
-                const value =
-                  filter.operator === "contains" ||
-                  filter.operator === "doesnotcontain"
-                    ? `%${filter.value}%`
-                    : filter.value;
+                if (filter.field === "org_status") {
+                  if (!["eq", "neq"].includes(filter.operator)) {
+                    console.warn(
+                      `Invalid operator for org_status: ${filter.operator}, use 'is equal to' or 'is not equal to' instead.`
+                    );
+                    return null; // Skip invalid operators
+                  }
 
-                return Sequelize.where(
-                  Sequelize.fn(
-                    "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col(filter.field), "bytea"),
-                    pubkey
-                  ),
-                  { [operator]: value }
-                );
+                  const operator = filter.operator === "eq" ? Op.eq : Op.ne;
+                  return {
+                    [filter.field]: { [operator]: filter.value === "true" },
+                  };
+                } else {
+                  const operator = operatorMapping[filter.operator] || Op.eq;
+                  const value =
+                    filter.operator === "contains" ||
+                    filter.operator === "doesnotcontain"
+                      ? `%${filter.value}%`
+                      : filter.value;
+
+                  return Sequelize.where(
+                    Sequelize.fn(
+                      "PGP_SYM_DECRYPT",
+                      Sequelize.cast(Sequelize.col(filter.field), "bytea"),
+                      pubkey
+                    ),
+                    { [operator]: value }
+                  );
+                }
               })
+              .filter(Boolean) // Remove null entries from the array
           : []),
         searchQuery
           ? {
@@ -316,7 +327,6 @@ export const getAllOrganizationsService = async ({
     const userWhere = filters
       ?.filter((filter) => filter.field.startsWith("user_"))
       .map((filter) => {
-        console.log("Processing User Filter:", filter);
         const operator = operatorMapping[filter.operator] || Op.eq;
         const value =
           filter.operator === "contains" || filter.operator === "doesnotcontain"
@@ -332,8 +342,6 @@ export const getAllOrganizationsService = async ({
           { [operator]: value }
         );
       });
-
-    console.log("Generated where (Object):", JSON.stringify(where, null, 2));
 
     const organizationData = await OrganizationModel.findAndCountAll({
       where,
@@ -383,11 +391,7 @@ export const getAllOrganizationsService = async ({
       ...pagination({ page, limit }),
     });
 
-    console.log("Raw data from DB (before encryption):", organizationData);
-
     const encryptedOrgData = encryptService(organizationData);
-
-    console.log("Encrypted data:", encryptedOrgData);
 
     return encryptedOrgData;
   } catch (error) {
