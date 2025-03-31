@@ -89,6 +89,150 @@ export const createOrganizationService = async (payload) => {
 };
 
 // Read Organization Service
+// export const getAllOrganizationsService = async ({
+//   page,
+//   limit,
+//   sorts,
+//   filters,
+//   searchQuery = "",
+// }) => {
+//   try {
+
+//     const order =
+//       sorts && sorts.length > 0
+//         ? sorts
+//             .filter((sort) => sort.dir && sort.field)
+//             .map((sort) => {
+//               // Check if the field is from the 'users' table (i.e., starts with 'user_')
+//               if (sort.field.startsWith("user_")) {
+//                 return [
+//                   Sequelize.literal(
+//                     `"users"."${sort.field.replace("user_", "")}"`
+//                   ),
+//                   sort.dir.toUpperCase(),
+//                 ];
+//               }
+//               return [sort.field, sort.dir.toUpperCase()];
+//             })
+//         : [["org_created_at", "DESC"]]; // Default order if no sorts provided
+
+//     const operatorMapping = {
+//       contains: Op.iLike,
+//       doesnotcontain: Op.notiLike,
+//       eq: Op.eq,
+//       neq: Op.ne,
+//       startswith: Op.startsWith,
+//       endswith: Op.endsWith,
+//       greaterThan: Op.gt,
+//       lessThan: Op.lt,
+//       greaterThanOrEquals: Op.gte,
+//       lessThanOrEquals: Op.lte,
+//     };
+
+//     const where = {
+//       [Op.and]: [
+//         ...(filters?.length
+//           ? filters.map((filter) => {
+//               const operator = operatorMapping[filter.operator] || Op.eq;
+//               const value =
+//                 filter.operator === "contains" ||
+//                 filter.operator === "doesnotcontain"
+//                   ? `%${filter.value}%`
+//                   : filter.value;
+
+//               return filter.field.startsWith("user_")
+//                 ? {
+//                     [`$users.${filter.field.replace("user_", "")}$`]: {
+//                       [operator]: value,
+//                     },
+//                   }
+//                 : { [filter.field]: { [operator]: value } };
+//             })
+//           : []),
+//         searchQuery
+//           ? {
+//               [Op.or]: [
+//                 Sequelize.where(
+//                   Sequelize.fn(
+//                     "PGP_SYM_DECRYPT",
+//                     Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+//                     pubkey
+//                   ),
+//                   { [Op.iLike]: `%${searchQuery}%` }
+//                 ),
+//                 Sequelize.where(
+//                   Sequelize.fn(
+//                     "PGP_SYM_DECRYPT",
+//                     Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
+//                     pubkey
+//                   ),
+//                   { [Op.iLike]: `%${searchQuery}%` }
+//                 ),
+//               ],
+//             }
+//           : {},
+//       ],
+//     };
+
+//     // console.log(OrganizationModel.tableName);
+//     // console.log(UserModel.tableName);
+
+//     const organizationData = await OrganizationModel.findAndCountAll({
+//       where,
+//       order,
+//       include: [
+//         {
+//           model: UserModel,
+//           as: "users",
+//           attributes: [
+//             [
+//               Sequelize.fn(
+//                 "PGP_SYM_DECRYPT",
+//                 Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
+//                 pubkey
+//               ),
+//               "user_email",
+//             ],
+//             [
+//               Sequelize.fn(
+//                 "PGP_SYM_DECRYPT",
+//                 Sequelize.cast(
+//                   Sequelize.col("users.user_phone_number"),
+//                   "bytea"
+//                 ),
+//                 pubkey
+//               ),
+//               "user_phone_number",
+//             ],
+//           ],
+//         },
+//       ],
+//       attributes: [
+//         "org_id",
+//         [
+//           Sequelize.fn(
+//             "PGP_SYM_DECRYPT",
+//             Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+//             pubkey
+//           ),
+//           "org_name",
+//         ],
+//         "org_status",
+//         "org_created_at",
+//         "org_updated_at",
+//       ],
+//       ...pagination({ page, limit }),
+//     });
+
+//     const encryptedOrgData = encryptService(organizationData);
+
+//     return encryptedOrgData;
+//   } catch (error) {
+//     console.error("Error in getAllOrganizationsService:", error);
+//     throw error;
+//   }
+// };
+
 export const getAllOrganizationsService = async ({
   page,
   limit,
@@ -97,24 +241,24 @@ export const getAllOrganizationsService = async ({
   searchQuery = "",
 }) => {
   try {
+    console.log("Received Filters:", filters);
 
     const order =
       sorts && sorts.length > 0
         ? sorts
             .filter((sort) => sort.dir && sort.field)
             .map((sort) => {
-              // Check if the field is from the 'users' table (i.e., starts with 'user_')
               if (sort.field.startsWith("user_")) {
                 return [
-                  Sequelize.literal(
-                    `"users"."${sort.field.replace("user_", "")}"`
-                  ),
+                  Sequelize.literal(`"users"."${sort.field}"`),
                   sort.dir.toUpperCase(),
                 ];
               }
               return [sort.field, sort.dir.toUpperCase()];
             })
-        : [["org_created_at", "DESC"]]; // Default order if no sorts provided
+        : [["org_created_at", "DESC"]];
+
+    console.log("Generated order:", JSON.stringify(order, null, 2));
 
     const operatorMapping = {
       contains: Op.iLike,
@@ -132,22 +276,25 @@ export const getAllOrganizationsService = async ({
     const where = {
       [Op.and]: [
         ...(filters?.length
-          ? filters.map((filter) => {
-              const operator = operatorMapping[filter.operator] || Op.eq;
-              const value =
-                filter.operator === "contains" ||
-                filter.operator === "doesnotcontain"
-                  ? `%${filter.value}%`
-                  : filter.value;
+          ? filters
+              .filter((filter) => filter.field.startsWith("org_"))
+              .map((filter) => {
+                const operator = operatorMapping[filter.operator] || Op.eq; // Default to 'equals' if no match
+                const value =
+                  filter.operator === "contains" ||
+                  filter.operator === "doesnotcontain"
+                    ? `%${filter.value}%`
+                    : filter.value;
 
-              return filter.field.startsWith("user_")
-                ? {
-                    [`$users.${filter.field.replace("user_", "")}$`]: {
-                      [operator]: value,
-                    },
-                  }
-                : { [filter.field]: { [operator]: value } };
-            })
+                return Sequelize.where(
+                  Sequelize.fn(
+                    "PGP_SYM_DECRYPT",
+                    Sequelize.cast(Sequelize.col(filter.field), "bytea"),
+                    pubkey
+                  ),
+                  { [operator]: value }
+                );
+              })
           : []),
         searchQuery
           ? {
@@ -160,22 +307,33 @@ export const getAllOrganizationsService = async ({
                   ),
                   { [Op.iLike]: `%${searchQuery}%` }
                 ),
-                Sequelize.where(
-                  Sequelize.fn(
-                    "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
-                    pubkey
-                  ),
-                  { [Op.iLike]: `%${searchQuery}%` }
-                ),
               ],
             }
           : {},
       ],
     };
 
-    console.log(OrganizationModel.tableName);
-    console.log(UserModel.tableName);
+    const userWhere = filters
+      ?.filter((filter) => filter.field.startsWith("user_"))
+      .map((filter) => {
+        console.log("Processing User Filter:", filter);
+        const operator = operatorMapping[filter.operator] || Op.eq;
+        const value =
+          filter.operator === "contains" || filter.operator === "doesnotcontain"
+            ? `%${filter.value}%`
+            : filter.value;
+
+        return Sequelize.where(
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col(`users.${filter.field}`), "bytea"),
+            pubkey
+          ),
+          { [operator]: value }
+        );
+      });
+
+    console.log("Generated where (Object):", JSON.stringify(where, null, 2));
 
     const organizationData = await OrganizationModel.findAndCountAll({
       where,
@@ -205,6 +363,7 @@ export const getAllOrganizationsService = async ({
               "user_phone_number",
             ],
           ],
+          where: userWhere,
         },
       ],
       attributes: [
@@ -224,16 +383,24 @@ export const getAllOrganizationsService = async ({
       ...pagination({ page, limit }),
     });
 
+    console.log("Raw data from DB (before encryption):", organizationData);
+
     const encryptedOrgData = encryptService(organizationData);
+
+    console.log("Encrypted data:", encryptedOrgData);
 
     return encryptedOrgData;
   } catch (error) {
     console.error("Error in getAllOrganizationsService:", error);
+    if (error.parent) {
+      console.error("Detailed DB Error:", error.parent);
+    }
     throw error;
   }
 };
 
 // Get Organization By ID Service
+
 export const getOrganizationByIdService = async (orgId) => {
   try {
     const foundOrg = await OrganizationModel.findOne({
@@ -373,7 +540,7 @@ export const updateOrganizationService = async (orgId, payload) => {
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
         website: orgData.website,
-        org_status: orgData.status === 'Disabled' ? false : true,
+        org_status: orgData.status === "Disabled" ? false : true,
         org_updated_at: new Date(),
       },
       { where: { org_id: orgId } }
