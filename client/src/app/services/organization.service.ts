@@ -114,6 +114,8 @@ export class OrganizationService {
       decryptedUserId,
     });
 
+    // const encryptedOrgId = this.cryptoService.Encrypt(orgId);
+
     // Send the encrypted payload to the backend and return the observable
     return this.http.put<any>(`${this.apiUrl}/update/${orgId}`, {
       payload: encryptedPayload,
@@ -122,6 +124,18 @@ export class OrganizationService {
 
   // Delete an organization (soft delete)
   deleteOrganization(orgId: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/delete/${orgId}`);
+    // Retrieve logged-in user's encrypted ID from local storage
+    const userId = localStorage.getItem('userId');
+    const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
+
+    // Encrypt the payload properly
+    const encryptedPayload = this.cryptoService.Encrypt({
+      orgId,
+      userId: decryptedUserId, // Ensure the key name matches backend expectations
+    });
+
+    return this.http.delete<any>(`${this.apiUrl}/delete/${orgId}`, {
+      body: { payload: encryptedPayload },
+    });
   }
 }
