@@ -70,7 +70,8 @@ export const getOrganizationByIdController = async (req, res) => {
   try {
     const { orgId } = req.params;
 
-    if (!orgId || !validateUuid(orgId)) {  // Ensure orgId is provided and valid
+    if (!orgId || !validateUuid(orgId)) {
+      // Ensure orgId is provided and valid
       return res.status(400).json({
         status: 400,
         message: "Invalid or missing organization ID in the request",
@@ -133,8 +134,9 @@ export const updateOrganizationController = async (req, res) => {
 // Controller to handle the deletion of an organization
 export const deleteOrganizationController = async (req, res) => {
   try {
-    // Step 1: Get the organization ID from the request parameters
-    const { orgId } = req.params;
+    // Step 1: Validate the incoming request data
+    const { payload } = req.body;
+    const { orgId } = req.params; // Get the organization ID from the URL params
 
     if (!orgId) {
       return res.status(400).json({
@@ -143,8 +145,15 @@ export const deleteOrganizationController = async (req, res) => {
       });
     }
 
+    if (!payload) {
+      return res.status(400).json({
+        status: 400,
+        message: "Missing encrypted data in the request",
+      });
+    }
+
     // Step 2: Call the deleteOrganizationService to handle the soft deletion
-    const result = await deleteOrganizationService(orgId);
+    const result = await deleteOrganizationService(orgId, payload);
 
     // Step 3: Return the successful response
     return response(res, {

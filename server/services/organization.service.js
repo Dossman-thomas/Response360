@@ -389,6 +389,8 @@ export const getOrganizationByIdService = async (orgId) => {
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
   try {
+
+    // const ordId = await decryptService(encryptedOrgId);
     // Step 1: Decrypt the incoming data
     const orgData = await decryptService(payload);
 
@@ -437,31 +439,34 @@ export const updateOrganizationService = async (orgId, payload) => {
 };
 
 // Delete Organization Service
-export const deleteOrganizationService = async (orgId) => {
+export const deleteOrganizationService = async (orgId, payload) => {
   try {
-    // Step 1: Update org_status to false
+    // Step 1: Decrypt the incoming payload (which contains both orgId and userId)
+    const decryptedData = await decryptService(payload);
+
+    if (!decryptedData || !decryptedData.userId || !decryptedData.orgId) {
+      throw new Error("Service: Decryption failed or missing required data.");
+    }
+
+    // Step 2: Ensure the decrypted orgId matches the requested one
+    if (decryptedData.orgId !== orgId) {
+      throw new Error("Service: Mismatched organization ID after decryption.");
+    }
+
+    // Step 3: Soft delete the organization
     const [updated] = await OrganizationModel.update(
       {
         org_status: false,
+        org_deleted_by: decryptedData.userId, // Ensure this is correctly decrypted
+        org_deleted_at: new Date(),
       },
       {
         where: { org_id: orgId },
       }
     );
 
-    // If no organization was found to update
     if (updated === 0) {
-      throw new Error("Organization not found.");
-    }
-
-    // Step 2: Perform the soft delete using destroy method (this will automatically set deletedAt because paranoid is true)
-    const deletedOrganization = await OrganizationModel.destroy({
-      where: { org_id: orgId },
-    });
-
-    // If no organization was found to delete (this could be redundant, but for safety)
-    if (deletedOrganization === 0) {
-      throw new Error("Organization not found for deletion.");
+      throw new Error("Organization not found or already deleted.");
     }
 
     return {
@@ -473,3 +478,4 @@ export const deleteOrganizationService = async (orgId) => {
     throw error;
   }
 };
+
