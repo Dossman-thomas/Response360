@@ -30,6 +30,11 @@ export class OrganizationService {
     adminEmail: string,
     adminPhone: string
   ) {
+
+    // retrieve logged in user's ID from local storage
+    const userId = localStorage.getItem('userId');
+    const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
+
     // Encrypt the form data into a single payload
     const encryptedPayload = this.cryptoService.Encrypt({
       orgName,
@@ -41,6 +46,7 @@ export class OrganizationService {
       adminLastName,
       adminEmail,
       adminPhone,
+      decryptedUserId
     });
 
     // Send the encrypted payload to the backend
