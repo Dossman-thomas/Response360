@@ -41,7 +41,7 @@ export const createOrganizationService = async (payload) => {
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
         website: orgData.website,
-        // org_created_by: orgData.createdBy, // needs more logic
+        org_created_by: orgData.decryptedUserId,
       },
       { transaction }
     );
@@ -71,7 +71,7 @@ export const createOrganizationService = async (payload) => {
         user_role: "Admin",
         org_id: organization.org_id,
         user_password: "Admin@123!", // Temporary password
-        // user_created_by: orgData.createdBy, // needs more logic
+        user_created_by: orgData.decryptedUserId, // Created by the same user who created the organization
       },
       { transaction }
     );
@@ -275,7 +275,6 @@ export const getAllOrganizationsService = async ({
 };
 
 // Get Organization By ID Service
-
 export const getOrganizationByIdService = async (orgId) => {
   try {
     const foundOrg = await OrganizationModel.findOne({
