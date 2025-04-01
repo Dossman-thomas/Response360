@@ -75,11 +75,13 @@ export const loginSuperAdminService = async (payload) => {
     );
 
     const encryptedToken = encryptService(token);
+    const encryptedUserId = encryptService(user.user_id); 
 
     //  Step 5: Return success message along with the token and user details
     return {
       message: "Success! Email and password verified!",
       encryptedToken, // Return the encrypted token
+      encryptedId: encryptedUserId, // Return the encrypted user ID
     };
   } catch (error) {
     throw error;

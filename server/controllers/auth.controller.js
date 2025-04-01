@@ -20,7 +20,7 @@ export const loginSuperAdminController = async (req, res) => {
     return response(res, {
       statusCode: 200,
       message: user.message,
-      data: { token: user.encryptedToken },
+      data: { token: user.encryptedToken, userId: user.encryptedId },
     });
   } catch (error) {
     console.error(error);
