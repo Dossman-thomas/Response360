@@ -30,7 +30,6 @@ export class OrganizationService {
     adminEmail: string,
     adminPhone: string
   ) {
-
     // retrieve logged in user's ID from local storage
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
@@ -46,7 +45,7 @@ export class OrganizationService {
       adminLastName,
       adminEmail,
       adminPhone,
-      decryptedUserId
+      decryptedUserId,
     });
 
     // Send the encrypted payload to the backend
@@ -100,6 +99,10 @@ export class OrganizationService {
     website: string,
     status: string
   ) {
+    // retrieve logged in user's ID from local storage
+    const userId = localStorage.getItem('userId');
+    const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
+
     // Encrypt the form data into a single payload
     const encryptedPayload = this.cryptoService.Encrypt({
       orgName,
@@ -108,6 +111,7 @@ export class OrganizationService {
       jurisdictionSize,
       website,
       status,
+      decryptedUserId,
     });
 
     // Send the encrypted payload to the backend and return the observable
@@ -120,5 +124,4 @@ export class OrganizationService {
   deleteOrganization(orgId: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/delete/${orgId}`);
   }
-  
 }
