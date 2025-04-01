@@ -50,11 +50,11 @@ export class AuthService {
       payload: encryptedPayload,
     }).subscribe({
       next: (response) => {
-        const { token } = response.data;
+        const { token, userId } = response.data;
         
         // Store the token and user in localStorage
         localStorage.setItem('token', token);
-        // localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('userId', userId);
 
         // Handle "Remember Me" functionality
         if (rememberMe) {
