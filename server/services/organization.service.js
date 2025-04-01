@@ -416,6 +416,7 @@ export const updateOrganizationService = async (orgId, payload) => {
         website: orgData.website,
         org_status: orgData.status === "Disabled" ? false : true,
         org_updated_at: new Date(),
+        org_updated_by: orgData.decryptedUserId,
       },
       { where: { org_id: orgId } }
     );
