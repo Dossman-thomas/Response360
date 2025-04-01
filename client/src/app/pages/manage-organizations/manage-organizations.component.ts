@@ -17,6 +17,7 @@ export class ManageOrganizationsComponent implements OnInit {
 
   showDeleteModal = false;
   deleteOrganizationId: string | null = null;
+  searchQuery: string = '';
 
   ngOnInit() {
     this.loadOrgDetails();
@@ -24,11 +25,13 @@ export class ManageOrganizationsComponent implements OnInit {
 
   // Kendo Grid Settings
   gridData: any = { data: [], total: 0 };
+
   body: any = {
     page: 1,
     limit: 10,
     sorts: null,
     filters: null,
+    searchQuery: '',
   };
 
   // Kendo Grid State
@@ -102,6 +105,12 @@ export class ManageOrganizationsComponent implements OnInit {
         }
       },
     });
+  }
+
+  onSearch(): void {
+    this.body.searchQuery = this.searchQuery;
+    this.body.page = 1; // Reset page number
+    this.loadOrgDetails();
   }
 
   // Navigate to the organization details page
