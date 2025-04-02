@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-// import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CryptoService } from '../../services/crypto.service';
@@ -83,7 +82,7 @@ export class OrganizationDetailsComponent implements OnInit {
         org_website: data.website,
         org_status: data.status ? 'Enabled' : 'Disabled',
       });
-  
+
       // Patch admin user data
       if (data.adminUser) {
         this.organizationForm.patchValue({
@@ -93,19 +92,27 @@ export class OrganizationDetailsComponent implements OnInit {
           admin_phone: data.adminUser.userPhoneNumber,
         });
       }
-  
+
       // Set other fields
 
       // Format date fields to display in a user-friendly format
-      const formatOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+      const formatOptions: Intl.DateTimeFormatOptions = {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      };
 
-      this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString('en-GB', formatOptions);
-      this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString('en-GB', formatOptions);
+      this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString(
+        'en-GB',
+        formatOptions
+      );
+      this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString(
+        'en-GB',
+        formatOptions
+      );
       this.org_status = data.status ? 'Enabled' : 'Disabled';
-
     });
   }
-  
 
   // Display error messages
   getErrorMessage(controlName: string): string {
@@ -118,60 +125,67 @@ export class OrganizationDetailsComponent implements OnInit {
 
   // Submit form data
   onSubmit(): void {
-    if (this.organizationForm.valid) {
-      const formValues = this.organizationForm.value;
-
-      const orgId = this.route.snapshot.queryParamMap.get('orgId'); // Get orgId for update mode
-
-      console.log('Form values:', formValues);
-
-      if (this.mode === 'update' && orgId) {
-        // Update organization logic
-        this.organizationService
-          .updateOrganization(
-            orgId, // Pass the orgId for the update
-            formValues.org_name,
-            formValues.org_address,
-            formValues.org_type,
-            formValues.jurisdiction_size,
-            formValues.org_website,
-            formValues.org_status
-          )
-          .subscribe({
-            next: (response) => {
-              console.log('Organization updated successfully:', response);
-              this.router.navigate(['/manage-organizations']);
-            },
-            error: (err) => {
-              console.error('Failed to update organization:', err);
-            },
-          });
-      } else {
-        // Create new organization logic
-        this.organizationService
-          .createOrganization(
-            formValues.org_name,
-            formValues.org_address,
-            formValues.org_type,
-            formValues.jurisdiction_size,
-            formValues.org_website,
-            formValues.admin_first_name,
-            formValues.admin_last_name,
-            formValues.admin_email,
-            formValues.admin_phone
-          )
-          .subscribe({
-            next: () => {
-              this.router.navigate(['/manage-organizations']);
-            },
-            error: (err) => {
-              console.error('Failed to create organization:', err);
-            },
-          });
-      }
-    } else {
+    // Mark all controls as touched to trigger validation messages
+    Object.values(this.organizationForm.controls).forEach((control) => {
+      control.markAsTouched();
+      control.updateValueAndValidity(); // Ensure validation runs
+    });
+  
+    // Now check if the form is still invalid
+    if (this.organizationForm.invalid) {
       console.log('Form is invalid');
-      alert('Please fill in all required fields.');
+      return; // Stop submission if invalid
+    }
+  
+    const formValues = this.organizationForm.value;
+    const orgId = this.route.snapshot.queryParamMap.get('orgId');
+  
+    console.log('Form values:', formValues);
+  
+    if (this.mode === 'update' && orgId) {
+      this.organizationService
+        .updateOrganization(
+          orgId, 
+          formValues.org_name,
+          formValues.org_address,
+          formValues.org_type,
+          formValues.jurisdiction_size,
+          formValues.org_website,
+          formValues.org_status
+        )
+        .subscribe({
+          next: (response) => {
+            console.log('Organization updated successfully:', response);
+            this.router.navigate(['/manage-organizations']);
+          },
+          error: (err) => {
+            console.error('Failed to update organization:', err);
+          },
+        });
+    } else {
+      this.organizationService
+        .createOrganization(
+          formValues.org_name,
+          formValues.org_address,
+          formValues.org_type,
+          formValues.jurisdiction_size,
+          formValues.org_website,
+          formValues.admin_first_name,
+          formValues.admin_last_name,
+          formValues.admin_email,
+          formValues.admin_phone
+        )
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/manage-organizations']);
+          },
+          error: (err) => {
+            console.error('Failed to create organization:', err);
+          },
+        });
     }
   }
+  
+
+
 }
