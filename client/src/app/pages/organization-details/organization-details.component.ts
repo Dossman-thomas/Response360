@@ -31,6 +31,8 @@ export class OrganizationDetailsComponent implements OnInit {
     this.checkMode();
   }
 
+
+
   // Initialize Reactive Form with validation
   initializeForm(): void {
     this.organizationForm = this.fb.group({
@@ -62,10 +64,11 @@ export class OrganizationDetailsComponent implements OnInit {
   checkMode(): void {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
     const orgIdParam = this.route.snapshot.queryParamMap.get('orgId');
+    const decryptedOrgId = orgIdParam ? this.cryptoService.Decrypt(orgIdParam) : null;
 
     if (modeParam === 'update' && orgIdParam) {
       this.mode = 'update';
-      this.fetchOrganizationDetails(orgIdParam);
+      this.fetchOrganizationDetails(decryptedOrgId);
     } else {
       this.mode = 'create';
     }

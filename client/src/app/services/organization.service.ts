@@ -103,6 +103,8 @@ export class OrganizationService {
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
 
+    const encryptedOrgId = this.cryptoService.Encrypt(orgId);
+
     // Encrypt the form data into a single payload
     const encryptedPayload = this.cryptoService.Encrypt({
       orgName,
@@ -117,7 +119,7 @@ export class OrganizationService {
     // const encryptedOrgId = this.cryptoService.Encrypt(orgId);
 
     // Send the encrypted payload to the backend and return the observable
-    return this.http.put<any>(`${this.apiUrl}/update/${orgId}`, {
+    return this.http.put<any>(`${this.apiUrl}/update/${encryptedOrgId}`, {
       payload: encryptedPayload,
     });
   }

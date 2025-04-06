@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
 import { OrganizationService } from '../../services/organization.service';
+import { CryptoService } from '../../services/crypto.service';
 
 @Component({
   selector: 'app-manage-organizations',
@@ -12,7 +13,8 @@ import { OrganizationService } from '../../services/organization.service';
 export class ManageOrganizationsComponent implements OnInit {
   constructor(
     private router: Router,
-    private organizationService: OrganizationService
+    private organizationService: OrganizationService,
+    private cryptoService: CryptoService
   ) {}
 
   showDeleteModal = false;
@@ -127,9 +129,12 @@ export class ManageOrganizationsComponent implements OnInit {
 
   // Edit organization (get org_id from row data)
   onEditOrganization(orgId: string): void {
-    console.log('Edit organization clicked. Org ID:', orgId);
+    const encryptedOrgId = this.cryptoService.Encrypt(orgId);
+    // console.log('Encrypted Org ID:', encryptedOrgId);
+
+
     this.router.navigate(['/organization-details'], {
-      queryParams: { mode: 'update', orgId: orgId }, // Pass orgId in query params
+      queryParams: { mode: 'update', orgId: encryptedOrgId }, // Pass orgId in query params
     });
   }
 
