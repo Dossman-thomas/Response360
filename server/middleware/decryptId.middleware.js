@@ -10,7 +10,8 @@ export const decryptOrgIdParam = async (req, res, next) => {
     }
 
     const decryptedOrgId = await decryptService(encryptedOrgId);
-    req.params.decryptedOrgId = decryptedOrgId;
+
+    req.params.orgId = decryptedOrgId;
 
     next();
   } catch (err) {
