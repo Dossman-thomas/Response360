@@ -62,11 +62,11 @@ export class OrganizationDetailsComponent implements OnInit {
   checkMode(): void {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
     const orgIdParam = this.route.snapshot.queryParamMap.get('orgId');
-    const decryptedOrgId = orgIdParam ? this.cryptoService.Decrypt(orgIdParam) : null;
+    // const decryptedOrgId = orgIdParam ? this.cryptoService.Decrypt(orgIdParam) : null;
 
     if (modeParam === 'update' && orgIdParam) {
       this.mode = 'update';
-      this.fetchOrganizationDetails(decryptedOrgId);
+      this.fetchOrganizationDetails(orgIdParam);
     } else {
       this.mode = 'create';
     }

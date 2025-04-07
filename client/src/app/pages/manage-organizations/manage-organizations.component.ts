@@ -170,7 +170,6 @@ export class ManageOrganizationsComponent implements OnInit {
       });
     }
   }
-  
 
   // Cancel delete
   onCancelDelete(): void {
