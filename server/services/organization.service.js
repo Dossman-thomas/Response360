@@ -1,7 +1,7 @@
 import { OrganizationModel, UserModel } from "../database/models/index.js";
 import { sequelize } from "../config/index.js";
 import { env } from "../config/index.js";
-import { Sequelize, Op } from "sequelize";
+import { Sequelize, Op, fn, col, literal } from "sequelize";
 import { pagination } from "../utils/index.js";
 import { encryptService, decryptService } from "../services/index.js";
 import { v4 as uuidv4 } from "uuid";
@@ -89,6 +89,191 @@ export const createOrganizationService = async (payload) => {
 };
 
 // Read Organization Service
+// export const getAllOrganizationsService = async ({
+//   page,
+//   limit,
+//   sorts,
+//   filters,
+//   searchQuery = "",
+// }) => {
+//   try {
+//     const order =
+//       sorts && sorts.length > 0
+//         ? sorts
+//             .filter(
+//               (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
+//             )
+//             .map((sort) => [
+//               Sequelize.literal(`${sort.field}`),
+//               sort.dir.toUpperCase(),
+//             ])
+//         : [["org_created_at", "DESC"]];
+
+//     // Ensure that sorts for users are handled safely
+//     const userOrder =
+//       sorts && sorts.length > 0
+//         ? sorts
+//             .filter(
+//               (sort) => sort.dir && sort.field && sort.field.startsWith("user_")
+//             )
+//             .map((sort) => [
+//               Sequelize.literal(`${sort.field}`),
+//               sort.dir.toUpperCase(),
+//             ])
+//         : [];
+
+//     const operatorMapping = {
+//       contains: Op.iLike,
+//       doesnotcontain: Op.notLike,
+//       eq: Op.eq,
+//       neq: Op.ne,
+//       startswith: Op.startsWith,
+//       endswith: Op.endsWith,
+//       greaterThan: Op.gt,
+//       lessThan: Op.lt,
+//       greaterThanOrEquals: Op.gte,
+//       lessThanOrEquals: Op.lte,
+//     };
+
+//     const where = {
+//       [Op.and]: [
+//         ...(filters?.length
+//           ? filters
+//               .filter((filter) => filter.field.startsWith("org_"))
+//               .map((filter) => {
+//                 if (filter.field === "org_status") {
+//                   const operator = filter.operator === "eq" ? Op.eq : Op.ne;
+//                   return {
+//                     [filter.field]: { [operator]: filter.value === "true" },
+//                   };
+//                 } else {
+//                   const operator = operatorMapping[filter.operator] || Op.eq;
+//                   const value =
+//                     filter.operator === "contains" ||
+//                     filter.operator === "doesnotcontain"
+//                       ? `%${filter.value}%`
+//                       : filter.value;
+
+//                   console.log(
+//                     `Operator: ${filter.operator}, Decrypted Value: ${filter.value}, Filtered Value: ${value}`
+//                   );
+
+//                   return Sequelize.where(
+//                     Sequelize.fn(
+//                       "PGP_SYM_DECRYPT",
+//                       Sequelize.cast(Sequelize.col(filter.field), "bytea"),
+//                       pubkey
+//                     ),
+//                     { [operator]: value }
+//                   );
+//                 }
+//               })
+//               .filter(Boolean) // Remove any null, undefined, or false values from array.
+//           : []),
+//         searchQuery
+//           ? {
+//               [Op.or]: [
+//                 Sequelize.where(
+//                   Sequelize.fn(
+//                     "PGP_SYM_DECRYPT",
+//                     Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+//                     pubkey
+//                   ),
+//                   { [Op.like]: `%${searchQuery}%` }
+//                 ),
+//               ],
+//             }
+//           : {},
+//       ],
+//     };
+
+//     const userWhere =
+//       filters
+//         ?.filter((filter) => filter.field.startsWith("user_"))
+//         .map((filter) => {
+//           const operator = operatorMapping[filter.operator] || Op.eq;
+//           const value =
+//             filter.operator === "contains" ||
+//             filter.operator === "doesnotcontain"
+//               ? `%${filter.value}%`
+//               : filter.value;
+
+//           return Sequelize.where(
+//             Sequelize.fn(
+//               "PGP_SYM_DECRYPT",
+//               Sequelize.cast(Sequelize.col(`users.${filter.field}`), "bytea"),
+//               pubkey
+//             ),
+//             { [operator]: value }
+//           );
+//         }) || [];
+
+//     console.log("Sorting Info:", {
+//       order,
+//       userOrder,
+//     });
+
+//     const organizationData = await OrganizationModel.findAndCountAll({
+//       where,
+//       order,
+//       include: [
+//         {
+//           model: UserModel,
+//           as: "users",
+//           attributes: [
+//             [
+//               Sequelize.fn(
+//                 "PGP_SYM_DECRYPT",
+//                 Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
+//                 pubkey
+//               ),
+//               "user_email",
+//             ],
+//             [
+//               Sequelize.fn(
+//                 "PGP_SYM_DECRYPT",
+//                 Sequelize.cast(
+//                   Sequelize.col("users.user_phone_number"),
+//                   "bytea"
+//                 ),
+//                 pubkey
+//               ),
+//               "user_phone_number",
+//             ],
+//           ],
+//           where: userWhere.length > 0 ? { [Op.and]: userWhere } : undefined, // Apply user filters, if none exist, set undefined so sequelize won't include an unnecessary where clause.
+//           order: userOrder,
+//         },
+//       ],
+//       attributes: [
+//         "org_id",
+//         [
+//           Sequelize.fn(
+//             "PGP_SYM_DECRYPT",
+//             Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+//             pubkey
+//           ),
+//           "org_name",
+//         ],
+//         "org_status",
+//         "org_created_at",
+//         "org_updated_at",
+//       ],
+//       ...pagination({ page, limit }),
+//     });
+
+//     const encryptedOrgData = encryptService(organizationData);
+
+//     return encryptedOrgData;
+//   } catch (error) {
+//     console.error("Error in getAllOrganizationsService:", error);
+//     if (error.parent) {
+//       console.error("Detailed DB Error:", error.parent);
+//     }
+//     throw error;
+//   }
+// };
+
 export const getAllOrganizationsService = async ({
   page,
   limit,
@@ -97,6 +282,14 @@ export const getAllOrganizationsService = async ({
   searchQuery = "",
 }) => {
   try {
+    console.log("params received: ", {
+      page,
+      limit,
+      sorts,
+      filters,
+      searchQuery,
+    });
+
     const order =
       sorts && sorts.length > 0
         ? sorts
@@ -108,6 +301,8 @@ export const getAllOrganizationsService = async ({
               sort.dir.toUpperCase(),
             ])
         : [["org_created_at", "DESC"]];
+
+    console.log("organization order: ", order);
 
     // Ensure that sorts for users are handled safely
     const userOrder =
@@ -121,6 +316,8 @@ export const getAllOrganizationsService = async ({
               sort.dir.toUpperCase(),
             ])
         : [];
+
+    console.log("user order: ", userOrder);
 
     const operatorMapping = {
       contains: Op.iLike,
@@ -208,10 +405,6 @@ export const getAllOrganizationsService = async ({
           );
         }) || [];
 
-    console.log("Sorting Info:", {
-      order,
-      userOrder,
-    });
 
     const organizationData = await OrganizationModel.findAndCountAll({
       where,
@@ -262,9 +455,12 @@ export const getAllOrganizationsService = async ({
       ...pagination({ page, limit }),
     });
 
+    console.log("organizationData rows: ", organizationData.rows);
+
     const encryptedOrgData = encryptService(organizationData);
 
     return encryptedOrgData;
+
   } catch (error) {
     console.error("Error in getAllOrganizationsService:", error);
     if (error.parent) {
@@ -389,7 +585,6 @@ export const getOrganizationByIdService = async (orgId) => {
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
   try {
-
     // const ordId = await decryptService(encryptedOrgId);
     // Step 1: Decrypt the incoming data
     const orgData = await decryptService(payload);
@@ -481,4 +676,3 @@ export const deleteOrganizationService = async (orgId, payload) => {
     throw error;
   }
 };
-
