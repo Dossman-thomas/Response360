@@ -14,4 +14,10 @@ export class SidebarComponent {
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
   }
+
+  onOrganizationDetailsClick(): void {
+    this.router.navigate(['/organization-details'], {
+      queryParams: { mode: 'create' },
+    });
+  }
 }
