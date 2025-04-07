@@ -444,6 +444,9 @@ export const deleteOrganizationService = async (orgId, payload) => {
     // Step 1: Decrypt the incoming payload (which contains both orgId and userId)
     const decryptedData = await decryptService(payload);
 
+    console.log("orgId: ", orgId);
+    console.log("Decrypted Data:", decryptedData);
+
     if (!decryptedData || !decryptedData.userId || !decryptedData.orgId) {
       throw new Error("Service: Decryption failed or missing required data.");
     }
@@ -457,7 +460,7 @@ export const deleteOrganizationService = async (orgId, payload) => {
     const [updated] = await OrganizationModel.update(
       {
         org_status: false,
-        org_deleted_by: decryptedData.userId, // Ensure this is correctly decrypted
+        org_deleted_by: decryptedData.userId,
         org_deleted_at: new Date(),
       },
       {

@@ -31,8 +31,6 @@ export class OrganizationDetailsComponent implements OnInit {
     this.checkMode();
   }
 
-
-
   // Initialize Reactive Form with validation
   initializeForm(): void {
     this.organizationForm = this.fb.group({
@@ -188,7 +186,5 @@ export class OrganizationDetailsComponent implements OnInit {
         });
     }
   }
-  
-
 
 }

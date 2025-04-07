@@ -21,7 +21,7 @@ const sequelize = new Sequelize(
       useUTC: true,
       timezone: "UTC",
     },
-    logging: true,  // Optional: Set to true if you want Sequelize logs
+    logging: false,  // Optional: Set to true if you want Sequelize logs
   }
 );
 
