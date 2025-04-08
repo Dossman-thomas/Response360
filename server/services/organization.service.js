@@ -1,7 +1,7 @@
 import { OrganizationModel, UserModel } from "../database/models/index.js";
 import { sequelize } from "../config/index.js";
 import { env } from "../config/index.js";
-import { Sequelize, Op, fn, col, literal } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 import { pagination } from "../utils/index.js";
 import { encryptService, decryptService } from "../services/index.js";
 import { v4 as uuidv4 } from "uuid";
@@ -31,16 +31,26 @@ export const createOrganizationService = async (payload) => {
     const encryptedOrgAddress = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
     );
+    const encryptedOrgEmail = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.orgEmail}', '${pubkey}')`
+    );
+    const encryptedOrgPhone = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.orgPhone}', '${pubkey}')`
+    );
 
     // Create the organization
     const organization = await OrganizationModel.create(
       {
         org_id: uuidv4(),
         org_name: encryptedOrgName,
+        org_email: encryptedOrgEmail,
+        org_phone_number: encryptedOrgPhone,
+        org_status: true,
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
         website: orgData.website,
+        logo: orgData.logo,
         org_created_by: orgData.decryptedUserId,
       },
       { transaction }
@@ -92,25 +102,71 @@ export const createOrganizationService = async (payload) => {
 export const getAllOrganizationsService = async ({
   page,
   limit,
-  sorts = [],
-  filters = [],
+  sorts,
+  filters,
   searchQuery = "",
 }) => {
   try {
-    // Ensure sorts and filters are arrays even if null is passed
-    const safeFilters = Array.isArray(filters) ? filters : [];
-    const safeSorts = Array.isArray(sorts) ? sorts : [];
-    
-    // Apply default sorting if none is provided or if no sort has direction
-    const hasValidSort = safeSorts.some(sort => sort && sort.dir);
-    if (!hasValidSort) {
-      safeSorts.length = 0; // Clear any invalid sorts
-      safeSorts.push({ field: "org_created_at", dir: "DESC" }); // Default to newest first
-    }
-    
-    console.log("params received:", { page, limit, sorts, filters, searchQuery });
+    console.log("params received: ", {
+      page,
+      limit,
+      sorts,
+      filters,
+      searchQuery,
+    });
 
-    // Operator mapping for Sequelize queries
+    const order =
+      sorts && sorts.length > 0
+        ? sorts
+            .filter(
+              (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
+            )
+            .map((sort) => [
+              Sequelize.literal(`${sort.field}`),
+              sort.dir.toUpperCase(),
+            ])
+        : [["org_created_at", "DESC"]];
+
+    // console.log("organization order: ", order);
+
+    // Create order arrays for handling both table columns
+    // let orderArray = [];
+
+    // if (sorts && sorts.length > 0) {
+    //   // Handle organization table sorting
+    //   const order = sorts
+    //     .filter(
+    //       (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
+    //     )
+    //     .map((sort) => [
+    //       Sequelize.literal(`${sort.field}`),
+    //       sort.dir.toUpperCase(),
+    //     ]);
+
+      // // Handle user table sorting - using proper association path
+      // const userSorts = sorts
+      //   .filter(
+      //     (sort) => sort.dir && sort.field && sort.field.startsWith("user_")
+      //   )
+      //   .map((sort) => [
+      //     // Use Sequelize.literal with the decryption function for user fields
+      //     Sequelize.literal(
+      //       `PGP_SYM_DECRYPT(CAST("users"."${sort.field}" AS BYTEA), '${pubkey}')`
+      //     ),
+      //     sort.dir.toUpperCase(),
+      //   ]);
+
+      // // Combine both sort arrays
+      // orderArray = [...orgSorts, ...userSorts];
+    // }
+
+    // Default sort if no valid sorts provided
+    // if (orderArray.length === 0) {
+    //   orderArray = [["org_created_at", "DESC"]];
+    // }
+
+    console.log("order array: ", order);
+
     const operatorMapping = {
       contains: Op.iLike,
       doesnotcontain: Op.notLike,
@@ -124,50 +180,41 @@ export const getAllOrganizationsService = async ({
       lessThanOrEquals: Op.lte,
     };
 
-    // Helper functions
-    const createDecryptedColumn = (field, alias = null) => {
-      return [
-        Sequelize.fn(
-          "PGP_SYM_DECRYPT",
-          Sequelize.cast(Sequelize.col(field), "bytea"),
-          pubkey
-        ),
-        alias || field,
-      ];
-    };
-
-    const buildFilterCondition = (filter) => {
-      // Special case for boolean status field
-      if (filter.field === "org_status") {
-        const operator = filter.operator === "eq" ? Op.eq : Op.ne;
-        return { [filter.field]: { [operator]: filter.value === "true" } };
-      }
-
-      // For encrypted fields
-      const operator = operatorMapping[filter.operator] || Op.eq;
-      const value = ["contains", "doesnotcontain"].includes(filter.operator)
-        ? `%${filter.value}%`
-        : filter.value;
-
-      return Sequelize.where(
-        Sequelize.fn(
-          "PGP_SYM_DECRYPT",
-          Sequelize.cast(Sequelize.col(filter.field), "bytea"),
-          pubkey
-        ),
-        { [operator]: value }
-      );
-    };
-
-    // Build organization where clause
-    const orgFilters = safeFilters
-      .filter(filter => filter.field?.startsWith("org_"))
-      .map(buildFilterCondition)
-      .filter(Boolean);
-
     const where = {
       [Op.and]: [
-        ...(orgFilters.length ? orgFilters : []),
+        ...(filters?.length
+          ? filters
+              .filter((filter) => filter.field.startsWith("org_"))
+              .map((filter) => {
+                if (filter.field === "org_status") {
+                  const operator = filter.operator === "eq" ? Op.eq : Op.ne;
+                  return {
+                    [filter.field]: { [operator]: filter.value === "true" },
+                  };
+                } else {
+                  const operator = operatorMapping[filter.operator] || Op.eq;
+                  const value =
+                    filter.operator === "contains" ||
+                    filter.operator === "doesnotcontain"
+                      ? `%${filter.value}%`
+                      : filter.value;
+
+                  console.log(
+                    `Operator: ${filter.operator}, Decrypted Value: ${filter.value}, Filtered Value: ${value}`
+                  );
+
+                  return Sequelize.where(
+                    Sequelize.fn(
+                      "PGP_SYM_DECRYPT",
+                      Sequelize.cast(Sequelize.col(filter.field), "bytea"),
+                      pubkey
+                    ),
+                    { [operator]: value }
+                  );
+                }
+              })
+              .filter(Boolean) // Remove any null, undefined, or false values from array.
+          : []),
         searchQuery
           ? {
               [Op.or]: [
@@ -185,116 +232,99 @@ export const getAllOrganizationsService = async ({
       ],
     };
 
-    // Build user where clause
-    const userWhere = safeFilters
-      .filter(filter => filter.field?.startsWith("user_"))
-      .map(filter => {
-        const operator = operatorMapping[filter.operator] || Op.eq;
-        const value = ["contains", "doesnotcontain"].includes(filter.operator)
-          ? `%${filter.value}%`
-          : filter.value;
+    // const userWhere =
+    //   filters
+    //     ?.filter((filter) => filter.field.startsWith("user_"))
+    //     .map((filter) => {
+    //       const operator = operatorMapping[filter.operator] || Op.eq;
+    //       const value =
+    //         filter.operator === "contains" ||
+    //         filter.operator === "doesnotcontain"
+    //           ? `%${filter.value}%`
+    //           : filter.value;
 
-        return Sequelize.where(
-          Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col(`users.${filter.field}`), "bytea"),
-            pubkey
-          ),
-          { [operator]: value }
-        );
-      });
+    //       return Sequelize.where(
+    //         Sequelize.fn(
+    //           "PGP_SYM_DECRYPT",
+    //           Sequelize.cast(Sequelize.col(`users.${filter.field}`), "bytea"),
+    //           pubkey
+    //         ),
+    //         { [operator]: value }
+    //       );
+    //     }) || [];
 
-    // Base query options
-    let queryOptions = {
+    const organizationData = await OrganizationModel.findAndCountAll({
       where,
-      include: [
-        {
-          model: UserModel,
-          as: "users",
-          attributes: [
-            createDecryptedColumn("users.user_email", "user_email"),
-            createDecryptedColumn("users.user_phone_number", "user_phone_number"),
-          ],
-          where: userWhere.length > 0 ? { [Op.and]: userWhere } : undefined,
-        },
-      ],
+      order,
+      // include: [
+      //   {
+      //     model: UserModel,
+      //     as: "users",
+      //     attributes: [
+      //       [
+      //         Sequelize.fn(
+      //           "PGP_SYM_DECRYPT",
+      //           Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
+      //           pubkey
+      //         ),
+      //         "user_email",
+      //       ],
+      //       [
+      //         Sequelize.fn(
+      //           "PGP_SYM_DECRYPT",
+      //           Sequelize.cast(
+      //             Sequelize.col("users.user_phone_number"),
+      //             "bytea"
+      //           ),
+      //           pubkey
+      //         ),
+      //         "user_phone_number",
+      //       ],
+      //     ],
+      //     where: userWhere.length > 0 ? { [Op.and]: userWhere } : undefined, // Apply user filters, if none exist, set undefined so sequelize won't include an unnecessary where clause.
+      //     // order: userOrder,
+      //   },
+      // ],
       attributes: [
         "org_id",
-        createDecryptedColumn("org_name", "org_name"),
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+            pubkey
+          ),
+          "org_name",
+        ],
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_email"), "bytea"),
+            pubkey
+          ),
+          "org_email",
+        ],
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_phone_number"), "bytea"),
+            pubkey
+          ),
+          "org_phone_number",
+        ],
         "org_status",
         "org_created_at",
         "org_updated_at",
       ],
-    };
+      ...pagination,
+    });
 
-    // Handle sorting
-    const userSort = safeSorts.find(sort => sort && sort.field?.startsWith("user_") && sort.dir);
+    // uncomment these two lines after debugging in postman
+    const encryptedOrgData = encryptService(organizationData);
 
-    if (userSort) {
-      // For user field sorting
-      const { field: userSortField, dir: userSortDirection } = userSort;
-      
-      // Get ordered organization IDs
-      const subQuery = await OrganizationModel.findAll({
-        where,
-        include: [
-          {
-            model: UserModel,
-            as: "users",
-            attributes: [],
-            where: userWhere.length > 0 ? { [Op.and]: userWhere } : undefined,
-          },
-        ],
-        attributes: ["org_id"],
-        order: [
-          [
-            Sequelize.literal(`(
-              SELECT PGP_SYM_DECRYPT(CAST("users"."${userSortField}" AS BYTEA), '${pubkey}')
-              FROM "users" 
-              WHERE "users"."org_id" = "organizations"."org_id" 
-              AND "users"."user_deleted_at" IS NULL 
-              LIMIT 1
-            )`),
-            userSortDirection.toUpperCase(),
-          ],
-        ],
-        raw: true,
-      });
+    return encryptedOrgData;
 
-      const orderedIds = subQuery.map(org => org.org_id);
-
-      if (orderedIds.length > 0) {
-        queryOptions.order = [
-          [
-            Sequelize.literal(
-              `CASE "organizations"."org_id" ${orderedIds
-                .map((id, index) => `WHEN '${id}' THEN ${index}`)
-                .join(" ")} ELSE ${orderedIds.length} END`
-            ),
-            "ASC",
-          ],
-        ];
-      }
-    } else {
-      // For organization field sorting
-      const orgOrder = safeSorts
-        .filter(sort => sort && sort.dir && sort.field && sort.field.startsWith("org_"))
-        .map(sort => [Sequelize.literal(sort.field), sort.dir.toUpperCase()]);
-      
-      // If we still don't have valid organization sorts after filtering, use default
-      if (orgOrder.length === 0) {
-        orgOrder.push(["org_created_at", "DESC"]);
-      }
-
-      queryOptions.order = orgOrder;
-    }
-
-    // Add pagination
-    queryOptions = { ...queryOptions, ...pagination({ page, limit }) };
-
-    // Execute query
-    const organizationData = await OrganizationModel.findAndCountAll(queryOptions);
-    return encryptService(organizationData);
+    // return raw data while debugging in postman
+    // return organizationData;
   } catch (error) {
     console.error("Error in getAllOrganizationsService:", error);
     if (error.parent) {
@@ -303,245 +333,6 @@ export const getAllOrganizationsService = async ({
     throw error;
   }
 };
-
-// debugging versions of read organization service
-// export const getAllOrganizationsService = async ({
-//   page,
-//   limit,
-//   sorts,
-//   filters,
-//   searchQuery = "",
-// }) => {
-//   try {
-//     console.log("params received: ", {
-//       page,
-//       limit,
-//       sorts,
-//       filters,
-//       searchQuery,
-//     });
-
-//     // const order =
-//     //   sorts && sorts.length > 0
-//     //     ? sorts
-//     //         .filter(
-//     //           (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
-//     //         )
-//     //         .map((sort) => [
-//     //           Sequelize.literal(`${sort.field}`),
-//     //           sort.dir.toUpperCase(),
-//     //         ])
-//     //     : [["org_created_at", "DESC"]];
-
-//     // console.log("organization order: ", order);
-
-//     // // Ensure that sorts for users are handled safely
-//     // const userOrder =
-//     //   sorts && sorts.length > 0
-//     //     ? sorts
-//     //         .filter(
-//     //           (sort) => sort.dir && sort.field && sort.field.startsWith("user_")
-//     //         )
-//     //         .map((sort) => [
-//     //           Sequelize.literal(`${sort.field}`),
-//     //           sort.dir.toUpperCase(),
-//     //         ])
-//     //     : [];
-
-//     // console.log("user order: ", userOrder);
-
-//     // Create order arrays for handling both table columns
-//     let orderArray = [];
-
-//     if (sorts && sorts.length > 0) {
-//       // Handle organization table sorting
-//       const orgSorts = sorts
-//         .filter(
-//           (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
-//         )
-//         .map((sort) => [
-//           Sequelize.literal(`${sort.field}`),
-//           sort.dir.toUpperCase(),
-//         ]);
-
-//       // Handle user table sorting - using proper association path
-//       const userSorts = sorts
-//         .filter(
-//           (sort) => sort.dir && sort.field && sort.field.startsWith("user_")
-//         )
-//         .map((sort) => [
-//           // Use Sequelize.literal with the decryption function for user fields
-//           Sequelize.literal(
-//             `PGP_SYM_DECRYPT(CAST("users"."${sort.field}" AS BYTEA), '${pubkey}')`
-//           ),
-//           sort.dir.toUpperCase(),
-//         ]);
-
-//       // Combine both sort arrays
-//       orderArray = [...orgSorts, ...userSorts];
-//     }
-
-//     // Default sort if no valid sorts provided
-//     if (orderArray.length === 0) {
-//       orderArray = [["org_created_at", "DESC"]];
-//     }
-
-//     console.log("combined order array: ", orderArray);
-
-//     const operatorMapping = {
-//       contains: Op.iLike,
-//       doesnotcontain: Op.notLike,
-//       eq: Op.eq,
-//       neq: Op.ne,
-//       startswith: Op.startsWith,
-//       endswith: Op.endsWith,
-//       greaterThan: Op.gt,
-//       lessThan: Op.lt,
-//       greaterThanOrEquals: Op.gte,
-//       lessThanOrEquals: Op.lte,
-//     };
-
-//     const where = {
-//       [Op.and]: [
-//         ...(filters?.length
-//           ? filters
-//               .filter((filter) => filter.field.startsWith("org_"))
-//               .map((filter) => {
-//                 if (filter.field === "org_status") {
-//                   const operator = filter.operator === "eq" ? Op.eq : Op.ne;
-//                   return {
-//                     [filter.field]: { [operator]: filter.value === "true" },
-//                   };
-//                 } else {
-//                   const operator = operatorMapping[filter.operator] || Op.eq;
-//                   const value =
-//                     filter.operator === "contains" ||
-//                     filter.operator === "doesnotcontain"
-//                       ? `%${filter.value}%`
-//                       : filter.value;
-
-//                   console.log(
-//                     `Operator: ${filter.operator}, Decrypted Value: ${filter.value}, Filtered Value: ${value}`
-//                   );
-
-//                   return Sequelize.where(
-//                     Sequelize.fn(
-//                       "PGP_SYM_DECRYPT",
-//                       Sequelize.cast(Sequelize.col(filter.field), "bytea"),
-//                       pubkey
-//                     ),
-//                     { [operator]: value }
-//                   );
-//                 }
-//               })
-//               .filter(Boolean) // Remove any null, undefined, or false values from array.
-//           : []),
-//         searchQuery
-//           ? {
-//               [Op.or]: [
-//                 Sequelize.where(
-//                   Sequelize.fn(
-//                     "PGP_SYM_DECRYPT",
-//                     Sequelize.cast(Sequelize.col("org_name"), "bytea"),
-//                     pubkey
-//                   ),
-//                   { [Op.like]: `%${searchQuery}%` }
-//                 ),
-//               ],
-//             }
-//           : {},
-//       ],
-//     };
-
-//     const userWhere =
-//       filters
-//         ?.filter((filter) => filter.field.startsWith("user_"))
-//         .map((filter) => {
-//           const operator = operatorMapping[filter.operator] || Op.eq;
-//           const value =
-//             filter.operator === "contains" ||
-//             filter.operator === "doesnotcontain"
-//               ? `%${filter.value}%`
-//               : filter.value;
-
-//           return Sequelize.where(
-//             Sequelize.fn(
-//               "PGP_SYM_DECRYPT",
-//               Sequelize.cast(Sequelize.col(`users.${filter.field}`), "bytea"),
-//               pubkey
-//             ),
-//             { [operator]: value }
-//           );
-//         }) || [];
-
-//     const organizationData = await OrganizationModel.findAndCountAll({
-//       where,
-//       // order: [ ...order, ...userOrder], // Combine organization and user orders
-//       include: [
-//         {
-//           model: UserModel,
-//           as: "users",
-//           attributes: [
-//             [
-//               Sequelize.fn(
-//                 "PGP_SYM_DECRYPT",
-//                 Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
-//                 pubkey
-//               ),
-//               "user_email",
-//             ],
-//             [
-//               Sequelize.fn(
-//                 "PGP_SYM_DECRYPT",
-//                 Sequelize.cast(
-//                   Sequelize.col("users.user_phone_number"),
-//                   "bytea"
-//                 ),
-//                 pubkey
-//               ),
-//               "user_phone_number",
-//             ],
-//           ],
-//           where: userWhere.length > 0 ? { [Op.and]: userWhere } : undefined, // Apply user filters, if none exist, set undefined so sequelize won't include an unnecessary where clause.
-//           // order: userOrder,
-//         },
-//       ],
-//       attributes: [
-//         "org_id",
-//         [
-//           Sequelize.fn(
-//             "PGP_SYM_DECRYPT",
-//             Sequelize.cast(Sequelize.col("org_name"), "bytea"),
-//             pubkey
-//           ),
-//           "org_name",
-//         ],
-//         "org_status",
-//         "org_created_at",
-//         "org_updated_at",
-//       ],
-//       ...pagination({ page, limit }),
-//       order: orderArray,
-//     });
-
-//     // uncomment these two lines after debugging in postman
-//     // const encryptedOrgData = encryptService(organizationData);
-
-//     // return encryptedOrgData;
-
-//     // return raw data while debugging in postman
-//     return organizationData;
-//   } catch (error) {
-//     console.error("Error in getAllOrganizationsService:", error);
-//     if (error.parent) {
-//       console.error("Detailed DB Error:", error.parent);
-//     }
-//     throw error;
-//   }
-// };
-
-
-
 
 // Get Organization By ID Service
 export const getOrganizationByIdService = async (orgId) => {
@@ -605,6 +396,22 @@ export const getOrganizationByIdService = async (orgId) => {
         [
           Sequelize.fn(
             "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_email"), "bytea"),
+            pubkey
+          ),
+          "org_email",
+        ],
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("org_phone_number"), "bytea"),
+            pubkey
+          ),
+          "org_phone_number",
+        ],
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
             Sequelize.cast(Sequelize.col("org_address"), "bytea"),
             pubkey
           ),
@@ -613,6 +420,7 @@ export const getOrganizationByIdService = async (orgId) => {
         "org_type",
         "jurisdiction",
         "website",
+        "logo",
         "org_status",
         "org_created_at",
         "org_updated_at",
@@ -628,10 +436,13 @@ export const getOrganizationByIdService = async (orgId) => {
     const orgData = {
       orgId: foundOrg.org_id, // Ensuring consistency with camelCase naming
       orgName: foundOrg.org_name,
+      orgEmail: foundOrg.org_email,
+      orgPhone: foundOrg.org_phone_number,
       orgType: foundOrg.org_type,
       jurisdictionSize: foundOrg.jurisdiction,
       registeredAddress: foundOrg.org_address,
       website: foundOrg.website,
+      logo: foundOrg.logo,
       status: foundOrg.org_status,
       orgCreatedAt: foundOrg.org_created_at,
       orgUpdatedAt: foundOrg.org_updated_at,
@@ -672,6 +483,12 @@ export const updateOrganizationService = async (orgId, payload) => {
     const encryptedOrgName = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
     );
+    const encryptedOrgEmail = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.orgEmail}', '${pubkey}')`
+    );
+    const encryptedOrgPhone = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.orgPhone}', '${pubkey}')`
+    );
     const encryptedOrgAddress = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
     );
@@ -680,10 +497,13 @@ export const updateOrganizationService = async (orgId, payload) => {
     const updatedOrganization = await OrganizationModel.update(
       {
         org_name: encryptedOrgName,
+        org_email: encryptedOrgEmail,
+        org_phone_number: encryptedOrgPhone,
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
         website: orgData.website,
+        logo: orgData.logo,
         org_status: orgData.status === "Disabled" ? false : true,
         org_updated_at: new Date(),
         org_updated_by: orgData.decryptedUserId,
