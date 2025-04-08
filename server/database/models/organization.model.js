@@ -16,12 +16,18 @@ const OrganizationModel = sequelize.define(
     },
     org_email: {
       type: DataTypes.TEXT, // Encrypted
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
     },
     org_phone_number: {
       type: DataTypes.TEXT, // Encrypted
+      allowNull: false,
     },
     org_status: {
       type: DataTypes.BOOLEAN,
+      allowNull: false,
       defaultValue: true,
     },
     org_created_by: {
