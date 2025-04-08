@@ -116,9 +116,9 @@ export class ManageOrganizationsComponent implements OnInit {
   }
 
   // Navigate to the organization details page
-  goToOrganizationDetails() {
-    this.router.navigate(['/organization-details']);
-  }
+  // goToOrganizationDetails() {
+  //   this.router.navigate(['/organization-details']);
+  // }
 
   // For "New" button
   onNewOrganization(): void {
