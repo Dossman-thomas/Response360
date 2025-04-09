@@ -115,55 +115,20 @@ export const getAllOrganizationsService = async ({
       searchQuery,
     });
 
+    const validSorts =
+      sorts?.length > 0
+        ? sorts.filter((sort) => sort.field && sort.field.startsWith("org_"))
+        : [];
+
     const order =
-      sorts && sorts.length > 0
-        ? sorts
-            .filter(
-              (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
-            )
-            .map((sort) => [
+      validSorts.length > 0
+        ? validSorts.every((sort) => sort.dir)
+          ? validSorts.map((sort) => [
               Sequelize.literal(`${sort.field}`),
               sort.dir.toUpperCase(),
             ])
+          : [["org_created_at", "DESC"]] // fallback if any sort is missing a dir
         : [["org_created_at", "DESC"]];
-
-    // console.log("organization order: ", order);
-
-    // Create order arrays for handling both table columns
-    // let orderArray = [];
-
-    // if (sorts && sorts.length > 0) {
-    //   // Handle organization table sorting
-    //   const order = sorts
-    //     .filter(
-    //       (sort) => sort.dir && sort.field && sort.field.startsWith("org_")
-    //     )
-    //     .map((sort) => [
-    //       Sequelize.literal(`${sort.field}`),
-    //       sort.dir.toUpperCase(),
-    //     ]);
-
-      // // Handle user table sorting - using proper association path
-      // const userSorts = sorts
-      //   .filter(
-      //     (sort) => sort.dir && sort.field && sort.field.startsWith("user_")
-      //   )
-      //   .map((sort) => [
-      //     // Use Sequelize.literal with the decryption function for user fields
-      //     Sequelize.literal(
-      //       `PGP_SYM_DECRYPT(CAST("users"."${sort.field}" AS BYTEA), '${pubkey}')`
-      //     ),
-      //     sort.dir.toUpperCase(),
-      //   ]);
-
-      // // Combine both sort arrays
-      // orderArray = [...orgSorts, ...userSorts];
-    // }
-
-    // Default sort if no valid sorts provided
-    // if (orderArray.length === 0) {
-    //   orderArray = [["org_created_at", "DESC"]];
-    // }
 
     console.log("order array: ", order);
 
@@ -232,59 +197,11 @@ export const getAllOrganizationsService = async ({
       ],
     };
 
-    // const userWhere =
-    //   filters
-    //     ?.filter((filter) => filter.field.startsWith("user_"))
-    //     .map((filter) => {
-    //       const operator = operatorMapping[filter.operator] || Op.eq;
-    //       const value =
-    //         filter.operator === "contains" ||
-    //         filter.operator === "doesnotcontain"
-    //           ? `%${filter.value}%`
-    //           : filter.value;
-
-    //       return Sequelize.where(
-    //         Sequelize.fn(
-    //           "PGP_SYM_DECRYPT",
-    //           Sequelize.cast(Sequelize.col(`users.${filter.field}`), "bytea"),
-    //           pubkey
-    //         ),
-    //         { [operator]: value }
-    //       );
-    //     }) || [];
+    console.log("where clause: ", where);
 
     const organizationData = await OrganizationModel.findAndCountAll({
       where,
       order,
-      // include: [
-      //   {
-      //     model: UserModel,
-      //     as: "users",
-      //     attributes: [
-      //       [
-      //         Sequelize.fn(
-      //           "PGP_SYM_DECRYPT",
-      //           Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
-      //           pubkey
-      //         ),
-      //         "user_email",
-      //       ],
-      //       [
-      //         Sequelize.fn(
-      //           "PGP_SYM_DECRYPT",
-      //           Sequelize.cast(
-      //             Sequelize.col("users.user_phone_number"),
-      //             "bytea"
-      //           ),
-      //           pubkey
-      //         ),
-      //         "user_phone_number",
-      //       ],
-      //     ],
-      //     where: userWhere.length > 0 ? { [Op.and]: userWhere } : undefined, // Apply user filters, if none exist, set undefined so sequelize won't include an unnecessary where clause.
-      //     // order: userOrder,
-      //   },
-      // ],
       attributes: [
         "org_id",
         [
@@ -315,7 +232,7 @@ export const getAllOrganizationsService = async ({
         "org_created_at",
         "org_updated_at",
       ],
-      ...pagination,
+      ...pagination({ page, limit }),
     });
 
     // uncomment these two lines after debugging in postman
