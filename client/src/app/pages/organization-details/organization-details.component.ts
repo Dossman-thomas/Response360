@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CryptoService } from '../../services/crypto.service';
+// import { CryptoService } from '../../services/crypto.service';
 import { OrganizationService } from '../../services/organization.service';
 
 @Component({
@@ -22,7 +22,7 @@ export class OrganizationDetailsComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private cryptoService: CryptoService,
+    // private cryptoService: CryptoService,
     private organizationService: OrganizationService
   ) {}
 
