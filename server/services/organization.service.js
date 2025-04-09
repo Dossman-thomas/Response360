@@ -145,6 +145,16 @@ export const getAllOrganizationsService = async ({
       lessThanOrEquals: Op.lte,
     };
 
+    // normalize searchQuery
+    const normalizedQuery = searchQuery.toLowerCase();
+    // map 'true' to 'Enabled' and 'false' to 'Disabled'
+    const statusQuery =
+      normalizedQuery === "true"
+        ? "Enabled"
+        : normalizedQuery === "false"
+        ? "Disabled"
+        : searchQuery;
+
     const where = {
       [Op.and]: [
         ...(filters?.length
@@ -191,6 +201,31 @@ export const getAllOrganizationsService = async ({
                   ),
                   { [Op.like]: `%${searchQuery}%` }
                 ),
+                Sequelize.where(
+                  Sequelize.fn(
+                    "PGP_SYM_DECRYPT",
+                    Sequelize.cast(Sequelize.col("org_email"), "bytea"),
+                    pubkey
+                  ),
+                  { [Op.like]: `%${searchQuery}%` }
+                ),
+                Sequelize.where(
+                  Sequelize.fn(
+                    "PGP_SYM_DECRYPT",
+                    Sequelize.cast(Sequelize.col("org_phone_number"), "bytea"),
+                    pubkey
+                  ),
+                  { [Op.like]: `%${searchQuery}%` }
+                ),
+                ...(statusQuery === "Enabled" || statusQuery === "Disabled"
+                  ? [
+                      {
+                        org_status: {
+                          [Op.eq]: statusQuery === "Enabled",
+                        },
+                      },
+                    ]
+                  : []),
               ],
             }
           : {},

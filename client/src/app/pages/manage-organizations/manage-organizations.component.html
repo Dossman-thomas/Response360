@@ -7,12 +7,12 @@
     class="d-flex justify-content-between align-items-center p-2 mt-3 mb-1 bg-light rounded-1"
   >
     <!-- Search Bar -->
-    <input 
-      type="text" 
-      class="form-control w-25" 
-      placeholder="Search" 
-      [(ngModel)]="searchQuery" 
-      (input)="onSearch()" 
+    <input
+      type="text"
+      class="form-control w-25"
+      placeholder="Search"
+      [(ngModel)]="searchQuery"
+      (input)="onSearch()"
     />
 
     <!-- New Organization Button -->
@@ -33,10 +33,7 @@
   >
     <!-- Column Definitions -->
     <kendo-grid-column field="org_name" title="Name"></kendo-grid-column>
-    <kendo-grid-column
-      field="org_email"
-      title="Email"
-    ></kendo-grid-column>
+    <kendo-grid-column field="org_email" title="Email"></kendo-grid-column>
     <kendo-grid-column
       field="org_phone_number"
       title="Phone Number"
@@ -63,7 +60,6 @@
   </kendo-grid>
 </div>
 
-
 <!-- Modal for Deleting User -->
 <div
   class="modal fade"
@@ -88,12 +84,12 @@
       </div>
       <div class="modal-footer">
         <button
-        type="button"
-        class="btn confirm-delete-btn"
-        (click)="onConfirmDelete()"
-      >
-        Delete
-      </button>
+          type="button"
+          class="btn confirm-delete-btn"
+          (click)="onConfirmDelete()"
+        >
+          Delete
+        </button>
         <button
           type="button"
           class="btn btn-secondary"
@@ -101,7 +97,6 @@
         >
           Cancel
         </button>
-
       </div>
     </div>
   </div>
