@@ -1,1 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+kendo-grid-filter-menu-container {
+    :is(kendo-dropdownlist.k-filter-and) {
+      display: none !important;
+    }
+    
+    :is(kendo-grid-string-filter-menu-input,
+        kendo-grid-numeric-filter-menu-input,
+        kendo-grid-date-filter-menu-input):nth-child(3) {
+      display: none !important;
+    }
+    }

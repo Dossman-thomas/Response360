@@ -4,6 +4,10 @@ import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
 import { OrganizationService } from '../../services/organization.service';
 import { CryptoService } from '../../services/crypto.service';
+import {
+  stringOperators,
+  booleanOperators,
+} from 'src/app/utils/utils/kendoOperators';
 
 @Component({
   selector: 'app-manage-organizations',
@@ -20,6 +24,9 @@ export class ManageOrganizationsComponent implements OnInit {
   showDeleteModal = false;
   deleteOrganizationId: string | null = null;
   searchQuery: string = '';
+
+  public stringOperators = stringOperators;
+  public booleanOperators = booleanOperators;
 
   ngOnInit() {
     this.loadOrgDetails();
@@ -127,7 +134,6 @@ export class ManageOrganizationsComponent implements OnInit {
     const encryptedOrgId = this.cryptoService.Encrypt(orgId);
     // console.log('Encrypted Org ID:', encryptedOrgId);
 
-
     this.router.navigate(['/organization-details'], {
       queryParams: { mode: 'update', orgId: encryptedOrgId }, // Pass orgId in query params
     });
@@ -147,22 +153,24 @@ export class ManageOrganizationsComponent implements OnInit {
   onConfirmDelete(): void {
     if (this.deleteOrganizationId !== null) {
       // Call the delete service and subscribe to the response
-      this.organizationService.deleteOrganization(this.deleteOrganizationId).subscribe({
-        next: (response) => {
-          console.log('Organization deleted successfully:', response);
-  
-          // Remove the deleted organization from the gridData array
-          this.gridData.data = this.gridData.data.filter(
-            (org: any) => org.org_id !== this.deleteOrganizationId
-          );
-  
-          this.resetDeleteModal(); // Close the delete modal
-        },
-        error: (err) => {
-          console.error('Failed to delete organization:', err);
-          // Optionally, show an error message to the user
-        },
-      });
+      this.organizationService
+        .deleteOrganization(this.deleteOrganizationId)
+        .subscribe({
+          next: (response) => {
+            console.log('Organization deleted successfully:', response);
+
+            // Remove the deleted organization from the gridData array
+            this.gridData.data = this.gridData.data.filter(
+              (org: any) => org.org_id !== this.deleteOrganizationId
+            );
+
+            this.resetDeleteModal(); // Close the delete modal
+          },
+          error: (err) => {
+            console.error('Failed to delete organization:', err);
+            // Optionally, show an error message to the user
+          },
+        });
     }
   }
 
