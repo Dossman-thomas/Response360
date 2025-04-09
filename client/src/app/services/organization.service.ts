@@ -28,6 +28,8 @@ export class OrganizationService {
   // Create a new organization
   createOrganization(
     orgName: string,
+    orgEmail: string,
+    orgPhone: string,
     registeredAddress: string,
     orgType: string,
     jurisdictionSize: string,
@@ -44,6 +46,8 @@ export class OrganizationService {
     // Encrypt the form data into a single payload
     const encryptedPayload = this.cryptoService.Encrypt({
       orgName,
+      orgEmail,
+      orgPhone,
       registeredAddress,
       orgType,
       jurisdictionSize,
@@ -112,6 +116,8 @@ export class OrganizationService {
   updateOrganization(
     orgId: string,
     orgName: string,
+    orgEmail: string,
+    orgPhone: string,
     registeredAddress: string,
     orgType: string,
     jurisdictionSize: string,
@@ -125,6 +131,8 @@ export class OrganizationService {
     // Encrypt the form data into a single payload
     const encryptedPayload = this.cryptoService.Encrypt({
       orgName,
+      orgEmail,
+      orgPhone,
       registeredAddress,
       orgType,
       jurisdictionSize,

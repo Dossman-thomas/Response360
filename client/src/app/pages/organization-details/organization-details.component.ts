@@ -148,6 +148,8 @@ export class OrganizationDetailsComponent implements OnInit {
         .updateOrganization(
           orgId, 
           formValues.org_name,
+          formValues.org_email,
+          formValues.org_phone_number,
           formValues.org_address,
           formValues.org_type,
           formValues.jurisdiction_size,
@@ -167,6 +169,8 @@ export class OrganizationDetailsComponent implements OnInit {
       this.organizationService
         .createOrganization(
           formValues.org_name,
+          formValues.org_email,
+          formValues.org_phone_number,
           formValues.org_address,
           formValues.org_type,
           formValues.jurisdiction_size,
