@@ -72,23 +72,6 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Organization Name</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        formControlName="org_name"
-                      />
-                      <small
-                        class="text-danger"
-                        *ngIf="
-                          organizationForm.get('org_name')?.invalid &&
-                          organizationForm.get('org_name')?.touched
-                        "
-                        >{{ getErrorMessage("org_name") }}</small
-                      >
-                    </div>
-
-                    <div class="mb-3">
                       <label class="form-label">Admin Email</label>
                       <input
                         type="email"
@@ -107,20 +90,53 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Admin Phone</label>
+                      <label class="form-label">Organization Name</label>
                       <input
                         type="text"
                         class="form-control"
-                        formControlName="admin_phone"
-                        [readonly]="mode === 'update'"
+                        formControlName="org_name"
                       />
                       <small
                         class="text-danger"
                         *ngIf="
-                          organizationForm.get('admin_phone')?.invalid &&
-                          organizationForm.get('admin_phone')?.touched
+                          organizationForm.get('org_name')?.invalid &&
+                          organizationForm.get('org_name')?.touched
                         "
-                        >{{ getErrorMessage("admin_phone") }}</small
+                        >{{ getErrorMessage("org_name") }}</small
+                      >
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Organization Email</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="org_email"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('org_email')?.invalid &&
+                          organizationForm.get('org_email')?.touched
+                        "
+                        >{{ getErrorMessage("org_email") }}</small
+                      >
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Organization Phone</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="org_phone_number"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('org_phone_number')?.invalid &&
+                          organizationForm.get('org_phone_number')?.touched
+                        "
+                        >{{ getErrorMessage("org_phone_number") }}</small
                       >
                     </div>
 
@@ -149,6 +165,24 @@
                           organizationForm.get('admin_last_name')?.touched
                         "
                         >{{ getErrorMessage("admin_last_name") }}</small
+                      >
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Admin Phone</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="admin_phone_number"
+                        [readonly]="mode === 'update'"
+                      />
+                      <small
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('admin_phone_number')?.invalid &&
+                          organizationForm.get('admin_phone_number')?.touched
+                        "
+                        >{{ getErrorMessage("admin_phone_number") }}</small
                       >
                     </div>
 

@@ -37,7 +37,7 @@ export class OrganizationDetailsComponent implements OnInit {
       admin_first_name: ['', Validators.required],
       admin_last_name: ['', Validators.required],
       admin_email: ['', [Validators.required, Validators.email]],
-      admin_phone: [
+      admin_phone_number: [
         '',
         [
           Validators.required,
@@ -47,6 +47,16 @@ export class OrganizationDetailsComponent implements OnInit {
         ],
       ],
       org_name: ['', Validators.required],
+      org_email: ['', [Validators.required, Validators.email]],
+      org_phone_number: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(
+            /^\+?1?\s?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}$/
+          ),
+        ],
+      ],
       org_status: ['Enabled', Validators.required],
       org_type: ['', Validators.required],
       jurisdiction_size: ['Global', Validators.required],
@@ -77,6 +87,8 @@ export class OrganizationDetailsComponent implements OnInit {
       // Patch organization data
       this.organizationForm.patchValue({
         org_name: data.orgName,
+        org_email: data.orgEmail,
+        org_phone_number: data.orgPhone,
         org_type: data.orgType,
         jurisdiction_size: data.jurisdictionSize,
         org_address: data.registeredAddress,
@@ -90,7 +102,7 @@ export class OrganizationDetailsComponent implements OnInit {
           admin_first_name: data.adminUser.firstName,
           admin_last_name: data.adminUser.lastName,
           admin_email: data.adminUser.userEmail,
-          admin_phone: data.adminUser.userPhoneNumber,
+          admin_phone_number: data.adminUser.userPhoneNumber,
         });
       }
 
@@ -178,7 +190,7 @@ export class OrganizationDetailsComponent implements OnInit {
           formValues.admin_first_name,
           formValues.admin_last_name,
           formValues.admin_email,
-          formValues.admin_phone
+          formValues.admin_phone_number
         )
         .subscribe({
           next: () => {
