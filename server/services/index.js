@@ -11,3 +11,5 @@ export {
   updateOrganizationService,
   deleteOrganizationService,
 } from "./organization.service.js";
+
+export { upload } from "./imageUpload.service.js";
