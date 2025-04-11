@@ -6,7 +6,7 @@ import fs from "fs";
 // Define storage settings
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../../client/src/assets/images");
+    const uploadPath = path.join(__dirname, "../../client/public/shared/images/");
     
     // Make sure the directory exists
     fs.mkdirSync(uploadPath, { recursive: true });

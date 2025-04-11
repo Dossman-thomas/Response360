@@ -12,4 +12,4 @@ export {
   deleteOrganizationController,
 } from "./organization.controller.js";
 
-// export { multer}
+export { uploadLogoController } from "./imageUpload.controller.js";
