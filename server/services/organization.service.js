@@ -263,6 +263,7 @@ export const getAllOrganizationsService = async ({
           ),
           "org_phone_number",
         ],
+        "logo",
         "org_status",
         "org_created_at",
         "org_updated_at",

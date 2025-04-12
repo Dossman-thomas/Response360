@@ -166,6 +166,7 @@ export class OrganizationDetailsComponent implements OnInit {
           formValues.org_type,
           formValues.jurisdiction_size,
           formValues.org_website,
+          formValues.logo,
           formValues.org_status
         )
         .subscribe({
@@ -187,6 +188,7 @@ export class OrganizationDetailsComponent implements OnInit {
           formValues.org_type,
           formValues.jurisdiction_size,
           formValues.org_website,
+          formValues.logo,
           formValues.admin_first_name,
           formValues.admin_last_name,
           formValues.admin_email,

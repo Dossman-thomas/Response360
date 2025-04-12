@@ -37,14 +37,15 @@ export class OrganizationService {
     adminFirstName: string,
     adminLastName: string,
     adminEmail: string,
-    adminPhone: string
+    adminPhone: string,
+    logo?: string
   ) {
     // retrieve logged in user's ID from local storage
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
 
     // Encrypt the form data into a single payload
-    const encryptedPayload = this.cryptoService.Encrypt({
+    const payload: any = {
       orgName,
       orgEmail,
       orgPhone,
@@ -57,7 +58,14 @@ export class OrganizationService {
       adminEmail,
       adminPhone,
       decryptedUserId,
-    });
+    };
+    
+    if (logo !== undefined) {
+      payload.logo = logo;
+    }
+    
+    const encryptedPayload = this.cryptoService.Encrypt(payload);
+    
 
     // Send the encrypted payload to the backend
     return this.http.post<any>(
@@ -122,14 +130,15 @@ export class OrganizationService {
     orgType: string,
     jurisdictionSize: string,
     website: string,
-    status: string
+    status: string,
+    logo?: string
   ) {
     // retrieve logged in user's ID from local storage
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
 
     // Encrypt the form data into a single payload
-    const encryptedPayload = this.cryptoService.Encrypt({
+    const payload: any = {
       orgName,
       orgEmail,
       orgPhone,
@@ -139,7 +148,14 @@ export class OrganizationService {
       website,
       status,
       decryptedUserId,
-    });
+    };
+    
+    if (logo !== undefined) {
+      payload.logo = logo;
+    }
+    
+    const encryptedPayload = this.cryptoService.Encrypt(payload);
+    
 
     // Encode encrypted orgId to make it safe for URL
     const encodedOrgId = encodeURIComponent(orgId);
