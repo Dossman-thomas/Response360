@@ -1,26 +1,35 @@
 import { UserModel } from "../database/models/index.js";
-import { Sequelize } from "sequelize";
 import { env } from "../config/index.js";
 
 const pubkey = env.encryption.pubkey;
 
 export const getUserByEmailService = async (email) => {
   try {
+    const sequelize = UserModel.sequelize;
     const foundUser = await UserModel.findOne({
-      where: Sequelize.where(
-        Sequelize.fn("PGP_SYM_DECRYPT", Sequelize.col("user_email"), pubkey),
+      attributes: [
+        "user_id",
+        [
+          sequelize.literal(`PGP_SYM_DECRYPT(first_name::bytea, '${pubkey}')`),
+          "first_name",
+        ],
+      ],
+      where: sequelize.where(
+        sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
         email
       ),
     });
 
     if (!foundUser) {
-      return null;
+      const error = new Error("User not found.");
+      error.status = 404;
+      throw error;
     }
 
     return foundUser;
-    
   } catch (error) {
     console.error("Error fetching user by email:", error);
+    if (error.status) throw error;
     throw new Error("Failed to fetch user.");
   }
 };
