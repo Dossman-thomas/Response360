@@ -10,11 +10,35 @@
             <div class="row">
               <div class="col-md-3">
                 <div
-                  class="d-flex justify-content-center align-items-center mb-2 bg-light border-0"
-                  style="height: 200px; width: 200px"
+                  class="d-flex justify-content-center align-items-center mb-2 bg-light border-0 position-relative"
+                  style="height: 200px; width: 200px; cursor: pointer"
+                  (click)="triggerFileInput()"
                 >
-                  <span>Logo</span>
+                  <ng-container
+                    *ngIf="
+                      previewUrl || organizationForm.get('logo')?.value;
+                      else placeholder
+                    "
+                  >
+                    <img
+                      [src]="previewUrl || organizationForm.get('logo')?.value"
+                      alt="Logo Preview"
+                      class="img-fluid h-100 w-100 object-fit-contain"
+                      style="max-height: 100%; max-width: 100%"
+                    />
+                  </ng-container>
+                  <ng-template #placeholder>
+                    <span class="text-muted">Click to upload logo</span>
+                  </ng-template>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onLogoSelected($event)"
+                    #fileInput
+                    hidden
+                  />
                 </div>
+
                 <!-- Display these fields only if mode is 'update' -->
                 <div *ngIf="mode === 'update'">
                   <div class="d-flex align-items-center">

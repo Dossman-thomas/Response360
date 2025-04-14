@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { uploadImageController } from "../controllers/index.js";
+import { uploadLogoController } from "../controllers/index.js";
 
 export const imageUploadRouter = Router();
 
-imageUploadRouter.post("/upload-logo", uploadImageController); // endpoint: /api/image/upload-logo
+imageUploadRouter.post("/upload-logo", uploadLogoController); // endpoint: /api/image/upload-logo

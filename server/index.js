@@ -2,6 +2,10 @@ import { env } from './config/index.js';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 import { sequelize } from "../server/config/index.js";
 
 import { routes } from './routes/router.js';
@@ -10,6 +14,10 @@ import { messages } from './messages/index.js';
 
 const PORT = env.server.port || process.env.PORT || 3000;
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 app.use(
   cors({
@@ -20,6 +28,7 @@ app.use(
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use('/shared/images', express.static(path.join(__dirname, '../client/public/shared/images')));
 
 app.use('/api', routes);
 

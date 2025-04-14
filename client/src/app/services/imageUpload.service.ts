@@ -7,14 +7,12 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ImageUploadService {
-  private uploadUrl = '/api/image/upload-logo';
+  private uploadUrl = 'http://localhost:5000/api/image/upload-logo';
 
   constructor(private http: HttpClient) {}
 
-  uploadLogo(file: File): Observable<{ message: string; path: string }> {
-    const formData = new FormData();
-    formData.append('logo', file);
-
+  uploadLogo(formData: FormData): Observable<{ message: string; path: string }> {
     return this.http.post<{ message: string; path: string }>(this.uploadUrl, formData);
   }
+  
 }

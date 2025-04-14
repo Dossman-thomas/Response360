@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 // import { CryptoService } from '../../services/crypto.service';
+import { ImageUploadService } from '../../services/imageUpload.service';
+import { ViewChild, ElementRef } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
 
 @Component({
@@ -16,14 +18,18 @@ export class OrganizationDetailsComponent implements OnInit {
   org_created_at?: string;
   org_updated_at?: string;
   org_status?: string;
-  // adminEmail!: string;
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  previewUrl: string | null = null;
+  selectedLogoFile: File | null = null;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     // private cryptoService: CryptoService,
-    private organizationService: OrganizationService
+    private organizationService: OrganizationService,
+    private imageUploadService: ImageUploadService
   ) {}
 
   ngOnInit(): void {
@@ -57,6 +63,7 @@ export class OrganizationDetailsComponent implements OnInit {
           ),
         ],
       ],
+      logo: [''],
       org_status: ['Enabled', Validators.required],
       org_type: ['', Validators.required],
       jurisdiction_size: ['Global', Validators.required],
@@ -94,6 +101,7 @@ export class OrganizationDetailsComponent implements OnInit {
         org_address: data.registeredAddress,
         org_website: data.website,
         org_status: data.status ? 'Enabled' : 'Disabled',
+        logo: `http://localhost:5000${data.logo}`
       });
 
       // Patch admin user data
@@ -143,22 +151,22 @@ export class OrganizationDetailsComponent implements OnInit {
       control.markAsTouched();
       control.updateValueAndValidity(); // Ensure validation runs
     });
-  
+
     // Now check if the form is still invalid
     if (this.organizationForm.invalid) {
       console.log('Form is invalid');
       return; // Stop submission if invalid
     }
-  
+
     const formValues = this.organizationForm.value;
     const orgId = this.route.snapshot.queryParamMap.get('orgId');
-  
+
     console.log('Form values:', formValues);
-  
+
     if (this.mode === 'update' && orgId) {
       this.organizationService
         .updateOrganization(
-          orgId, 
+          orgId,
           formValues.org_name,
           formValues.org_email,
           formValues.org_phone_number,
@@ -166,8 +174,8 @@ export class OrganizationDetailsComponent implements OnInit {
           formValues.org_type,
           formValues.jurisdiction_size,
           formValues.org_website,
-          formValues.logo,
-          formValues.org_status
+          formValues.org_status,
+          formValues.logo
         )
         .subscribe({
           next: (response) => {
@@ -179,6 +187,8 @@ export class OrganizationDetailsComponent implements OnInit {
           },
         });
     } else {
+      console.log("submitting logo path: ", formValues.logo);
+
       this.organizationService
         .createOrganization(
           formValues.org_name,
@@ -188,11 +198,11 @@ export class OrganizationDetailsComponent implements OnInit {
           formValues.org_type,
           formValues.jurisdiction_size,
           formValues.org_website,
-          formValues.logo,
           formValues.admin_first_name,
           formValues.admin_last_name,
           formValues.admin_email,
-          formValues.admin_phone_number
+          formValues.admin_phone_number,
+          formValues.logo
         )
         .subscribe({
           next: () => {
@@ -205,4 +215,44 @@ export class OrganizationDetailsComponent implements OnInit {
     }
   }
 
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input?.files?.length) {
+      this.selectedLogoFile = input.files[0];
+
+      // Update preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(this.selectedLogoFile);
+
+      // Upload immediately to server
+      const formData = new FormData();
+      formData.append('logo', this.selectedLogoFile);
+
+      this.imageUploadService.uploadLogo(formData).subscribe({
+        next: (response) => {
+          console.log('Image uploaded:', response);
+          alert('Logo uploaded successfully!');
+
+          // this.toastr.success('Logo uploaded successfully!');
+
+          // Save relative path into the form
+          this.organizationForm.patchValue({ logo: response.path });
+          console.log(
+            'Updated logo path in form:',
+            this.organizationForm.get('logo')?.value
+          );
+        },
+        error: (err) => {
+          console.error('Image upload failed:', err);
+        },
+      });
+    }
+  }
 }

@@ -18,6 +18,9 @@ export const createOrganizationService = async (payload) => {
     // Step 1: Decrypt the incoming data
     const orgData = await decryptService(payload);
 
+    console.log("logo: ", orgData.logo);
+    console.log("orgData: ", orgData);
+
     if (!orgData) {
       throw new Error(
         "Service: Decryption failed or missing organization data."
@@ -408,6 +411,8 @@ export const getOrganizationByIdService = async (orgId) => {
           }
         : null, // In case no admin user is found
     };
+
+    console.log("orgData.logo: ", orgData.logo);
 
     // Encrypt the organization data
     const encryptedOrgData = encryptService(orgData);
