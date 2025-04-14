@@ -1,13 +1,14 @@
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import { env } from "../config/index.js";
+// import dotenv from 'dotenv';
 
-dotenv.config();
+// dotenv.config();
 
 const transporter = nodemailer.createTransport({
   service: 'gmail', // or use host/port for a custom SMTP provider
   auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD, // App password if using Gmail
+    user: env.email.username,
+    pass: env.email.password, // App password if using Gmail
   },
 });
 
@@ -17,9 +18,9 @@ const transporter = nodemailer.createTransport({
  * @param {string} resetLink - URL to reset the password.
  */
 
-export const sendResetPasswordEmail = async (to, resetLink) => {
+export const sendResetPasswordEmailService = async (to, resetLink) => {
   const mailOptions = {
-    from: `"Response360 Support" <${process.env.EMAIL_USERNAME}>`,
+    from: `"Response360 Support" <${env.email.username}>`,
     to,
     subject: 'Reset Your AlertNest Password',
     html: `

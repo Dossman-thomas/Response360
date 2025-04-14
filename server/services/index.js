@@ -14,4 +14,6 @@ export {
 
 export { getUserByEmailService } from "./user.service.js";
 
+export { sendResetPasswordEmailService } from "./email.service.js";
+
 export { upload } from "./imageUpload.service.js";

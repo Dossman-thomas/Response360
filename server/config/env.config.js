@@ -20,4 +20,9 @@ export const env = { // Environment configuration object
   encryption: {
     pubkey: process.env.pubkey,
   },
+  email: {
+    username: process.env.EMAIL_USERNAME,
+    password: process.env.EMAIL_PASSWORD,
+  },
+  frontendUrl: process.env.FRONTEND_URL,
 };
