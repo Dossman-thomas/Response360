@@ -12,4 +12,6 @@ export {
   deleteOrganizationController,
 } from "./organization.controller.js";
 
+export { getUserByEmailController } from "./user.controller.js";
+
 export { uploadLogoController } from "./imageUpload.controller.js";

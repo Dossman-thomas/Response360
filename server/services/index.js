@@ -12,4 +12,6 @@ export {
   deleteOrganizationService,
 } from "./organization.service.js";
 
+export { getUserByEmailService } from "./user.service.js";
+
 export { upload } from "./imageUpload.service.js";
