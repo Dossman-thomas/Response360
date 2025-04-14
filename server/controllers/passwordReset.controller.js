@@ -1,14 +1,14 @@
 import { passwordResetService } from "../services/index.js";
 
 export const passwordResetController = async (req, res) => {
-  const { token, newPassword } = req.body;
+  const { payload } = req.body;
 
-  if (!token || !newPassword) {
+  if (!payload) {
     return res.status(400).json({ success: false, message: 'Token and new password are required.' });
   }
 
   try {
-    const result = await passwordResetService(token, newPassword);
+    const result = await passwordResetService(payload);
 
     if (!result.success) {
       return res.status(400).json({ success: false, message: result.message });

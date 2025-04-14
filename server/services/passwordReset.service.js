@@ -1,15 +1,23 @@
 import jwt from "jsonwebtoken";
 import { UserModel } from "../database/models/index.js";
 import { env } from "../config/index.js";
+import { decryptService } from "./index.js";
 
-export const passwordResetService = async (token, newPassword) => {
+export const passwordResetService = async (payload) => {
   try {
-    // Step 1: Verify the token
-    const decoded = jwt.verify(token, env.server.jwtSecret);
+    // Decrypt the payload
+    const decryptedPayload = await decryptService(payload);
+    // Extract token and newPassword from the decrypted payload
+    const { token, newPassword } = decryptedPayload;
+    // decrypt the token
+    const decryptedToken = await decryptService(token);
+    // Verify the token
+    const decoded = jwt.verify(decryptedToken, env.server.jwtSecret);
 
-    // Step 2: Find the user based on the decoded userId
+    // Find the user based on the decoded userId
     const foundUser = await UserModel.findOne({ where: { user_id: decoded.userId } });
 
+    // Check if the user exists
     if (!foundUser) {
       const error = new Error("User not found.");
       error.status = 404;
