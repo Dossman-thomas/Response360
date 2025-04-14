@@ -14,4 +14,6 @@ export {
 
 export { getUserByEmailController } from "./user.controller.js";
 
+export { forgotPasswordController } from "./forgotPassword.controller.js";
+
 export { uploadLogoController } from "./imageUpload.controller.js";

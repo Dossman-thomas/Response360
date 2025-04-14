@@ -9,7 +9,7 @@ export const forgotPasswordService = async (email) => {
     const token = jwt.sign(
       { userId: user.user_id },
       env.server.jwtSecret,
-      { expiresIn: "1h" }
+      { expiresIn: "15m" }
     );
   
     const resetLink = `${env.frontendUrl}/reset-password?token=${token}`;
