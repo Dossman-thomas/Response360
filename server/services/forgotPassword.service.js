@@ -5,6 +5,8 @@ import { env } from "../config/index.js";
 
 export const forgotPasswordService = async (email) => {
     const user = await getUserByEmailService(email);
+
+    console.log("forgotPasswordService: user found successfully!")
   
     const token = jwt.sign(
       { userId: user.user_id },
