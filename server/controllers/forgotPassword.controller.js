@@ -1,10 +1,10 @@
 import { forgotPasswordService } from "../services/index.js";
 
 export const forgotPasswordController = async (req, res) => {
-  const { email } = req.body;
+  const { payload } = req.body;
 
   try {
-    await forgotPasswordService(email);
+    await forgotPasswordService(payload);
     return res.status(200).json({ message: "Password reset link sent." });
   } catch (error) {
     console.error("Forgot password controller error:", error.message);

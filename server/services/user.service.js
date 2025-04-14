@@ -1,10 +1,14 @@
 import { UserModel } from "../database/models/index.js";
 import { env } from "../config/index.js";
+import { encryptService, decryptService } from "./index.js";
 
 const pubkey = env.encryption.pubkey;
 
-export const getUserByEmailService = async (email) => {
+export const getUserByEmailService = async (payload) => {
   try {
+    const decryptedPayload = await decryptService(payload);
+    const { email } = decryptedPayload;
+
     const sequelize = UserModel.sequelize;
     const foundUser = await UserModel.findOne({
       attributes: [
@@ -26,7 +30,7 @@ export const getUserByEmailService = async (email) => {
       throw error;
     }
 
-    return foundUser;
+    return encryptService(foundUser);
   } catch (error) {
     console.error("Error fetching user by email:", error);
     if (error.status) throw error;

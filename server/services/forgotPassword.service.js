@@ -1,28 +1,49 @@
 import jwt from "jsonwebtoken";
-import { getUserByEmailService } from "./index.js";
-import { sendResetPasswordEmailService } from "./index.js";
+import {
+  getUserByEmailService,
+  sendResetPasswordEmailService,
+  encryptService,
+  decryptService,
+} from "./index.js";
+// import { sendResetPasswordEmailService } from "./index.js";
+// import { encryptService } from "./index.js";
 import { env } from "../config/index.js";
 
-export const forgotPasswordService = async (email) => {
-  const user = await getUserByEmailService(email);
+export const forgotPasswordService = async (payload) => {
+  // pass encrypted payload to getUserByEmailService
+  const foundUser = await getUserByEmailService(payload);
+  // decrypt the foundUser
+  const decryptedUser = await decryptService(foundUser);
+  // extract user_id, email, first_name from decryptedPayload
+  const { user_id, user_email: email, first_name } = decryptedUser;
 
   console.log("forgotPasswordService: user found successfully!");
 
-  const token = jwt.sign({ userId: user.user_id }, env.server.jwtSecret, {
+  // Generate a JWT token that lasts for 15 minutes
+  const token = jwt.sign({ userId: user_id }, env.server.jwtSecret, {
     expiresIn: "15m",
   });
 
-  const resetLink = `${env.frontendUrl}/reset-password?token=${token}`;
+  // Encrypt the token to securely pass in the email URL
+  const encryptedToken = await encryptService(token);
+  // resetLink includes encryptedToken so as not to be exposed in the URL
+  const resetLink = `${env.frontendUrl}/reset-password?token=${encryptedToken}`;
 
-  const emailSent = await sendResetPasswordEmailService(
+  // encrypt the payload to pass to sendResetPasswordEmailService, which expects this
+  const newPayload = await encryptService({
     email,
     resetLink,
-    user.first_name
-  );
+    first_name,
+  });
 
+  // call sendResetPasswordEmailService with the encrypted payload
+  const emailSent = await sendResetPasswordEmailService(newPayload);
+
+  // Check if the email was sent successfully
   if (!emailSent) {
     throw new Error("Failed to send reset email.");
   }
 
+  // Return success
   return true;
 };

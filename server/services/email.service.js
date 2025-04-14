@@ -1,8 +1,6 @@
 import nodemailer from "nodemailer";
+import { decryptService } from "./index.js";
 import { env } from "../config/index.js";
-// import dotenv from 'dotenv';
-
-// dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -17,17 +15,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-/**
- * Sends a password reset email.
- * @param {string} to - Recipient's email address.
- * @param {string} resetLink - URL to reset the password.
- */
+export const sendResetPasswordEmailService = async (payload) => {
+  const decryptedPayload = await decryptService(payload);
+  const { to, resetLink, firstName } = decryptedPayload;
 
-export const sendResetPasswordEmailService = async (
-  to,
-  resetLink,
-  firstName
-) => {
   const mailOptions = {
     from: `"Response360 Support" <${env.email.username}>`,
     to,

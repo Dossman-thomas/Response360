@@ -5,9 +5,9 @@ import { Sequelize, Op } from "sequelize";
 import { pagination } from "../utils/index.js";
 import { encryptService, decryptService } from "../services/index.js";
 import { v4 as uuidv4 } from "uuid";
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 
-dotenv.config();
+// dotenv.config();
 
 const pubkey = env.encryption.pubkey;
 

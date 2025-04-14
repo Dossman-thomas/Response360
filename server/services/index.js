@@ -18,4 +18,6 @@ export { sendResetPasswordEmailService } from "./email.service.js";
 
 export { forgotPasswordService } from "./forgotPassword.service.js";
 
+export { passwordResetService } from "./passwordReset.service.js";
+
 export { upload } from "./imageUpload.service.js";
