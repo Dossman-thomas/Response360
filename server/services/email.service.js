@@ -17,14 +17,16 @@ const transporter = nodemailer.createTransport({
 
 export const sendResetPasswordEmailService = async (payload) => {
   const decryptedPayload = await decryptService(payload);
-  const { to, resetLink, firstName } = decryptedPayload;
+  console.log("Decrypted payload in sendResetPasswordEmailService:", decryptedPayload);
+
+  const { to, resetLink, first_name } = decryptedPayload;
 
   const mailOptions = {
     from: `"Response360 Support" <${env.email.username}>`,
     to,
     subject: "Reset Your Response360 Password",
     html: `
-      <p>Hi ${firstName || "there"},</p>
+      <p>Hi ${first_name || "there"},</p>
       <p>You requested to reset your Response360 password. Click the link below to continue:</p>
       <a href="${resetLink}">${resetLink}</a>
       <p>If you didn’t request this, just ignore this email.</p>

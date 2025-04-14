@@ -1,14 +1,14 @@
 import { getUserByEmailService } from "../services/index.js";
 
 export const getUserByEmailController = async (req, res) => {
-  const { email } = req.body;
+  const { payload } = req.body;
 
-  if (!email) {
+  if (!payload) {
     return res.status(400).json({ message: "Email is required." });
   }
 
   try {
-    const foundUser = await getUserByEmailService(email);
+    const foundUser = await getUserByEmailService(payload);
 
     if (!foundUser) {
       return res.status(404).json({ message: "User not found." });

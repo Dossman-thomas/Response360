@@ -17,6 +17,8 @@ export const forgotPasswordService = async (payload) => {
   // extract user_id, email, first_name from decryptedPayload
   const { user_id, user_email: email, first_name } = decryptedUser;
 
+  console.log("decrypted email: ", email);
+
   console.log("forgotPasswordService: user found successfully!");
 
   // Generate a JWT token that lasts for 15 minutes
@@ -29,12 +31,16 @@ export const forgotPasswordService = async (payload) => {
   // resetLink includes encryptedToken so as not to be exposed in the URL
   const resetLink = `${env.frontendUrl}/reset-password?token=${encryptedToken}`;
 
+  const to = email; // The recipient's email address
+
   // encrypt the payload to pass to sendResetPasswordEmailService, which expects this
   const newPayload = await encryptService({
-    email,
+    to,
     resetLink,
     first_name,
   });
+
+  console.log("encrypted payload: ", newPayload);
 
   // call sendResetPasswordEmailService with the encrypted payload
   const emailSent = await sendResetPasswordEmailService(newPayload);

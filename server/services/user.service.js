@@ -17,6 +17,10 @@ export const getUserByEmailService = async (payload) => {
           sequelize.literal(`PGP_SYM_DECRYPT(first_name::bytea, '${pubkey}')`),
           "first_name",
         ],
+        [
+          sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
+          "user_email",
+        ],
       ],
       where: sequelize.where(
         sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
