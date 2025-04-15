@@ -63,15 +63,15 @@ export class AuthService {
           // Handle "Remember Me" functionality
           if (rememberMe) {
             // Encrypt the email and password before saving them in cookies
-            const encryptedEmail = (
-              this.cryptoService.Encrypt(user_email) as { payload: string }
-            ).payload;
-            const encryptedPassword = (
-              this.cryptoService.Encrypt(user_password) as { payload: string }
-            ).payload;
+            // const encryptedEmail = (
+            //   this.cryptoService.Encrypt(user_email) as { payload: string }
+            // ).payload;
+            // const encryptedPassword = (
+            //   this.cryptoService.Encrypt(user_password) as { payload: string }
+            // ).payload;
 
-            this.cookieService.set('email', encryptedEmail, 90); // Save email for 90 days
-            this.cookieService.set('password', encryptedPassword, 90); // Save password for 90 days
+            this.cookieService.set('email', user_email, 90); // Save email for 90 days
+            this.cookieService.set('password', user_password, 90); // Save password for 90 days
             this.cookieService.set('rememberMe', 'true', 90); // Save rememberMe flag
           } else {
             // Clear cookies if "Remember Me" is not selected

@@ -12,7 +12,7 @@
     <li>
       <button routerLink="/dashboard" routerLinkActive="active">
         <i *ngIf="isCollapsed" class="fa-solid fa-table-columns"></i>
-        <span *ngIf="!isCollapsed">Dashboard</span>
+        <span *ngIf="!isCollapsed">Super Admin Dashboard</span>
       </button>
     </li>
     <li>
@@ -22,9 +22,9 @@
       </button>
     </li>
     <li>
-      <button routerLink="/organization-details" routerLinkActive="active" (click)="onOrganizationDetailsClick()">
+      <button>
         <i *ngIf="isCollapsed" class="fa fa-plus-circle"></i>
-        <span *ngIf="!isCollapsed">> Add New Organization</span>
+        <span *ngIf="!isCollapsed">My Account</span>
       </button>
     </li>
   </ul>
