@@ -25,7 +25,7 @@ export const loginSuperAdminService = async (payload) => {
         "user_id",
         [
           sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
-          "decrypted_email",
+          "user_email",
         ],
         "user_password",
       ],
@@ -36,7 +36,7 @@ export const loginSuperAdminService = async (payload) => {
     });
 
     // console.log("user: ", user);
-    
+
     if (!user || user.length === 0) {
       const error = new Error(
         "Invalid credentials. Please check your email and password, then try again."
@@ -74,14 +74,19 @@ export const loginSuperAdminService = async (payload) => {
       { expiresIn: tokenExpiry } // expires based on "Remember Me"
     );
 
-    const encryptedToken = encryptService(token);
-    const encryptedUserId = encryptService(user.user_id); 
+    const responsePayload = {
+      token: encryptService(token),
+      userId: encryptService(user.user_id),
+      user_email: encryptService(user.user_email),
+      user_password: encryptService(user_password)
+    };
+
+    const encryptedPayload = encryptService(responsePayload);
 
     //  Step 5: Return success message along with the token and user details
     return {
       message: "Success! Email and password verified!",
-      encryptedToken, // Return the encrypted token
-      encryptedId: encryptedUserId, // Return the encrypted user ID
+      encryptedPayload,
     };
   } catch (error) {
     throw error;

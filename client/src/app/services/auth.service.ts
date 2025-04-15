@@ -54,7 +54,9 @@ export class AuthService {
       })
       .subscribe({
         next: (response) => {
-          const { token, userId } = response.data;
+          // Decrypt the response data
+          const decryptedResponse = this.cryptoService.Decrypt(response.data);
+          const { token, userId, user_email, user_password } = decryptedResponse;
 
           // Store the token and user in localStorage
           localStorage.setItem('token', token);
@@ -62,14 +64,7 @@ export class AuthService {
 
           // Handle "Remember Me" functionality
           if (rememberMe) {
-            // Encrypt the email and password before saving them in cookies
-            // const encryptedEmail = (
-            //   this.cryptoService.Encrypt(user_email) as { payload: string }
-            // ).payload;
-            // const encryptedPassword = (
-            //   this.cryptoService.Encrypt(user_password) as { payload: string }
-            // ).payload;
-
+            // Set encrypted cookies for email and password
             this.cookieService.set('email', user_email, 90); // Save email for 90 days
             this.cookieService.set('password', user_password, 90); // Save password for 90 days
             this.cookieService.set('rememberMe', 'true', 90); // Save rememberMe flag
@@ -101,6 +96,7 @@ export class AuthService {
   logout() {
     // Clear localStorage and cookies
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     // localStorage.removeItem('currentUser');
 
     // Update authentication state
