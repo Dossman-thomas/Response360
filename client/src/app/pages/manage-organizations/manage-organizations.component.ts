@@ -93,6 +93,7 @@ export class ManageOrganizationsComponent implements OnInit {
             ...org,
             user_email: org.users?.[0]?.user_email || 'N/A',
             user_phone_number: org.users?.[0]?.user_phone_number || 'N/A',
+            // statusLabel: org.org_status ? 'Active' : 'Inactive',
           }));
 
           this.gridData = {
@@ -117,10 +118,23 @@ export class ManageOrganizationsComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.body.searchQuery = this.searchQuery;
-    this.body.page = 1; // Reset page number
+    const normalizedQuery = this.searchQuery.trim().toLowerCase();
+  
+    if (!normalizedQuery) {
+      // If input is cleared, remove search filter
+      this.body.searchQuery = '';
+    } else if ('active'.startsWith(normalizedQuery)) {
+      this.body.searchQuery = 'true';
+    } else if ('deactivated'.startsWith(normalizedQuery)) {
+      this.body.searchQuery = 'false';
+    } else {
+      this.body.searchQuery = this.searchQuery;
+    }
+  
+    this.body.page = 1;
     this.loadOrgDetails();
   }
+  
 
   // For "New" button
   onNewOrganization(): void {

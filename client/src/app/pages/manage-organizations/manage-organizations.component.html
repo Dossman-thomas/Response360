@@ -38,7 +38,12 @@
       field="org_phone_number"
       title="Phone Number"
     ></kendo-grid-column>
-    <kendo-grid-column field="org_status" title="Status"></kendo-grid-column>
+    <kendo-grid-column field="org_status" title="Status">
+      <ng-template kendoGridCellTemplate let-dataItem>
+        {{ dataItem.org_status ? 'Active' : 'Deactivated' }}
+      </ng-template>
+    </kendo-grid-column>
+    
 
     <!-- Action Buttons -->
     <kendo-grid-column title="Action" [width]="150">
