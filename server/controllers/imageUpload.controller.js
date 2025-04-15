@@ -1,4 +1,5 @@
 import { upload } from "../services/index.js";
+import { encryptService } from "../services/index.js";
 
 // Wrap the upload logic to use in your routes
 export const uploadLogoController = (req, res, next) => {
@@ -16,10 +17,13 @@ export const uploadLogoController = (req, res, next) => {
   
       // Send back the file path (relative to frontend access)
       const filePath = `/shared/images/${req.file.filename}`;
+
+      // encrypt path to send in response securely
+      const encryptedPath = encryptService(filePath);
   
       res.status(200).json({
         message: "File uploaded successfully",
-        path: filePath,
+        path: encryptedPath,
       });
     });
   };

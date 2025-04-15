@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-// import { CryptoService } from '../../services/crypto.service';
+import { CryptoService } from '../../services/crypto.service';
 import { ImageUploadService } from '../../services/imageUpload.service';
 import { ViewChild, ElementRef } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-organization-details',
@@ -27,9 +28,10 @@ export class OrganizationDetailsComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    // private cryptoService: CryptoService,
+    private cryptoService: CryptoService,
     private organizationService: OrganizationService,
-    private imageUploadService: ImageUploadService
+    private imageUploadService: ImageUploadService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -91,6 +93,7 @@ export class OrganizationDetailsComponent implements OnInit {
 
   fetchOrganizationDetails(orgId: string): void {
     this.organizationService.getOrganizationById(orgId).subscribe((data) => {
+      const decryptedLogoPath = this.cryptoService.Decrypt(data.logo);
       // Patch organization data
       this.organizationForm.patchValue({
         org_name: data.orgName,
@@ -101,7 +104,7 @@ export class OrganizationDetailsComponent implements OnInit {
         org_address: data.registeredAddress,
         org_website: data.website,
         org_status: data.status ? 'Enabled' : 'Disabled',
-        logo: `http://localhost:5000${data.logo}`
+        logo: decryptedLogoPath ? `http://localhost:5000${decryptedLogoPath}` : '',
       });
 
       // Patch admin user data
@@ -187,7 +190,7 @@ export class OrganizationDetailsComponent implements OnInit {
           },
         });
     } else {
-      console.log("submitting logo path: ", formValues.logo);
+      console.log('submitting logo path: ', formValues.logo);
 
       this.organizationService
         .createOrganization(
@@ -238,16 +241,15 @@ export class OrganizationDetailsComponent implements OnInit {
       this.imageUploadService.uploadLogo(formData).subscribe({
         next: (response) => {
           console.log('Image uploaded:', response);
-          alert('Logo uploaded successfully!');
+          this.toastr.success('Logo uploaded successfully!');
 
-          // this.toastr.success('Logo uploaded successfully!');
+          // Encrypt the path
+          const encryptedPath = this.cryptoService.Encrypt(response.path);
 
-          // Save relative path into the form
-          this.organizationForm.patchValue({ logo: response.path });
-          console.log(
-            'Updated logo path in form:',
-            this.organizationForm.get('logo')?.value
-          );
+          // Save encrypted path in form
+          this.organizationForm.patchValue({ logo: encryptedPath });
+
+          console.log('Updated encrypted logo path in form:', encryptedPath);
         },
         error: (err) => {
           console.error('Image upload failed:', err);
