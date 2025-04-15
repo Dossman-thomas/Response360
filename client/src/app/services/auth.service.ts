@@ -5,6 +5,7 @@ import { CryptoService } from './crypto.service';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,7 @@ export class AuthService {
     private cryptoService: CryptoService,
     private router: Router,
     private cookieService: CookieService,
+    private toastr: ToastrService
   ) {
     this.checkInitialAuthState();
     window.addEventListener('popstate', this.handlePopStateEvent.bind(this));
@@ -73,12 +75,12 @@ export class AuthService {
         // this.userService.setCurrentUser(user);
 
         // Notify user and navigate
-        // this.toastr.success('Logged in successfully!');
+        this.toastr.success('Logged in successfully!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error('Login error:', err); // Log error for debugging
-        // this.toastr.error('Invalid credentials. Please try again.');
+        this.toastr.error('Invalid credentials. Please try again.');
       },
       complete: () => {
         console.log('Login request completed.');
