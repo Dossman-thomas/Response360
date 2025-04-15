@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
+import { CryptoService } from '../../services/crypto.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private cryptoService: CryptoService
   ) {}
 
   ngOnInit() {
@@ -34,11 +36,19 @@ export class LoginComponent implements OnInit {
     const storedRememberMe = this.cookieService.get('rememberMe');
 
     if (storedEmail) {
-      this.email = storedEmail;
+      try {
+        this.email = this.cryptoService.Decrypt(storedEmail);
+      } catch (err) {
+        console.error('Failed to decrypt stored email');
+      }
     }
-
+    
     if (storedPassword) {
-      this.password = storedPassword;
+      try {
+        this.password = this.cryptoService.Decrypt(storedPassword);
+      } catch (err) {
+        console.error('Failed to decrypt stored password');
+      }
     }
 
     if (storedRememberMe) {

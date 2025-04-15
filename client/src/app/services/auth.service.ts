@@ -48,44 +48,54 @@ export class AuthService {
 
     // console.log('Payload:', encryptedPayload); // Log to check payload
 
-    return this.http.post<any>(`http://localhost:5000/api/auth/super-admin/login`, {
-      payload: encryptedPayload,
-    }).subscribe({
-      next: (response) => {
-        const { token, userId } = response.data;
-        
-        // Store the token and user in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userId', userId);
+    return this.http
+      .post<any>(`http://localhost:5000/api/auth/super-admin/login`, {
+        payload: encryptedPayload,
+      })
+      .subscribe({
+        next: (response) => {
+          const { token, userId } = response.data;
 
-        // Handle "Remember Me" functionality
-        if (rememberMe) {
-          this.cookieService.set('email', user_email, 90); // Save email for 90 days
-          this.cookieService.set('password', user_password, 90); // Save password for 90 days
-          this.cookieService.set('rememberMe', 'true', 90); // Save rememberMe flag
-        } else {
-          // Clear cookies if "Remember Me" is not selected
-          this.cookieService.delete('email');
-          this.cookieService.delete('password');
-          this.cookieService.delete('rememberMe');
-        }
+          // Store the token and user in localStorage
+          localStorage.setItem('token', token);
+          localStorage.setItem('userId', userId);
 
-        // Update authentication state
-        this.isLoggedInSubject.next(true);
-        // this.userService.setCurrentUser(user);
+          // Handle "Remember Me" functionality
+          if (rememberMe) {
+            // Encrypt the email and password before saving them in cookies
+            const encryptedEmail = (
+              this.cryptoService.Encrypt(user_email) as { payload: string }
+            ).payload;
+            const encryptedPassword = (
+              this.cryptoService.Encrypt(user_password) as { payload: string }
+            ).payload;
 
-        // Notify user and navigate
-        this.toastr.success('Logged in successfully!');
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        console.error('Login error:', err); // Log error for debugging
-        this.toastr.error('Invalid credentials. Please try again.');
-      },
-      complete: () => {
-        console.log('Login request completed.');
-      }
-    });
+            this.cookieService.set('email', encryptedEmail, 90); // Save email for 90 days
+            this.cookieService.set('password', encryptedPassword, 90); // Save password for 90 days
+            this.cookieService.set('rememberMe', 'true', 90); // Save rememberMe flag
+          } else {
+            // Clear cookies if "Remember Me" is not selected
+            this.cookieService.delete('email');
+            this.cookieService.delete('password');
+            this.cookieService.delete('rememberMe');
+          }
+
+          // Update authentication state
+          this.isLoggedInSubject.next(true);
+          // this.userService.setCurrentUser(user);
+
+          // Notify user and navigate
+          this.toastr.success('Logged in successfully!');
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          console.error('Login error:', err); // Log error for debugging
+          this.toastr.error('Invalid credentials. Please try again.');
+        },
+        complete: () => {
+          console.log('Login request completed.');
+        },
+      });
   }
 
   logout() {
@@ -105,4 +115,3 @@ export class AuthService {
     return !!localStorage.getItem('token'); // Check token presence
   }
 }
-

@@ -95,7 +95,6 @@ export class OrganizationService {
       );
   }
   
-
   // Read a single organization by ID
   getOrganizationById(orgId: string): Observable<any> {
     // Encode encrypted orgId to make it safe for URL
