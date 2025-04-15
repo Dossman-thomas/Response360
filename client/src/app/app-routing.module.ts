@@ -7,6 +7,8 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ManageOrganizationsComponent } from './pages/manage-organizations/manage-organizations.component';
 import { OrganizationDetailsComponent } from './pages/organization-details/organization-details.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
 const routes: Routes = [
   {
@@ -30,10 +32,17 @@ const routes: Routes = [
         component: OrganizationDetailsComponent,
         canActivate: [AuthGuard],
       },
+      {
+        path: 'reset-password/:token',
+        component: ResetPasswordComponent,
+        canActivate: [AuthGuard],
+      }
     ],
   },
   { path: 'super-admin-login', component: LoginComponent },
-  { path: '**', redirectTo: '/super-admin-login' }, // Redirect to the login page if the URL is invalid
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: '**', redirectTo: '/super-admin-login' },
+
 ];
 
 @NgModule({

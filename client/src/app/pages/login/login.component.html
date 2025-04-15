@@ -54,5 +54,11 @@
       <button type="submit" class="btn btn-primary w-100 mb-2" id="login-btn" [disabled]="loginForm.invalid">
           Login
       </button>
+
+      <div class="text-center mt-3">
+        <a [routerLink]="['/forgot-password']" class="text-decoration-none">
+          Forgot Password? <strong>Click here to Reset</strong>
+        </a>
+      </div>
   </form>
 </div>

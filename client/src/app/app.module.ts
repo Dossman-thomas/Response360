@@ -24,6 +24,8 @@ import { OrganizationDetailsComponent } from './pages/organization-details/organ
 import { SidebarComponent } from './pages/layout/sidebar/sidebar.component';
 import { HeaderComponent } from './pages/layout/header/header.component';
 import { LayoutComponent } from './pages/layout/layout/layout.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
 
 @NgModule({
@@ -36,6 +38,8 @@ import { LayoutComponent } from './pages/layout/layout/layout.component';
     SidebarComponent,
     HeaderComponent,
     LayoutComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,
