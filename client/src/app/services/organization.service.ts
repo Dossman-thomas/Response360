@@ -77,27 +77,24 @@ export class OrganizationService {
 
   // Read all organizations
   getAllOrganizations(body: any): Observable<any> {
+    const encryptedPayload = this.cryptoService.Encrypt(body);
+  
     return this.http
-      .post<any>(`${this.apiUrl}/read`, body, {
+      .post<any>(`${this.apiUrl}/read`, { payload: encryptedPayload }, {
         headers: this.getHeaders(),
-      }) // Send the body to the backend
+      })
       .pipe(
         map((res) => {
-          // Decrypt the encrypted data in the response
           const decryptedData = this.cryptoService.Decrypt(res.data);
-
-          // console.log('Decrypted data: ', decryptedData);
-
-          // Return the decrypted data
           return decryptedData;
         }),
         catchError((error) => {
-          // Handle the error and return a user-friendly error message or rethrow
           console.error('Error occurred:', error);
           return throwError(() => new Error('Failed to fetch organizations'));
         })
       );
   }
+  
 
   // Read a single organization by ID
   getOrganizationById(orgId: string): Observable<any> {

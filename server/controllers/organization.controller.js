@@ -42,15 +42,9 @@ export const createOrganizationController = async (req, res) => {
 // Controller to handle the reading of an organization
 export const getAllOrganizationsController = async (req, res) => {
   try {
-    const { page, limit, sorts, filters, searchQuery } = req.body;
+    const { payload } = req.body;
 
-    const encryptedOrgData = await getAllOrganizationsService({
-      page,
-      limit,
-      sorts,
-      filters,
-      searchQuery,
-    });
+    const encryptedOrgData = await getAllOrganizationsService(payload);
 
     return response(res, {
       statusCode: 200,

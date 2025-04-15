@@ -102,14 +102,14 @@ export const createOrganizationService = async (payload) => {
 };
 
 // Read Organization Service
-export const getAllOrganizationsService = async ({
-  page,
-  limit,
-  sorts,
-  filters,
-  searchQuery = "",
-}) => {
+export const getAllOrganizationsService = async (payload) => {
   try {
+
+    // decrypt the payload
+    const decryptedPayload = await decryptService(payload);
+    // extract params from payload
+    const { page, limit, sorts, filters, searchQuery } = decryptedPayload;
+
     console.log("params received: ", {
       page,
       limit,
