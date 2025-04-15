@@ -9,8 +9,10 @@ export const passwordResetService = async (payload) => {
     const decryptedPayload = await decryptService(payload);
     // Extract token and newPassword from the decrypted payload
     const { token, newPassword } = decryptedPayload;
+    // decode URL-safe token
+    const decodedToken = decodeURIComponent(token);
     // decrypt the token
-    const decryptedToken = await decryptService(token);
+    const decryptedToken = await decryptService(decodedToken);
     // Verify the token
     const decoded = jwt.verify(decryptedToken, env.server.jwtSecret);
 

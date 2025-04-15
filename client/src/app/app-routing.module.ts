@@ -31,14 +31,10 @@ const routes: Routes = [
         path: 'organization-details',
         component: OrganizationDetailsComponent,
         canActivate: [AuthGuard],
-      },
-      {
-        path: 'reset-password/:token',
-        component: ResetPasswordComponent,
-        canActivate: [AuthGuard],
       }
     ],
   },
+  { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'super-admin-login', component: LoginComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: '**', redirectTo: '/super-admin-login' },

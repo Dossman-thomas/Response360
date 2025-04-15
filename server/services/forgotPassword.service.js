@@ -28,8 +28,10 @@ export const forgotPasswordService = async (payload) => {
 
   // Encrypt the token to securely pass in the email URL
   const encryptedToken = await encryptService(token);
+  // Encode the token to make it URL-safe
+  const encodedToken = encodeURIComponent(encryptedToken);
   // resetLink includes encryptedToken so as not to be exposed in the URL
-  const resetLink = `${env.frontendUrl}/reset-password?token=${encryptedToken}`;
+  const resetLink = `${env.frontendUrl}/reset-password?token=${encodedToken}`;
 
   const to = email; // The recipient's email address
 
