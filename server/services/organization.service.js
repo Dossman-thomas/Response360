@@ -1,12 +1,11 @@
 import { OrganizationModel, UserModel } from '../database/models/index.js';
 import { sequelize } from '../config/index.js';
 import { env } from '../config/index.js';
-import { Sequelize } from 'sequelize';
 import {
   pagination,
   buildWhereClause,
   buildOrderClause,
-  encryptSensitiveData,
+  encryptFields,
   decryptOrgFields,
   decryptUserFields,
 } from '../utils/index.js';
@@ -29,55 +28,46 @@ export const createOrganizationService = async (payload) => {
       );
     }
 
-    // Encrypt sensitive data using the utility function
-    const encryptedOrgName = encryptSensitiveData(orgData.orgName, pubkey);
-    const encryptedOrgAddress = encryptSensitiveData(
-      orgData.registeredAddress,
-      pubkey
-    );
-    const encryptedOrgEmail = encryptSensitiveData(orgData.orgEmail, pubkey);
-    const encryptedOrgPhone = encryptSensitiveData(orgData.orgPhone, pubkey);
-    const encryptedWebsite = encryptSensitiveData(orgData.website, pubkey);
-    const encryptedLogo = encryptSensitiveData(orgData.logo, pubkey);
+    // Encrypt destructured sensitive data using the utility function
+    const {
+      orgName,
+      orgEmail,
+      orgPhone,
+      registeredAddress,
+      website,
+      logo,
+      adminFirstName,
+      adminLastName,
+      adminEmail,
+      adminPhone
+    } = encryptFields(orgData, pubkey);
 
     // Create the organization
     const organization = await OrganizationModel.create(
       {
         org_id: uuidv4(),
-        org_name: encryptedOrgName,
-        org_email: encryptedOrgEmail,
-        org_phone_number: encryptedOrgPhone,
+        org_name: orgName,
+        org_email: orgEmail,
+        org_phone_number: orgPhone,
         org_status: true,
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
-        org_address: encryptedOrgAddress,
-        website: encryptedWebsite,
-        logo: encryptedLogo,
+        org_address: registeredAddress,
+        website: website,
+        logo: logo,
         org_created_by: orgData.decryptedUserId,
       },
       { transaction }
     );
 
-    // Encrypt admin user data
-    const encryptedFirstName = encryptSensitiveData(
-      orgData.adminFirstName,
-      pubkey
-    );
-    const encryptedLastName = encryptSensitiveData(
-      orgData.adminLastName,
-      pubkey
-    );
-    const encryptedUserEmail = encryptSensitiveData(orgData.adminEmail, pubkey);
-    const encryptedUserPhone = encryptSensitiveData(orgData.adminPhone, pubkey);
-
     // Create the admin user
     await UserModel.create(
       {
         user_id: uuidv4(),
-        first_name: encryptedFirstName,
-        last_name: encryptedLastName,
-        user_email: encryptedUserEmail,
-        user_phone_number: encryptedUserPhone,
+        first_name: adminFirstName,
+        last_name: adminLastName,
+        user_email: adminEmail,
+        user_phone_number: adminPhone,
         user_role: 'Admin',
         org_id: organization.org_id,
         user_password: 'Admin@123!', // Temporary password
@@ -211,7 +201,7 @@ export const getOrganizationByIdService = async (orgId) => {
         : null, // In case no admin user is found
     };
 
-    console.log('orgData.logo: ', orgData.logo);
+    // console.log('orgData.logo: ', orgData.logo);
 
     // Encrypt the organization data
     const encryptedOrgData = encryptService(orgData);
@@ -235,39 +225,22 @@ export const updateOrganizationService = async (orgId, payload) => {
       );
     }
 
-    console.log('logo path sent from frontend update: ', orgData.logo);
+    // console.log('logo path sent from frontend update: ', orgData.logo);
 
-    // Step 2: Encrypt sensitive data
-    const encryptedOrgName = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
-    );
-    const encryptedOrgEmail = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.orgEmail}', '${pubkey}')`
-    );
-    const encryptedOrgPhone = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.orgPhone}', '${pubkey}')`
-    );
-    const encryptedOrgAddress = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
-    );
-    const encryptedWebsite = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.website}', '${pubkey}')`
-    );
-    const encryptedLogo = Sequelize.literal(
-      `PGP_SYM_ENCRYPT('${orgData.logo}', '${pubkey}')`
-    );
+    // Encrypt sensitive data
+    const encryptedOrgData = encryptOrgFields(orgData, pubkey);
 
     // Step 3: Update the organization
     const updatedOrganization = await OrganizationModel.update(
       {
-        org_name: encryptedOrgName,
-        org_email: encryptedOrgEmail,
-        org_phone_number: encryptedOrgPhone,
+        org_name: encryptedOrgData.orgName,
+        org_email: encryptedOrgData.orgEmail,
+        org_phone_number: encryptedOrgData.orgPhone,
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
-        org_address: encryptedOrgAddress,
-        website: encryptedWebsite,
-        logo: encryptedLogo,
+        org_address: encryptedOrgData.registeredAddress,
+        website: encryptedOrgData.website,
+        logo: encryptedOrgData.logo,
         org_status: orgData.status === 'Disabled' ? false : true,
         org_updated_at: new Date(),
         org_updated_by: orgData.decryptedUserId,
@@ -293,22 +266,19 @@ export const updateOrganizationService = async (orgId, payload) => {
 // Delete Organization Service
 export const deleteOrganizationService = async (orgId, payload) => {
   try {
-    // Step 1: Decrypt the incoming payload (which contains both orgId and userId)
+    // Decrypt the incoming payload (which contains both orgId and userId)
     const decryptedData = await decryptService(payload);
-
-    console.log('orgId: ', orgId);
-    console.log('Decrypted Data:', decryptedData);
-
+    // Check if the decrypted data is valid
     if (!decryptedData || !decryptedData.userId || !decryptedData.orgId) {
       throw new Error('Service: Decryption failed or missing required data.');
     }
 
-    // Step 2: Ensure the decrypted orgId matches the requested one
+    // Ensure the decrypted orgId matches the requested one
     if (decryptedData.orgId !== orgId) {
       throw new Error('Service: Mismatched organization ID after decryption.');
     }
 
-    // Step 3: Soft delete the organization
+    // Soft delete the organization
     const [updated] = await OrganizationModel.update(
       {
         org_status: false,
@@ -320,6 +290,7 @@ export const deleteOrganizationService = async (orgId, payload) => {
       }
     );
 
+    // If no organization was found throw an error
     if (updated === 0) {
       throw new Error('Organization not found or already deleted.');
     }

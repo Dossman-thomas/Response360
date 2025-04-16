@@ -12,6 +12,8 @@ export { buildOrderClause } from './order.util.js';
 
 export { encryptSensitiveData } from './pgp-encrypt.util.js';
 
+export { encryptFields } from './encrypt-fields.util.js';
+
 export { decryptSensitiveData } from './pgp-decrypt.util.js';
 
 export { decryptOrgFields, decryptUserFields } from './decrypt-fields.util.js';
