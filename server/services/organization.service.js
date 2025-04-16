@@ -40,6 +40,12 @@ export const createOrganizationService = async (payload) => {
     const encryptedOrgPhone = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.orgPhone}', '${pubkey}')`
     );
+    const encryptedWebsite = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.website}', '${pubkey}')`
+    );
+    const encryptedLogo = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.logo}', '${pubkey}')`
+    );
 
     // Create the organization
     const organization = await OrganizationModel.create(
@@ -52,8 +58,8 @@ export const createOrganizationService = async (payload) => {
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
-        website: orgData.website,
-        logo: orgData.logo,
+        website: encryptedWebsite,
+        logo: encryptedLogo,
         org_created_by: orgData.decryptedUserId,
       },
       { transaction }
@@ -373,10 +379,24 @@ export const getOrganizationByIdService = async (orgId) => {
           ),
           "org_address",
         ],
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("website"), "bytea"),
+            pubkey
+          ),
+          "website",
+        ],
+        [
+          Sequelize.fn(
+            "PGP_SYM_DECRYPT",
+            Sequelize.cast(Sequelize.col("logo"), "bytea"),
+            pubkey
+          ),
+          "logo",
+        ],
         "org_type",
         "jurisdiction",
-        "website",
-        "logo",
         "org_status",
         "org_created_at",
         "org_updated_at",
@@ -437,6 +457,8 @@ export const updateOrganizationService = async (orgId, payload) => {
       );
     }
 
+    console.log("logo path sent from frontend update: ", orgData.logo);
+
     // Step 2: Encrypt sensitive data
     const encryptedOrgName = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.orgName}', '${pubkey}')`
@@ -450,6 +472,12 @@ export const updateOrganizationService = async (orgId, payload) => {
     const encryptedOrgAddress = Sequelize.literal(
       `PGP_SYM_ENCRYPT('${orgData.registeredAddress}', '${pubkey}')`
     );
+    const encryptedWebsite = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.website}', '${pubkey}')`
+    );
+    const encryptedLogo = Sequelize.literal(
+      `PGP_SYM_ENCRYPT('${orgData.logo}', '${pubkey}')`
+    );
 
     // Step 3: Update the organization
     const updatedOrganization = await OrganizationModel.update(
@@ -460,8 +488,8 @@ export const updateOrganizationService = async (orgId, payload) => {
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
         org_address: encryptedOrgAddress,
-        website: orgData.website,
-        logo: orgData.logo,
+        website: encryptedWebsite,
+        logo: encryptedLogo,
         org_status: orgData.status === "Disabled" ? false : true,
         org_updated_at: new Date(),
         org_updated_by: orgData.decryptedUserId,
