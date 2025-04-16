@@ -9,3 +9,5 @@ export { operatorMapping } from './operator-mapping.util.js';
 export { buildWhereClause } from './where.util.js';
 
 export { buildOrderClause } from './order.util.js';
+
+export { encryptSensitiveData } from './pgp-encrypt.util.js';
