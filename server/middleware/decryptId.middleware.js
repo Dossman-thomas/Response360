@@ -9,12 +9,8 @@ export const decryptOrgIdParam = async (req, res, next) => {
       return res.status(400).json({ error: 'Missing encryptedId param' });
     }
 
-    console.log('Encrypted Org ID before decode:', encryptedOrgId);
-
     // Decode any URL-encoded characters like "%2F, %3D, %2B", etc.
     encryptedOrgId = decodeURIComponent(encryptedOrgId);
-
-    console.log('Encrypted Org ID after decode:', encryptedOrgId);
 
     const decryptedOrgId = await decryptService(encryptedOrgId);
 
