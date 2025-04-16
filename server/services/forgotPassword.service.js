@@ -5,8 +5,6 @@ import {
   encryptService,
   decryptService,
 } from "./index.js";
-// import { sendResetPasswordEmailService } from "./index.js";
-// import { encryptService } from "./index.js";
 import { env } from "../config/index.js";
 
 export const forgotPasswordService = async (payload) => {
@@ -15,11 +13,7 @@ export const forgotPasswordService = async (payload) => {
   // decrypt the foundUser
   const decryptedUser = await decryptService(foundUser);
   // extract user_id, email, first_name from decryptedPayload
-  const { user_id, user_email: email, first_name } = decryptedUser;
-
-  console.log("decrypted email: ", email);
-
-  console.log("forgotPasswordService: user found successfully!");
+  const { user_id, user_email, first_name } = decryptedUser;
 
   // Generate a JWT token that lasts for 15 minutes
   const token = jwt.sign({ userId: user_id }, env.server.jwtSecret, {
@@ -33,7 +27,7 @@ export const forgotPasswordService = async (payload) => {
   // resetLink includes encryptedToken so as not to be exposed in the URL
   const resetLink = `${env.frontendUrl}/reset-password?token=${encodedToken}`;
 
-  const to = email; // The recipient's email address
+  const to = user_email; // The recipient's email address
 
   // encrypt the payload to pass to sendResetPasswordEmailService, which expects this
   const newPayload = await encryptService({
@@ -41,8 +35,6 @@ export const forgotPasswordService = async (payload) => {
     resetLink,
     first_name,
   });
-
-  console.log("encrypted payload: ", newPayload);
 
   // call sendResetPasswordEmailService with the encrypted payload
   const emailSent = await sendResetPasswordEmailService(newPayload);

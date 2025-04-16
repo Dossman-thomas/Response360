@@ -1,30 +1,24 @@
 import { UserModel } from '../database/models/index.js';
 import { env } from '../config/index.js';
 import { encryptService, decryptService } from './index.js';
-
+import { decryptFields, decryptSensitiveData } from '../utils/index.js';
 
 const pubkey = env.encryption.pubkey;
 
 export const getUserByEmailService = async (payload) => {
   try {
     const decryptedPayload = await decryptService(payload);
-    const { email } = decryptedPayload;
+    const { user_email: email } = decryptedPayload;
 
     const sequelize = UserModel.sequelize;
+    const [decryptedExpr] = decryptSensitiveData('user_email', pubkey);
     const foundUser = await UserModel.findOne({
       attributes: [
         'user_id',
-        [
-          sequelize.literal(`PGP_SYM_DECRYPT(first_name::bytea, '${pubkey}')`),
-          'first_name',
-        ],
-        [
-          sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
-          'user_email',
-        ],
+        ...decryptFields(['first_name', 'user_email'], pubkey),
       ],
       where: sequelize.where(
-        sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
+        decryptedExpr,
         email
       ),
     });

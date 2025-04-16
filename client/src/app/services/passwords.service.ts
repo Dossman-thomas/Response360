@@ -10,7 +10,7 @@ export class PasswordsService {
   constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
   forgotPassword(email: string) {
-    const encryptedPayload = this.cryptoService.Encrypt({ email });
+    const encryptedPayload = this.cryptoService.Encrypt({ user_email: email });
 
     return this.http.post<{ success: boolean; message?: string }>(
       `${environment.backendUrl}/auth/forgot-password`,
