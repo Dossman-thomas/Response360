@@ -6,7 +6,9 @@ import {
   pagination,
   buildWhereClause,
   buildOrderClause,
-  encryptSensitiveData
+  encryptSensitiveData,
+  decryptOrgFields,
+  decryptUserFields,
 } from '../utils/index.js';
 import { encryptService, decryptService } from '../services/index.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,12 +24,17 @@ export const createOrganizationService = async (payload) => {
 
     // Check if the decrypted data is valid
     if (!orgData) {
-      throw new Error('Service: Decryption failed or missing organization data.');
+      throw new Error(
+        'Service: Decryption failed or missing organization data.'
+      );
     }
 
     // Encrypt sensitive data using the utility function
     const encryptedOrgName = encryptSensitiveData(orgData.orgName, pubkey);
-    const encryptedOrgAddress = encryptSensitiveData(orgData.registeredAddress, pubkey);
+    const encryptedOrgAddress = encryptSensitiveData(
+      orgData.registeredAddress,
+      pubkey
+    );
     const encryptedOrgEmail = encryptSensitiveData(orgData.orgEmail, pubkey);
     const encryptedOrgPhone = encryptSensitiveData(orgData.orgPhone, pubkey);
     const encryptedWebsite = encryptSensitiveData(orgData.website, pubkey);
@@ -52,8 +59,14 @@ export const createOrganizationService = async (payload) => {
     );
 
     // Encrypt admin user data
-    const encryptedFirstName = encryptSensitiveData(orgData.adminFirstName, pubkey);
-    const encryptedLastName = encryptSensitiveData(orgData.adminLastName, pubkey);
+    const encryptedFirstName = encryptSensitiveData(
+      orgData.adminFirstName,
+      pubkey
+    );
+    const encryptedLastName = encryptSensitiveData(
+      orgData.adminLastName,
+      pubkey
+    );
     const encryptedUserEmail = encryptSensitiveData(orgData.adminEmail, pubkey);
     const encryptedUserPhone = encryptSensitiveData(orgData.adminPhone, pubkey);
 
@@ -107,30 +120,10 @@ export const getAllOrganizationsService = async (payload) => {
       order,
       attributes: [
         'org_id',
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
-            pubkey
-          ),
-          'org_name',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_email'), 'bytea'),
-            pubkey
-          ),
-          'org_email',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_phone_number'), 'bytea'),
-            pubkey
-          ),
-          'org_phone_number',
-        ],
+        ...decryptOrgFields(
+          ['org_name', 'org_email', 'org_phone_number'],
+          pubkey
+        ),
         'logo',
         'org_status',
         'org_created_at',
@@ -161,95 +154,26 @@ export const getOrganizationByIdService = async (orgId) => {
           model: UserModel,
           as: 'users',
           where: { user_role: 'Admin' }, // Only fetch the admin user associated with this organization
-          attributes: [
-            [
-              Sequelize.fn(
-                'PGP_SYM_DECRYPT',
-                Sequelize.cast(Sequelize.col('users.first_name'), 'bytea'),
-                pubkey
-              ),
-              'first_name',
-            ],
-            [
-              Sequelize.fn(
-                'PGP_SYM_DECRYPT',
-                Sequelize.cast(Sequelize.col('users.last_name'), 'bytea'),
-                pubkey
-              ),
-              'last_name',
-            ],
-            [
-              Sequelize.fn(
-                'PGP_SYM_DECRYPT',
-                Sequelize.cast(Sequelize.col('users.user_email'), 'bytea'),
-                pubkey
-              ),
-              'user_email',
-            ],
-            [
-              Sequelize.fn(
-                'PGP_SYM_DECRYPT',
-                Sequelize.cast(
-                  Sequelize.col('users.user_phone_number'),
-                  'bytea'
-                ),
-                pubkey
-              ),
-              'user_phone_number',
-            ],
-          ],
+          attributes: decryptUserFields(
+            ['first_name', 'last_name', 'user_email', 'user_phone_number'],
+            pubkey
+          ),
         },
       ],
+
       attributes: [
         'org_id',
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
-            pubkey
-          ),
-          'org_name',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_email'), 'bytea'),
-            pubkey
-          ),
-          'org_email',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_phone_number'), 'bytea'),
-            pubkey
-          ),
-          'org_phone_number',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('org_address'), 'bytea'),
-            pubkey
-          ),
-          'org_address',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('website'), 'bytea'),
-            pubkey
-          ),
-          'website',
-        ],
-        [
-          Sequelize.fn(
-            'PGP_SYM_DECRYPT',
-            Sequelize.cast(Sequelize.col('logo'), 'bytea'),
-            pubkey
-          ),
-          'logo',
-        ],
+        ...decryptOrgFields(
+          [
+            'org_name',
+            'org_email',
+            'org_phone_number',
+            'org_address',
+            'website',
+            'logo',
+          ],
+          pubkey
+        ),
         'org_type',
         'jurisdiction',
         'org_status',
@@ -302,7 +226,6 @@ export const getOrganizationByIdService = async (orgId) => {
 // Update Organization Service
 export const updateOrganizationService = async (orgId, payload) => {
   try {
-
     // Decrypt the incoming data
     const orgData = await decryptService(payload);
 
