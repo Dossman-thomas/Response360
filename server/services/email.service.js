@@ -17,8 +17,6 @@ const transporter = nodemailer.createTransport({
 
 export const sendResetPasswordEmailService = async (payload) => {
   const decryptedPayload = await decryptService(payload);
-  console.log("Decrypted payload in sendResetPasswordEmailService:", decryptedPayload);
-
   const { to, resetLink, first_name } = decryptedPayload;
 
   const mailOptions = {

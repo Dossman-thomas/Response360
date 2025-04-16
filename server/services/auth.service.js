@@ -1,91 +1,84 @@
-import { UserModel } from "../database/models/index.js";
-import dotenv from "dotenv";
-import { encryptService, decryptService } from "../services/index.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { UserModel } from '../database/models/index.js';
+import { env } from '../config/index.js';
+import { encryptService, decryptService } from '../services/index.js';
+import { decryptSensitiveData } from '../utils/index.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-dotenv.config();
-const pubkey = process.env.pubkey;
+const pubkey = env.encryption.pubkey;
 
 export const loginSuperAdminService = async (payload) => {
   try {
-    // Step 1: Decrypt the payload first (decryptService should return { user_email, user_password })
+    // Decrypt the payload first (decryptService should return { user_email, user_password })
     const decryptedData = await decryptService(payload);
-
+    // Check if decryption was successful and contains the required fields
     if (!decryptedData.user_email || !decryptedData.user_password) {
-      throw new Error("Service: Decryption failed or missing credentials.");
+      throw new Error('Service: Decryption failed or missing credentials.');
     }
-
+    // Extract user_email, user_password, and rememberMe from decrypted data
     const { user_email, user_password, rememberMe } = decryptedData;
 
-    // Step 2: Query the database to find a matching user
+    // Query the database to find a matching user
     const sequelize = UserModel.sequelize;
+    const [decryptedExpr] = decryptSensitiveData('user_email', pubkey);
+    console.log('decryptedExpr', decryptedExpr);
     const user = await UserModel.findOne({
       attributes: [
-        "user_id",
-        [
-          sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
-          "user_email",
-        ],
-        "user_password",
+        'user_id',
+        [decryptedExpr, 'user_email'],
+        'user_password',
       ],
-      where: sequelize.where(
-        sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
-        user_email
-      ),
+      where: sequelize.where(decryptedExpr, user_email),
     });
 
-    // console.log("user: ", user);
-
+    // Check if user exists
     if (!user || user.length === 0) {
       const error = new Error(
-        "Invalid credentials. Please check your email and password, then try again."
+        'Invalid credentials. Please check your email and password, then try again.'
       );
       error.status = 404;
       throw error;
     }
 
-    console.log("user_password: ", user_password);
-    console.log("foundUser.user_password: ", user.user_password);
-
-    // Step 3: Compare the decrypted password with the hashed password in the db
+    // Compare the decrypted password with the hashed password in the db
     const isPasswordValid = await bcrypt.compare(
       user_password,
       user.user_password
     );
 
-    console.log("isPasswordValid: ", isPasswordValid);
-
+    // check if password is valid
     if (!isPasswordValid) {
       const error = new Error(
-        "Invalid credentials. Please check your email and password, then try again."
+        'Invalid credentials. Please check your email and password, then try again.'
       );
       error.status = 404;
       throw error;
     }
 
-    // Step 4: Set token expiration based on "Remember Me" flag
-    const tokenExpiry = rememberMe ? "90d" : "1h"; // Use 90 days for "Remember Me", else 1 hour
+    // Set token expiration based on "Remember Me" flag
+    const tokenExpiry = rememberMe ? '90d' : '1h'; // Use 90 days for "Remember Me", else 1 hour
 
     // Generate JWT token if authentication is successful
     const token = jwt.sign(
-      { id: user.user_id, email: user.decrypted_email },
+      { id: user.user_id, email: user.user_email },
       process.env.JWT_SECRET,
-      { expiresIn: tokenExpiry } // expires based on "Remember Me"
+      { expiresIn: tokenExpiry }
     );
 
+    // Encrypt the token and user details before sending them back
     const responsePayload = {
       token: encryptService(token),
       userId: encryptService(user.user_id),
       user_email: encryptService(user.user_email),
-      user_password: encryptService(user_password)
+      user_password: encryptService(user_password),
     };
 
+    // Encrypt the response payload
     const encryptedPayload = encryptService(responsePayload);
 
-    //  Step 5: Return success message along with the token and user details
+    // Return success message along with the token and user details
     return {
-      message: "Success! Email and password verified!",
+      message: 'Success! Email and password verified!',
       encryptedPayload,
     };
   } catch (error) {

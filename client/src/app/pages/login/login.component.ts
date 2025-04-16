@@ -38,12 +38,6 @@ export class LoginComponent implements OnInit {
     console.log('Stored Email:', storedEmail);
     console.log('Stored Password:', storedPassword);
 
-    console.log('decryptedEmail:', this.cryptoService.Decrypt(storedEmail));
-    console.log(
-      'decryptedPassword:',
-      this.cryptoService.Decrypt(storedPassword)
-    );
-
     if (storedEmail) {
       this.email = this.cryptoService.Decrypt(storedEmail);
     }

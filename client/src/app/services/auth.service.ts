@@ -46,8 +46,6 @@ export class AuthService {
       rememberMe,
     });
 
-    // console.log('Payload:', encryptedPayload); // Log to check payload
-
     return this.http
       .post<any>(`http://localhost:5000/api/auth/super-admin/login`, {
         payload: encryptedPayload,
