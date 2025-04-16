@@ -6,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-import { sequelize } from "../server/config/index.js";
+import { sequelize } from '../server/config/index.js';
 
 import { routes } from './routes/router.js';
 import { response } from './utils/index.js';
@@ -18,7 +18,6 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
 app.use(
   cors({
     origin: '*',
@@ -28,10 +27,12 @@ app.use(
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use('/shared/images', express.static(path.join(__dirname, '../client/public/shared/images')));
+app.use(
+  '/shared/images',
+  express.static(path.join(__dirname, '../client/public/shared/images'))
+);
 
 app.use('/api', routes);
-
 
 app.use((err, req, res, next) => {
   console.error(err);
@@ -44,7 +45,7 @@ app.use((err, req, res, next) => {
 // Sync database and start the server after successful connection
 (async () => {
   try {
-    // await sequelize.sync({ alter: true }); 
+    // await sequelize.sync({ alter: true });
     // await sequelize.sync({ force: true });
 
     console.log('Database synced successfully');

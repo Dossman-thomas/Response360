@@ -1,13 +1,14 @@
-import { OrganizationModel, UserModel } from "../database/models/index.js";
-import { sequelize } from "../config/index.js";
-import { env } from "../config/index.js";
-import { Sequelize, Op } from "sequelize";
-import { pagination } from "../utils/index.js";
-import { encryptService, decryptService } from "../services/index.js";
-import { v4 as uuidv4 } from "uuid";
-// import dotenv from "dotenv";
-
-// dotenv.config();
+import { OrganizationModel, UserModel } from '../database/models/index.js';
+import { sequelize } from '../config/index.js';
+import { env } from '../config/index.js';
+import { Sequelize } from 'sequelize';
+import {
+  pagination,
+  buildWhereClause,
+  buildOrderClause,
+} from '../utils/index.js';
+import { encryptService, decryptService } from '../services/index.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const pubkey = env.encryption.pubkey;
 
@@ -18,12 +19,12 @@ export const createOrganizationService = async (payload) => {
     // Step 1: Decrypt the incoming data
     const orgData = await decryptService(payload);
 
-    console.log("logo: ", orgData.logo);
-    console.log("orgData: ", orgData);
+    // console.log('logo: ', orgData.logo);
+    // console.log('orgData: ', orgData);
 
     if (!orgData) {
       throw new Error(
-        "Service: Decryption failed or missing organization data."
+        'Service: Decryption failed or missing organization data.'
       );
     }
 
@@ -87,9 +88,9 @@ export const createOrganizationService = async (payload) => {
         last_name: encryptedLastName,
         user_email: encryptedUserEmail,
         user_phone_number: encryptedUserPhone,
-        user_role: "Admin",
+        user_role: 'Admin',
         org_id: organization.org_id,
-        user_password: "Admin@123!", // Temporary password
+        user_password: 'Admin@123!', // Temporary password
         user_created_by: orgData.decryptedUserId, // Created by the same user who created the organization
       },
       { transaction }
@@ -98,199 +99,250 @@ export const createOrganizationService = async (payload) => {
     await transaction.commit();
     return {
       statusCode: 201,
-      message: "Organization and Admin created successfully",
+      message: 'Organization and Admin created successfully',
     };
   } catch (error) {
-    console.error("Error in createOrganizationService:", error);
+    console.error('Error in createOrganizationService:', error);
     await transaction.rollback();
     throw error;
   }
 };
 
 // Read Organization Service
+// export const getAllOrganizationsService = async (payload) => {
+//   try {
+//     // decrypt the payload
+//     const decryptedPayload = await decryptService(payload);
+//     // extract params from payload
+//     const { page, limit, sorts, filters, searchQuery } = decryptedPayload;
+
+//     const validSorts =
+//       sorts?.length > 0
+//         ? sorts.filter((sort) => sort.field && sort.field.startsWith('org_'))
+//         : [];
+
+//     const order =
+//       validSorts.length > 0
+//         ? validSorts.every((sort) => sort.dir)
+//           ? validSorts.map((sort) => [
+//               Sequelize.literal(`${sort.field}`),
+//               sort.dir.toUpperCase(),
+//             ])
+//           : [['org_created_at', 'DESC']] // fallback if any sort is missing a dir
+//         : [['org_created_at', 'DESC']];
+
+//     // console.log('order array: ', order);
+
+//     const operatorMapping = {
+//       contains: Op.iLike,
+//       doesnotcontain: Op.notLike,
+//       eq: Op.eq,
+//       neq: Op.ne,
+//       startswith: Op.startsWith,
+//       endswith: Op.endsWith,
+//       greaterThan: Op.gt,
+//       lessThan: Op.lt,
+//       greaterThanOrEquals: Op.gte,
+//       lessThanOrEquals: Op.lte,
+//     };
+
+//     // normalize searchQuery
+//     const normalizedQuery = searchQuery.toLowerCase();
+//     // map 'true' to 'Enabled' and 'false' to 'Disabled'
+//     const statusQuery =
+//       normalizedQuery === 'true'
+//         ? 'Enabled'
+//         : normalizedQuery === 'false'
+//         ? 'Disabled'
+//         : searchQuery;
+
+//     const where = {
+//       [Op.and]: [
+//         ...(filters?.length
+//           ? filters
+//               .filter((filter) => filter.field.startsWith('org_'))
+//               .map((filter) => {
+//                 if (filter.field === 'org_status') {
+//                   const operator = filter.operator === 'eq' ? Op.eq : Op.ne;
+//                   return {
+//                     [filter.field]: { [operator]: filter.value === 'true' },
+//                   };
+//                 } else {
+//                   const operator = operatorMapping[filter.operator] || Op.eq;
+//                   const value =
+//                     filter.operator === 'contains' ||
+//                     filter.operator === 'doesnotcontain'
+//                       ? `%${filter.value}%`
+//                       : filter.value;
+
+//                   console.log(
+//                     `Operator: ${filter.operator}, Decrypted Value: ${filter.value}, Filtered Value: ${value}`
+//                   );
+
+//                   return Sequelize.where(
+//                     Sequelize.fn(
+//                       'PGP_SYM_DECRYPT',
+//                       Sequelize.cast(Sequelize.col(filter.field), 'bytea'),
+//                       pubkey
+//                     ),
+//                     { [operator]: value }
+//                   );
+//                 }
+//               })
+//               .filter(Boolean) // Remove any null, undefined, or false values from array.
+//           : []),
+//         searchQuery
+//           ? {
+//               [Op.or]: [
+//                 Sequelize.where(
+//                   Sequelize.fn(
+//                     'PGP_SYM_DECRYPT',
+//                     Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
+//                     pubkey
+//                   ),
+//                   { [Op.like]: `%${searchQuery}%` }
+//                 ),
+//                 Sequelize.where(
+//                   Sequelize.fn(
+//                     'PGP_SYM_DECRYPT',
+//                     Sequelize.cast(Sequelize.col('org_email'), 'bytea'),
+//                     pubkey
+//                   ),
+//                   { [Op.like]: `%${searchQuery}%` }
+//                 ),
+//                 Sequelize.where(
+//                   Sequelize.fn(
+//                     'PGP_SYM_DECRYPT',
+//                     Sequelize.cast(Sequelize.col('org_phone_number'), 'bytea'),
+//                     pubkey
+//                   ),
+//                   { [Op.like]: `%${searchQuery}%` }
+//                 ),
+//                 ...(statusQuery === 'Enabled' || statusQuery === 'Disabled'
+//                   ? [
+//                       {
+//                         org_status: {
+//                           [Op.eq]: statusQuery === 'Enabled',
+//                         },
+//                       },
+//                     ]
+//                   : []),
+//               ],
+//             }
+//           : {},
+//       ],
+//     };
+
+//     const organizationData = await OrganizationModel.findAndCountAll({
+//       where,
+//       order,
+//       attributes: [
+//         'org_id',
+//         [
+//           Sequelize.fn(
+//             'PGP_SYM_DECRYPT',
+//             Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
+//             pubkey
+//           ),
+//           'org_name',
+//         ],
+//         [
+//           Sequelize.fn(
+//             'PGP_SYM_DECRYPT',
+//             Sequelize.cast(Sequelize.col('org_email'), 'bytea'),
+//             pubkey
+//           ),
+//           'org_email',
+//         ],
+//         [
+//           Sequelize.fn(
+//             'PGP_SYM_DECRYPT',
+//             Sequelize.cast(Sequelize.col('org_phone_number'), 'bytea'),
+//             pubkey
+//           ),
+//           'org_phone_number',
+//         ],
+//         'logo',
+//         'org_status',
+//         'org_created_at',
+//         'org_updated_at',
+//       ],
+//       ...pagination({ page, limit }),
+//     });
+
+//     // uncomment these two lines after debugging in postman
+//     const encryptedOrgData = encryptService(organizationData);
+
+//     return encryptedOrgData;
+
+//   } catch (error) {
+//     console.error('Error in getAllOrganizationsService:', error);
+//     if (error.parent) {
+//       console.error('Detailed DB Error:', error.parent);
+//     }
+//     throw error;
+//   }
+// };
 export const getAllOrganizationsService = async (payload) => {
   try {
-
     // decrypt the payload
     const decryptedPayload = await decryptService(payload);
     // extract params from payload
     const { page, limit, sorts, filters, searchQuery } = decryptedPayload;
 
-    console.log("params received: ", {
-      page,
-      limit,
-      sorts,
+    // build clauses
+    const order = buildOrderClause(sorts);
+    const where = buildWhereClause({
       filters,
       searchQuery,
+      statusQuery: searchQuery,
+      pubkey,
     });
-
-    const validSorts =
-      sorts?.length > 0
-        ? sorts.filter((sort) => sort.field && sort.field.startsWith("org_"))
-        : [];
-
-    const order =
-      validSorts.length > 0
-        ? validSorts.every((sort) => sort.dir)
-          ? validSorts.map((sort) => [
-              Sequelize.literal(`${sort.field}`),
-              sort.dir.toUpperCase(),
-            ])
-          : [["org_created_at", "DESC"]] // fallback if any sort is missing a dir
-        : [["org_created_at", "DESC"]];
-
-    console.log("order array: ", order);
-
-    const operatorMapping = {
-      contains: Op.iLike,
-      doesnotcontain: Op.notLike,
-      eq: Op.eq,
-      neq: Op.ne,
-      startswith: Op.startsWith,
-      endswith: Op.endsWith,
-      greaterThan: Op.gt,
-      lessThan: Op.lt,
-      greaterThanOrEquals: Op.gte,
-      lessThanOrEquals: Op.lte,
-    };
-
-    // normalize searchQuery
-    const normalizedQuery = searchQuery.toLowerCase();
-    // map 'true' to 'Enabled' and 'false' to 'Disabled'
-    const statusQuery =
-      normalizedQuery === "true"
-        ? "Enabled"
-        : normalizedQuery === "false"
-        ? "Disabled"
-        : searchQuery;
-
-    const where = {
-      [Op.and]: [
-        ...(filters?.length
-          ? filters
-              .filter((filter) => filter.field.startsWith("org_"))
-              .map((filter) => {
-                if (filter.field === "org_status") {
-                  const operator = filter.operator === "eq" ? Op.eq : Op.ne;
-                  return {
-                    [filter.field]: { [operator]: filter.value === "true" },
-                  };
-                } else {
-                  const operator = operatorMapping[filter.operator] || Op.eq;
-                  const value =
-                    filter.operator === "contains" ||
-                    filter.operator === "doesnotcontain"
-                      ? `%${filter.value}%`
-                      : filter.value;
-
-                  console.log(
-                    `Operator: ${filter.operator}, Decrypted Value: ${filter.value}, Filtered Value: ${value}`
-                  );
-
-                  return Sequelize.where(
-                    Sequelize.fn(
-                      "PGP_SYM_DECRYPT",
-                      Sequelize.cast(Sequelize.col(filter.field), "bytea"),
-                      pubkey
-                    ),
-                    { [operator]: value }
-                  );
-                }
-              })
-              .filter(Boolean) // Remove any null, undefined, or false values from array.
-          : []),
-        searchQuery
-          ? {
-              [Op.or]: [
-                Sequelize.where(
-                  Sequelize.fn(
-                    "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col("org_name"), "bytea"),
-                    pubkey
-                  ),
-                  { [Op.like]: `%${searchQuery}%` }
-                ),
-                Sequelize.where(
-                  Sequelize.fn(
-                    "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col("org_email"), "bytea"),
-                    pubkey
-                  ),
-                  { [Op.like]: `%${searchQuery}%` }
-                ),
-                Sequelize.where(
-                  Sequelize.fn(
-                    "PGP_SYM_DECRYPT",
-                    Sequelize.cast(Sequelize.col("org_phone_number"), "bytea"),
-                    pubkey
-                  ),
-                  { [Op.like]: `%${searchQuery}%` }
-                ),
-                ...(statusQuery === "Enabled" || statusQuery === "Disabled"
-                  ? [
-                      {
-                        org_status: {
-                          [Op.eq]: statusQuery === "Enabled",
-                        },
-                      },
-                    ]
-                  : []),
-              ],
-            }
-          : {},
-      ],
-    };
-
-    console.log("where clause: ", where);
 
     const organizationData = await OrganizationModel.findAndCountAll({
       where,
       order,
       attributes: [
-        "org_id",
+        'org_id',
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
             pubkey
           ),
-          "org_name",
+          'org_name',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_email"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_email'), 'bytea'),
             pubkey
           ),
-          "org_email",
+          'org_email',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_phone_number"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_phone_number'), 'bytea'),
             pubkey
           ),
-          "org_phone_number",
+          'org_phone_number',
         ],
-        "logo",
-        "org_status",
-        "org_created_at",
-        "org_updated_at",
+        'logo',
+        'org_status',
+        'org_created_at',
+        'org_updated_at',
       ],
       ...pagination({ page, limit }),
     });
 
-    // uncomment these two lines after debugging in postman
     const encryptedOrgData = encryptService(organizationData);
 
     return encryptedOrgData;
-
-    // return raw data while debugging in postman
-    // return organizationData;
   } catch (error) {
-    console.error("Error in getAllOrganizationsService:", error);
+    console.error('Error in getAllOrganizationsService:', error);
     if (error.parent) {
-      console.error("Detailed DB Error:", error.parent);
+      console.error('Detailed DB Error:', error.parent);
     }
     throw error;
   }
@@ -304,108 +356,108 @@ export const getOrganizationByIdService = async (orgId) => {
       include: [
         {
           model: UserModel,
-          as: "users",
-          where: { user_role: "Admin" }, // Only fetch the admin user associated with this organization
+          as: 'users',
+          where: { user_role: 'Admin' }, // Only fetch the admin user associated with this organization
           attributes: [
             [
               Sequelize.fn(
-                "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.first_name"), "bytea"),
+                'PGP_SYM_DECRYPT',
+                Sequelize.cast(Sequelize.col('users.first_name'), 'bytea'),
                 pubkey
               ),
-              "first_name",
+              'first_name',
             ],
             [
               Sequelize.fn(
-                "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.last_name"), "bytea"),
+                'PGP_SYM_DECRYPT',
+                Sequelize.cast(Sequelize.col('users.last_name'), 'bytea'),
                 pubkey
               ),
-              "last_name",
+              'last_name',
             ],
             [
               Sequelize.fn(
-                "PGP_SYM_DECRYPT",
-                Sequelize.cast(Sequelize.col("users.user_email"), "bytea"),
+                'PGP_SYM_DECRYPT',
+                Sequelize.cast(Sequelize.col('users.user_email'), 'bytea'),
                 pubkey
               ),
-              "user_email",
+              'user_email',
             ],
             [
               Sequelize.fn(
-                "PGP_SYM_DECRYPT",
+                'PGP_SYM_DECRYPT',
                 Sequelize.cast(
-                  Sequelize.col("users.user_phone_number"),
-                  "bytea"
+                  Sequelize.col('users.user_phone_number'),
+                  'bytea'
                 ),
                 pubkey
               ),
-              "user_phone_number",
+              'user_phone_number',
             ],
           ],
         },
       ],
       attributes: [
-        "org_id",
+        'org_id',
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_name"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_name'), 'bytea'),
             pubkey
           ),
-          "org_name",
+          'org_name',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_email"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_email'), 'bytea'),
             pubkey
           ),
-          "org_email",
+          'org_email',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_phone_number"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_phone_number'), 'bytea'),
             pubkey
           ),
-          "org_phone_number",
+          'org_phone_number',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("org_address"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('org_address'), 'bytea'),
             pubkey
           ),
-          "org_address",
+          'org_address',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("website"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('website'), 'bytea'),
             pubkey
           ),
-          "website",
+          'website',
         ],
         [
           Sequelize.fn(
-            "PGP_SYM_DECRYPT",
-            Sequelize.cast(Sequelize.col("logo"), "bytea"),
+            'PGP_SYM_DECRYPT',
+            Sequelize.cast(Sequelize.col('logo'), 'bytea'),
             pubkey
           ),
-          "logo",
+          'logo',
         ],
-        "org_type",
-        "jurisdiction",
-        "org_status",
-        "org_created_at",
-        "org_updated_at",
+        'org_type',
+        'jurisdiction',
+        'org_status',
+        'org_created_at',
+        'org_updated_at',
       ],
     });
 
     // Check if organization exists
     if (!foundOrg) {
-      throw new Error("Organization not found.");
+      throw new Error('Organization not found.');
     }
 
     // Prepare the data object for encryption
@@ -432,14 +484,14 @@ export const getOrganizationByIdService = async (orgId) => {
         : null, // In case no admin user is found
     };
 
-    console.log("orgData.logo: ", orgData.logo);
+    console.log('orgData.logo: ', orgData.logo);
 
     // Encrypt the organization data
     const encryptedOrgData = encryptService(orgData);
 
     return encryptedOrgData;
   } catch (error) {
-    console.error("Error in getOrganizationByIdService:", error);
+    console.error('Error in getOrganizationByIdService:', error);
     throw error;
   }
 };
@@ -453,11 +505,11 @@ export const updateOrganizationService = async (orgId, payload) => {
 
     if (!orgData) {
       throw new Error(
-        "Service: Decryption failed or missing organization data."
+        'Service: Decryption failed or missing organization data.'
       );
     }
 
-    console.log("logo path sent from frontend update: ", orgData.logo);
+    console.log('logo path sent from frontend update: ', orgData.logo);
 
     // Step 2: Encrypt sensitive data
     const encryptedOrgName = Sequelize.literal(
@@ -490,7 +542,7 @@ export const updateOrganizationService = async (orgId, payload) => {
         org_address: encryptedOrgAddress,
         website: encryptedWebsite,
         logo: encryptedLogo,
-        org_status: orgData.status === "Disabled" ? false : true,
+        org_status: orgData.status === 'Disabled' ? false : true,
         org_updated_at: new Date(),
         org_updated_by: orgData.decryptedUserId,
       },
@@ -499,15 +551,15 @@ export const updateOrganizationService = async (orgId, payload) => {
 
     // If no organization was found
     if (updatedOrganization[0] === 0) {
-      throw new Error("Organization not found.");
+      throw new Error('Organization not found.');
     }
 
     return {
       statusCode: 200,
-      message: "Organization updated successfully",
+      message: 'Organization updated successfully',
     };
   } catch (error) {
-    console.error("Error in updateOrganizationService:", error);
+    console.error('Error in updateOrganizationService:', error);
     throw error;
   }
 };
@@ -518,16 +570,16 @@ export const deleteOrganizationService = async (orgId, payload) => {
     // Step 1: Decrypt the incoming payload (which contains both orgId and userId)
     const decryptedData = await decryptService(payload);
 
-    console.log("orgId: ", orgId);
-    console.log("Decrypted Data:", decryptedData);
+    console.log('orgId: ', orgId);
+    console.log('Decrypted Data:', decryptedData);
 
     if (!decryptedData || !decryptedData.userId || !decryptedData.orgId) {
-      throw new Error("Service: Decryption failed or missing required data.");
+      throw new Error('Service: Decryption failed or missing required data.');
     }
 
     // Step 2: Ensure the decrypted orgId matches the requested one
     if (decryptedData.orgId !== orgId) {
-      throw new Error("Service: Mismatched organization ID after decryption.");
+      throw new Error('Service: Mismatched organization ID after decryption.');
     }
 
     // Step 3: Soft delete the organization
@@ -543,15 +595,15 @@ export const deleteOrganizationService = async (orgId, payload) => {
     );
 
     if (updated === 0) {
-      throw new Error("Organization not found or already deleted.");
+      throw new Error('Organization not found or already deleted.');
     }
 
     return {
       statusCode: 200,
-      message: "Organization soft-deleted successfully",
+      message: 'Organization soft-deleted successfully',
     };
   } catch (error) {
-    console.error("Error in deleteOrganizationService:", error);
+    console.error('Error in deleteOrganizationService:', error);
     throw error;
   }
 };

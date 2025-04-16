@@ -1,6 +1,6 @@
-import { UserModel } from "../database/models/index.js";
-import { env } from "../config/index.js";
-import { encryptService, decryptService } from "./index.js";
+import { UserModel } from '../database/models/index.js';
+import { env } from '../config/index.js';
+import { encryptService, decryptService } from './index.js';
 
 const pubkey = env.encryption.pubkey;
 
@@ -12,14 +12,14 @@ export const getUserByEmailService = async (payload) => {
     const sequelize = UserModel.sequelize;
     const foundUser = await UserModel.findOne({
       attributes: [
-        "user_id",
+        'user_id',
         [
           sequelize.literal(`PGP_SYM_DECRYPT(first_name::bytea, '${pubkey}')`),
-          "first_name",
+          'first_name',
         ],
         [
           sequelize.literal(`PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}')`),
-          "user_email",
+          'user_email',
         ],
       ],
       where: sequelize.where(
@@ -29,15 +29,15 @@ export const getUserByEmailService = async (payload) => {
     });
 
     if (!foundUser) {
-      const error = new Error("User not found.");
+      const error = new Error('User not found.');
       error.status = 404;
       throw error;
     }
 
     return encryptService(foundUser);
   } catch (error) {
-    console.error("Error fetching user by email:", error);
+    console.error('Error fetching user by email:', error);
     if (error.status) throw error;
-    throw new Error("Failed to fetch user.");
+    throw new Error('Failed to fetch user.');
   }
 };
