@@ -6,7 +6,7 @@ import {
   buildWhereClause,
   buildOrderClause,
   encryptFields,
-  decryptOrgFields,
+  decryptFields,
   decryptUserFields,
 } from '../utils/index.js';
 import { encryptService, decryptService } from '../services/index.js';
@@ -39,7 +39,7 @@ export const createOrganizationService = async (payload) => {
       adminFirstName,
       adminLastName,
       adminEmail,
-      adminPhone
+      adminPhone,
     } = encryptFields(orgData, pubkey);
 
     // Create the organization
@@ -110,10 +110,7 @@ export const getAllOrganizationsService = async (payload) => {
       order,
       attributes: [
         'org_id',
-        ...decryptOrgFields(
-          ['org_name', 'org_email', 'org_phone_number'],
-          pubkey
-        ),
+        ...decryptFields(['org_name', 'org_email', 'org_phone_number'], pubkey),
         'logo',
         'org_status',
         'org_created_at',
@@ -153,7 +150,7 @@ export const getOrganizationByIdService = async (orgId) => {
 
       attributes: [
         'org_id',
-        ...decryptOrgFields(
+        ...decryptFields(
           [
             'org_name',
             'org_email',
@@ -228,19 +225,20 @@ export const updateOrganizationService = async (orgId, payload) => {
     // console.log('logo path sent from frontend update: ', orgData.logo);
 
     // Encrypt sensitive data
-    const encryptedOrgData = encryptOrgFields(orgData, pubkey);
+    const { orgName, orgEmail, orgPhone, registeredAddress, website, logo } =
+      encryptFields(orgData, pubkey);
 
     // Step 3: Update the organization
     const updatedOrganization = await OrganizationModel.update(
       {
-        org_name: encryptedOrgData.orgName,
-        org_email: encryptedOrgData.orgEmail,
-        org_phone_number: encryptedOrgData.orgPhone,
+        org_name: orgName,
+        org_email: orgEmail,
+        org_phone_number: orgPhone,
         org_type: orgData.orgType,
         jurisdiction: orgData.jurisdictionSize,
-        org_address: encryptedOrgData.registeredAddress,
-        website: encryptedOrgData.website,
-        logo: encryptedOrgData.logo,
+        org_address: registeredAddress,
+        website: website,
+        logo: logo,
         org_status: orgData.status === 'Disabled' ? false : true,
         org_updated_at: new Date(),
         org_updated_by: orgData.decryptedUserId,

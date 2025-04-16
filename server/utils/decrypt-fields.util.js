@@ -1,6 +1,6 @@
 import { decryptSensitiveData } from './index.js';
 
-export const decryptOrgFields = (fields, pubkey) =>
+export const decryptFields = (fields, pubkey) =>
   fields.map((field) => decryptSensitiveData(field, pubkey));
 
 export const decryptUserFields = (fields, pubkey) =>

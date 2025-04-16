@@ -2,6 +2,7 @@ import { UserModel } from '../database/models/index.js';
 import { env } from '../config/index.js';
 import { encryptService, decryptService } from './index.js';
 
+
 const pubkey = env.encryption.pubkey;
 
 export const getUserByEmailService = async (payload) => {
