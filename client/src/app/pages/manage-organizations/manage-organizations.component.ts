@@ -4,10 +4,6 @@ import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { State } from '@progress/kendo-data-query';
 import { OrganizationService } from '../../services/organization.service';
 import { CryptoService } from '../../services/crypto.service';
-import {
-  stringOperators,
-  booleanOperators,
-} from 'src/app/utils/utils/kendoOperators';
 
 @Component({
   selector: 'app-manage-organizations',
@@ -24,9 +20,6 @@ export class ManageOrganizationsComponent implements OnInit {
   showDeleteModal = false;
   deleteOrganizationId: string | null = null;
   searchQuery: string = '';
-
-  public stringOperators = stringOperators;
-  public booleanOperators = booleanOperators;
 
   ngOnInit() {
     this.loadOrgDetails();

@@ -13,7 +13,7 @@ import { ToastrModule } from 'ngx-toastr';
 
 // Services
 import { CryptoService } from './services/crypto.service';
-import { CryptoApiService } from './services/crypto-api.service';
+
 
 // Components
 import { AppComponent } from './app.component';
@@ -59,7 +59,6 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
   ],
   providers: [
     CryptoService,
-    CryptoApiService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],

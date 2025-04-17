@@ -1,29 +1,21 @@
 // organization.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { getHeaders } from '../utils/getHeaders.util';
 import { Observable, throwError } from 'rxjs';
 import { CryptoService } from './crypto.service';
-import { Router } from '@angular/router';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../shared/environments/environment'
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrganizationService {
-  private apiUrl = 'http://localhost:5000/api/organization'; // Replace with your actual API URL
 
   constructor(
     private http: HttpClient,
     private cryptoService: CryptoService,
-    private router: Router
   ) {}
-
-  // Set the headers for the HTTP requests
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-    });
-  }
 
   // Create a new organization
   createOrganization(
@@ -69,9 +61,9 @@ export class OrganizationService {
 
     // Send the encrypted payload to the backend
     return this.http.post<any>(
-      `${this.apiUrl}/create`,
+      `${environment.backendUrl}/organization/create`,
       { payload: encryptedPayload },
-      { headers: this.getHeaders() }
+      { headers: getHeaders() }
     );
   }
 
@@ -80,8 +72,8 @@ export class OrganizationService {
     const encryptedPayload = this.cryptoService.Encrypt(body);
   
     return this.http
-      .post<any>(`${this.apiUrl}/read`, { payload: encryptedPayload }, {
-        headers: this.getHeaders(),
+      .post<any>(`${environment.backendUrl}/organization/read`, { payload: encryptedPayload }, {
+        headers: getHeaders(),
       })
       .pipe(
         map((res) => {
@@ -102,8 +94,8 @@ export class OrganizationService {
 
     // Send the encrypted ID to the backend
     return this.http
-      .get<any>(`${this.apiUrl}/read/${encodedOrgId}`, {
-        headers: this.getHeaders(),
+      .get<any>(`${environment.backendUrl}/organization/read/${encodedOrgId}`, {
+        headers: getHeaders(),
       })
       .pipe(
         map((response) => {
@@ -158,9 +150,9 @@ export class OrganizationService {
 
     // Send the encrypted payload to the backend and return the observable
     return this.http.put<any>(
-      `${this.apiUrl}/update/${encodedOrgId}`,
+      `${environment.backendUrl}/organization/update/${encodedOrgId}`,
       { payload: encryptedPayload },
-      { headers: this.getHeaders() }
+      { headers: getHeaders() }
     );
   }
 
@@ -186,8 +178,8 @@ export class OrganizationService {
     const encodedOrgId = encodeURIComponent(orgIdString);
   
     // Send the encrypted orgId in the URL and the encrypted payload in the body
-    return this.http.delete<any>(`${this.apiUrl}/delete/${encodedOrgId}`, {
-      headers: this.getHeaders(),
+    return this.http.delete<any>(`${environment.backendUrl}/organization/delete/${encodedOrgId}`, {
+      headers: getHeaders(),
       body: { payload: encryptedPayload },
     });
   }

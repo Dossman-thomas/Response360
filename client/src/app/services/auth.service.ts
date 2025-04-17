@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../shared/environments/environment';
 import { CryptoService } from './crypto.service';
+import { getHeaders } from '../utils/getHeaders.util';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
@@ -13,6 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  private baseUrl = `${environment.backendUrl}/auth/super-admin`; // Base URL for the authentication API
 
   constructor(
     private http: HttpClient,
@@ -47,7 +49,7 @@ export class AuthService {
     });
 
     return this.http
-      .post<any>(`http://localhost:5000/api/auth/super-admin/login`, {
+      .post<any>(`${environment.backendUrl}/auth/super-admin/login`, {
         payload: encryptedPayload,
       })
       .subscribe({
