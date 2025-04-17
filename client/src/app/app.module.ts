@@ -14,11 +14,9 @@ import { ToastrModule } from 'ngx-toastr';
 // Services
 import { CryptoService } from './services/crypto.service';
 
-
 // Components
 import { AppComponent } from './app.component';
 import { LoginComponent } from './pages/login/login.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ManageOrganizationsComponent } from './pages/manage-organizations/manage-organizations.component';
 import { OrganizationDetailsComponent } from './pages/organization-details/organization-details.component';
 import { SidebarComponent } from './pages/layout/sidebar/sidebar.component';
@@ -26,13 +24,16 @@ import { HeaderComponent } from './pages/layout/header/header.component';
 import { LayoutComponent } from './pages/layout/layout/layout.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
+import { AdminMyAccountComponent } from './pages/admin-my-account/admin-my-account.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    DashboardComponent,
+    AdminDashboardComponent,
+    AdminMyAccountComponent,
     ManageOrganizationsComponent,
     OrganizationDetailsComponent,
     SidebarComponent,

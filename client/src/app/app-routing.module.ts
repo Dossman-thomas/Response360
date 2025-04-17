@@ -4,11 +4,12 @@ import { AuthGuard } from './auth/auth.guard';
 
 import { LayoutComponent } from './pages/layout/layout/layout.component';
 import { LoginComponent } from './pages/login/login.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ManageOrganizationsComponent } from './pages/manage-organizations/manage-organizations.component';
 import { OrganizationDetailsComponent } from './pages/organization-details/organization-details.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
+import { AdminMyAccountComponent } from './pages/admin-my-account/admin-my-account.component';
 
 const routes: Routes = [
   {
@@ -18,8 +19,8 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: '/super-admin-login', pathMatch: 'full' },
       {
-        path: 'dashboard',
-        component: DashboardComponent,
+        path: 'super-admin-dashboard',
+        component: AdminDashboardComponent,
         canActivate: [AuthGuard],
       },
       {
@@ -31,7 +32,12 @@ const routes: Routes = [
         path: 'organization-details',
         component: OrganizationDetailsComponent,
         canActivate: [AuthGuard],
-      }
+      },
+      {
+        path: 'admin-my-account',
+        component: AdminMyAccountComponent,
+        canActivate: [AuthGuard],
+      },
     ],
   },
   { path: 'reset-password', component: ResetPasswordComponent },
