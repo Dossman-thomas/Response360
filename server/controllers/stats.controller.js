@@ -5,13 +5,13 @@ import { messages } from '../messages/index.js';
 export const getDashboardStatsController = async (req, res) => {
   try {
     // Call the service with no parameters
-    const statsData = await getDashboardStatsService();
+    const encryptedStats = await getDashboardStatsService();
 
     // Return successful response
     return response(res, {
       statusCode: 200,
       message: messages.general.SUCCESS,
-      data: statsData,
+      data: encryptedStats,
     });
   } catch (error) {
     console.error(error);

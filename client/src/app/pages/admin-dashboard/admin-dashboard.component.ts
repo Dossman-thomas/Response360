@@ -81,8 +81,8 @@ export class AdminDashboardComponent implements OnInit {
   getDashboardStats(): void {
     this.statsService.getDashboardStats().subscribe({
       next: (response: any) => {
-        this.totalUsers = response.data.userCount || 0;
-        this.totalOrganizations = response.data.orgCount || 0;
+        this.totalUsers = response.userCount || 0;
+        this.totalOrganizations = response.orgCount || 0;
       },
       error: (err) => {
         console.error('Failed to fetch dashboard stats:', err);
