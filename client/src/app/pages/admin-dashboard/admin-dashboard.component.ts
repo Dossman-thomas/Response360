@@ -35,43 +35,18 @@ export class AdminDashboardComponent implements OnInit {
     page: 1,
     sorts: null,
     filters: null,
-    limit: 10,
+    limit: 5,
   };
 
   // Kendo Grid state
   public state: State = {
-    skip: 0,
-    take: 10,
-    sort: [],
-    filter: {
-      logic: 'and',
-      filters: [],
-    },
+    take: 5,
   };
 
   public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
     this.body.page = Math.floor(state.skip / state.take) + 1; // Page number
     this.body.limit = state.take; // Items per page
-
-    // Sort
-    this.body.sorts =
-      state.sort?.map((sortElement) => ({
-        field: sortElement.field,
-        dir: sortElement.dir,
-      })) || null;
-
-    // Filter
-    this.body.filters =
-      state.filter?.filters
-        ?.flatMap((item: any) => item.filters || [])
-        .map((filter: any) => ({
-          field: filter.field,
-          operator: filter.operator || 'contains', // Default operator
-          value: filter.value,
-        })) || null;
-
-    console.log('request payload: ', this.body);
 
     this.loadOrgDetails(); // Fetch data
   }
@@ -83,12 +58,10 @@ export class AdminDashboardComponent implements OnInit {
         // console.log('response: ', response);
 
         if (Array.isArray(response.rows)) {
-
           this.gridData = {
             data: response.rows,
             total: response.count || response.rows.length,
           };
-
         } else {
           console.error('Failed to fetch organization details:', response);
         }
@@ -108,9 +81,8 @@ export class AdminDashboardComponent implements OnInit {
   getDashboardStats(): void {
     this.statsService.getDashboardStats().subscribe({
       next: (response: any) => {
-        console.log('Dashboard stats:', response);
-        this.totalUsers = response.totalUsers || 0;
-        this.totalOrganizations = response.totalOrganizations || 0;
+        this.totalUsers = response.data.userCount || 0;
+        this.totalOrganizations = response.data.orgCount || 0;
       },
       error: (err) => {
         console.error('Failed to fetch dashboard stats:', err);

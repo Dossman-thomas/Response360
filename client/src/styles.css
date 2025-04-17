@@ -1,4 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
+/* ========== CSS RESET ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Grid styles */
 kendo-grid-filter-menu-container {
     :is(kendo-dropdownlist.k-filter-and) {
       display: none !important;

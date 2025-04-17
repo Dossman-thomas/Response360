@@ -78,23 +78,14 @@ export class ManageOrganizationsComponent implements OnInit {
   private loadOrgDetails(): void {
     this.organizationService.getAllOrganizations(this.body).subscribe({
       next: (response: any) => {
-        // console.log('response: ', response);
 
         if (Array.isArray(response.rows)) {
-          // Flatten user data
-          // const formattedData = response.rows.map((org: any) => ({
-          //   ...org,
-          //   user_email: org.users?.[0]?.user_email || 'N/A',
-          //   user_phone_number: org.users?.[0]?.user_phone_number || 'N/A',
-          //   // statusLabel: org.org_status ? 'Active' : 'Inactive',
-          // }));
 
           this.gridData = {
             data: response.rows,
             total: response.count || response.rows.length,
           };
 
-          // console.log('Organization details:', this.gridData);
         } else {
           console.error('Failed to fetch organization details:', response);
         }
