@@ -21,3 +21,5 @@ export { forgotPasswordService } from "./forgotPassword.service.js";
 export { passwordResetService } from "./passwordReset.service.js";
 
 export { upload } from "./imageUpload.service.js";
+
+export { getDashboardStatsService } from "./stats.service.js";

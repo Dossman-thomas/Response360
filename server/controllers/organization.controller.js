@@ -4,10 +4,10 @@ import {
   getOrganizationByIdService,
   updateOrganizationService,
   deleteOrganizationService,
-} from "../services/index.js";
-import { response } from "../utils/index.js";
-import { messages } from "../messages/index.js";
-import { validate as validateUuid } from "uuid";
+} from '../services/index.js';
+import { response } from '../utils/index.js';
+import { messages } from '../messages/index.js';
+import { validate as validateUuid } from 'uuid';
 
 // Controller to handle the creation of an organization
 export const createOrganizationController = async (req, res) => {
@@ -18,7 +18,7 @@ export const createOrganizationController = async (req, res) => {
     if (!payload) {
       return res.status(400).json({
         status: 400,
-        message: "Missing encrypted data in the request",
+        message: 'Missing encrypted data in the request',
       });
     }
 
@@ -68,7 +68,7 @@ export const getOrganizationByIdController = async (req, res) => {
       // Ensure orgId is provided and valid
       return res.status(400).json({
         status: 400,
-        message: "Invalid or missing organization ID in the request",
+        message: 'Invalid or missing organization ID in the request',
       });
     }
 
@@ -97,14 +97,14 @@ export const updateOrganizationController = async (req, res) => {
     if (!payload) {
       return res.status(400).json({
         status: 400,
-        message: "Missing encrypted data in the request",
+        message: 'Missing encrypted data in the request',
       });
     }
 
     if (!orgId) {
       return res.status(400).json({
         status: 400,
-        message: "Organization ID is required",
+        message: 'Organization ID is required',
       });
     }
 
@@ -135,14 +135,14 @@ export const deleteOrganizationController = async (req, res) => {
     if (!orgId) {
       return res.status(400).json({
         status: 400,
-        message: "Missing organization ID in the request",
+        message: 'Missing organization ID in the request',
       });
     }
 
     if (!payload) {
       return res.status(400).json({
         status: 400,
-        message: "Missing encrypted data in the request",
+        message: 'Missing encrypted data in the request',
       });
     }
 
