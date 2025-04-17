@@ -81,7 +81,7 @@ export class AuthService {
 
           // Notify user and navigate
           this.toastr.success('Logged in successfully!');
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/super-admin-dashboard']);
         },
         error: (err) => {
           console.error('Login error:', err); // Log error for debugging

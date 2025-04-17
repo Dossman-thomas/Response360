@@ -82,15 +82,15 @@ export class ManageOrganizationsComponent implements OnInit {
 
         if (Array.isArray(response.rows)) {
           // Flatten user data
-          const formattedData = response.rows.map((org: any) => ({
-            ...org,
-            user_email: org.users?.[0]?.user_email || 'N/A',
-            user_phone_number: org.users?.[0]?.user_phone_number || 'N/A',
-            // statusLabel: org.org_status ? 'Active' : 'Inactive',
-          }));
+          // const formattedData = response.rows.map((org: any) => ({
+          //   ...org,
+          //   user_email: org.users?.[0]?.user_email || 'N/A',
+          //   user_phone_number: org.users?.[0]?.user_phone_number || 'N/A',
+          //   // statusLabel: org.org_status ? 'Active' : 'Inactive',
+          // }));
 
           this.gridData = {
-            data: formattedData,
+            data: response.rows,
             total: response.count || response.rows.length,
           };
 
