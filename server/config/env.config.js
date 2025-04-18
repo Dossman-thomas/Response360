@@ -24,5 +24,10 @@ export const env = { // Environment configuration object
     username: process.env.EMAIL_USERNAME,
     password: process.env.EMAIL_PASSWORD,
   },
+  filePaths: {
+    staticFilePath: process.env.STATIC_FILE_PATH,
+    relativePath: process.env.RELATIVE_PATH,
+  },
   frontendUrl: process.env.FRONTEND_URL,
+
 };

@@ -28,8 +28,8 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(
-  '/shared/images',
-  express.static(path.join(__dirname, '../client/public/shared/images'))
+  env.filePaths.relativePath,
+  express.static(path.join(__dirname, env.filePaths.staticFilePath))
 );
 
 app.use('/api', routes);
