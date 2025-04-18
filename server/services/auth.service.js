@@ -21,7 +21,6 @@ export const loginSuperAdminService = async (payload) => {
     // Query the database to find a matching user
     const sequelize = UserModel.sequelize;
     const [decryptedExpr] = decryptSensitiveData('user_email', pubkey);
-    console.log('decryptedExpr', decryptedExpr);
     const user = await UserModel.findOne({
       attributes: [
         'user_id',
@@ -82,6 +81,7 @@ export const loginSuperAdminService = async (payload) => {
       encryptedPayload,
     };
   } catch (error) {
+    console.error('Error in loginSuperAdminService:', error);
     throw error;
   }
 };
