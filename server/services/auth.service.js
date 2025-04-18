@@ -69,7 +69,7 @@ export const loginSuperAdminService = async (payload) => {
       token: encryptService(token),
       userId: encryptService(user.user_id),
       user_email: encryptService(user.user_email),
-      user_password: encryptService(user_password),
+      // user_password: encryptService(user_password),
     };
 
     // Encrypt the response payload

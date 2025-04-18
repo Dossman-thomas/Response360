@@ -45,8 +45,8 @@ app.use((err, req, res, next) => {
 // Sync database and start the server after successful connection
 (async () => {
   try {
-    // await sequelize.sync({ alter: true });
-    // await sequelize.sync({ force: true });
+    // await sequelize.sync({ alter: env.db.alter });
+    // await sequelize.sync({ force: env.db.force });
 
     console.log('Database synced successfully');
     app.listen(PORT, () => {

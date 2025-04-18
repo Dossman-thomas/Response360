@@ -12,6 +12,8 @@ export const env = { // Environment configuration object
     password: process.env.DB_PASSWORD,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
+    force: process.env.DB_FORCE, // Force sync the database
+    alter: process.env.DB_ALTER, // Alter the database schema
   },
   server: {
     port: process.env.SERVER_PORT,
