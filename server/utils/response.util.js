@@ -7,7 +7,7 @@ const production = env.nodeEnv === 'prod';
 // Define an asynchronous function to handle responses
 const response = async (res, returnResponse) => {
   // Destructure properties from the returnResponse object
-  let { statusCode, message, data, count, error } = returnResponse;
+  let { statusCode, message, success, data, count, error } = returnResponse;
 
   // Check if the response status code indicates an internal server error
   if (statusCode === 500) {
@@ -24,6 +24,7 @@ const response = async (res, returnResponse) => {
   return res.status(statusCode).json({
     status: statusCode,
     message,
+    success,
     data,
     count,
     error,

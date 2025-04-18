@@ -35,9 +35,6 @@ export class LoginComponent implements OnInit {
     const storedPassword = this.cookieService.get('password');
     const storedRememberMe = this.cookieService.get('rememberMe');
 
-    console.log('Stored Email:', storedEmail);
-    console.log('Stored Password:', storedPassword);
-
     if (storedEmail) {
       this.email = this.cryptoService.Decrypt(storedEmail);
     }

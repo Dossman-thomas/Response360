@@ -18,8 +18,8 @@ export const updateUserPasswordController = async (req, res) => {
 
     return response(res, {
       statusCode: 200,
-      message: messages.general.SUCCESS,
-      data: result,
+      success: true,
+      message: messages.general.SUCCESS
     });
   } catch (error) {
     console.error('Error in updateUserPasswordController:', error);

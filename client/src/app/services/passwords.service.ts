@@ -26,4 +26,13 @@ export class PasswordsService {
       { payload: encryptedPayload }
     );
   }
+
+  updatePassword(userId: string, newPassword: string) {
+    const encryptedPayload = this.cryptoService.Encrypt({ userId, newPassword });
+
+    return this.http.post<{ success: boolean; message?: string }>(
+      `${environment.backendUrl}/user/update-password`,
+      { payload: encryptedPayload }
+    );
+  }
 }
