@@ -18,6 +18,9 @@ export class AdminMyAccountComponent implements OnInit {
   userData: any = {};
   showNewPassword = false;
   showConfirmPassword = false;
+  showCurrentPassword = false;
+  currentPasswordVerified = false; 
+  verifyingPassword = false; 
 
   constructor(
     private fb: FormBuilder,
@@ -55,16 +58,22 @@ export class AdminMyAccountComponent implements OnInit {
 
     this.passwordForm = this.fb.group(
       {
+        currentPassword: ['', Validators.required],
         newPassword: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', [Validators.required]],
+        confirmPassword: ['', Validators.required],
       },
       { validators: this.passwordsMatchValidator }
     );
+    
   }
 
   togglePasswordForm() {
     this.showPasswordForm = !this.showPasswordForm;
     this.passwordForm.reset();
+  }
+  
+  toggleCurrentPasswordVisibility(){
+    this.showCurrentPassword = !this.showCurrentPassword;
   }
 
   toggleNewPasswordVisibility() {
@@ -82,34 +91,83 @@ export class AdminMyAccountComponent implements OnInit {
       : { mismatch: true };
   }
 
-  updatePassword() {
-    const storedUserId = localStorage.getItem('userId');
-
-    if (!storedUserId) {
-      console.error('User ID not found in local storage');
-      return;
-    }
-
-    const userId = this.cryptoService.Decrypt(storedUserId);
-
-    const newPassword = this.passwordForm.get('newPassword')!.value;
-
-    this.passwordsService.updatePassword(userId, newPassword).subscribe(
+  verifyCurrentPassword() {
+    const currentPassword = this.passwordForm.get('currentPassword')?.value;
+  
+    if (!this.userEmail || !currentPassword) return;
+  
+    this.verifyingPassword = true;
+    this.passwordsService.verifyCurrentPassword(this.userEmail, currentPassword).subscribe(
       (res) => {
+        this.verifyingPassword = false;
         if (res.success) {
-          this.toastr.success('Password updated successfully');
-          this.passwordForm.reset();
-          this.togglePasswordForm();
+          this.currentPasswordVerified = true;
+          this.toastr.success('Current password confirmed');
         } else {
-          // show error
-          console.error('Error updating password:', res.message);
+          this.currentPasswordVerified = false;
+          this.toastr.error('Incorrect current password');
         }
       },
       (err) => {
-        console.error(err);
-        this.toastr.error('Error updating password');
-        this.passwordForm.reset();
+        this.verifyingPassword = false;
+        this.currentPasswordVerified = false;
+        this.toastr.error('Password verification failed');
+        console.error('Error verifying password:', err);
       }
     );
   }
+  
+
+  updatePassword() {
+    const storedUserId = localStorage.getItem('userId');
+  
+    if (!storedUserId) {
+      console.error('User ID not found in local storage');
+      this.toastr.error('Something went wrong. Please try again.');
+      return;
+    }
+  
+    const userId = this.cryptoService.Decrypt(storedUserId);
+    const currentPassword = this.passwordForm.get('currentPassword')?.value;
+    const newPassword = this.passwordForm.get('newPassword')?.value;
+  
+    if (!this.userEmail || !currentPassword || !newPassword) {
+      this.toastr.error('Please fill out all password fields');
+      return;
+    }
+  
+    // Step 1: Verify current password
+    this.passwordsService.verifyCurrentPassword(this.userEmail, currentPassword).subscribe(
+      (verifyRes) => {
+        if (!verifyRes.success) {
+          this.toastr.error('Current password is incorrect');
+          return;
+        }
+  
+        // Step 2: Update password
+        this.passwordsService.updatePassword(userId, newPassword).subscribe(
+          (updateRes) => {
+            if (updateRes.success) {
+              this.toastr.success('Password updated successfully');
+              this.passwordForm.reset();
+              this.togglePasswordForm();
+            } else {
+              console.error('Error updating password:', updateRes.message);
+              this.toastr.error(updateRes.message || 'Failed to update password');
+            }
+          },
+          (updateErr) => {
+            console.error(updateErr);
+            this.toastr.error('Error updating password');
+            this.passwordForm.reset();
+          }
+        );
+      },
+      (verifyErr) => {
+        console.error('Error verifying current password:', verifyErr);
+        this.toastr.error('Failed to verify current password');
+      }
+    );
+  }
+  
 }

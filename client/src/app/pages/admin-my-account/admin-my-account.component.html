@@ -35,90 +35,121 @@
     </div>
 
     <!-- Update Password Form -->
-    <form
-      *ngIf="showPasswordForm"
-      [formGroup]="passwordForm"
-      (ngSubmit)="updatePassword()"
-      class="mt-4"
+<form
+*ngIf="showPasswordForm"
+[formGroup]="passwordForm"
+(ngSubmit)="updatePassword()"
+class="mt-4"
+>
+<div class="form-group d-flex flex-column">
+  <!-- Current Password Field -->
+  <div class="input-group w-75 my-2">
+    <label
+      class="input-group-text w-25 justify-content-center"
+      for="currentPassword"
+      >Current Password:</label
     >
-      <div class="form-group d-flex flex-column">
-        <!-- New Password Field -->
-        <div class="input-group w-75 my-2">
-          <label
-            class="input-group-text w-25 justify-content-center"
-            for="newPassword"
-            >New Password:</label
-          >
-          <input
-            [type]="showNewPassword ? 'text' : 'password'"
-            id="newPassword"
-            class="form-control"
-            formControlName="newPassword"
-          />
-          <span
-            class="input-group-text"
-            (click)="toggleNewPasswordVisibility()"
-            style="cursor: pointer"
-          >
-            <i
-              class="fa"
-              [ngClass]="showNewPassword ? 'fa-eye' : 'fa-eye-slash'"
-            ></i>
-          </span>
-        </div>
-        <div
-          *ngIf="
-            passwordForm.get('newPassword')?.invalid &&
-            (passwordForm.get('newPassword')?.dirty ||
-              passwordForm.get('newPassword')?.touched)
-          "
-          class="text-danger"
-        >
-          Password must be at least 6 characters.
-        </div>
+    <input
+      [type]="showCurrentPassword ? 'text' : 'password'"
+      id="currentPassword"
+      class="form-control"
+      formControlName="currentPassword"
+    />
+    <span
+      class="input-group-text"
+      (click)="toggleCurrentPasswordVisibility()"
+      style="cursor: pointer"
+    >
+      <i
+        class="fa"
+        [ngClass]="showCurrentPassword ? 'fa-eye' : 'fa-eye-slash'"
+      ></i>
+    </span>
+  </div>
+  <div
+    *ngIf="passwordForm.get('currentPassword')?.invalid &&
+          (passwordForm.get('currentPassword')?.dirty || passwordForm.get('currentPassword')?.touched)"
+    class="text-danger"
+  >
+    Current password is required.
+  </div>
 
-        <!-- Confirm Password Field -->
-        <div class="input-group w-75 my-3">
-          <label
-            class="input-group-text w-25 justify-content-center"
-            for="confirmPassword"
-            >Confirm Password:</label
-          >
-          <input
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            id="confirmPassword"
-            class="form-control"
-            formControlName="confirmPassword"
-          />
-          <span
-            class="input-group-text"
-            (click)="toggleConfirmPasswordVisibility()"
-            style="cursor: pointer"
-          >
-            <i
-              class="fa"
-              [ngClass]="showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'"
-            ></i>
-          </span>
-        </div>
-        <div
-          *ngIf="passwordForm.errors?.['mismatch'] && (passwordForm.get('confirmPassword')?.dirty || passwordForm.get('confirmPassword')?.touched)"
-          class="text-danger"
-        >
-          Passwords must match.
-        </div>
+  <!-- New Password Field -->
+  <div class="input-group w-75 my-2">
+    <label
+      class="input-group-text w-25 justify-content-center"
+      for="newPassword"
+      >New Password:</label
+    >
+    <input
+      [type]="showNewPassword ? 'text' : 'password'"
+      id="newPassword"
+      class="form-control"
+      formControlName="newPassword"
+    />
+    <span
+      class="input-group-text"
+      (click)="toggleNewPasswordVisibility()"
+      style="cursor: pointer"
+    >
+      <i
+        class="fa"
+        [ngClass]="showNewPassword ? 'fa-eye' : 'fa-eye-slash'"
+      ></i>
+    </span>
+  </div>
+  <div
+    *ngIf="passwordForm.get('newPassword')?.invalid &&
+          (passwordForm.get('newPassword')?.dirty || passwordForm.get('newPassword')?.touched)"
+    class="text-danger"
+  >
+    Password must be at least 6 characters.
+  </div>
 
-        <!-- Submit Button -->
-        <div class="d-flex justify-content-center w-75 mt-4">
-          <button
-            type="submit"
-            class="btn btn-primary w-100"
-            [disabled]="passwordForm.invalid"
-          >
-            Update Password
-          </button>
-        </div>
-      </div>
-    </form>
+  <!-- Confirm Password Field -->
+  <div class="input-group w-75 my-3">
+    <label
+      class="input-group-text w-25 justify-content-center"
+      for="confirmPassword"
+      >Confirm Password:</label
+    >
+    <input
+      [type]="showConfirmPassword ? 'text' : 'password'"
+      id="confirmPassword"
+      class="form-control"
+      formControlName="confirmPassword"
+    />
+    <span
+      class="input-group-text"
+      (click)="toggleConfirmPasswordVisibility()"
+      style="cursor: pointer"
+    >
+      <i
+        class="fa"
+        [ngClass]="showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'"
+      ></i>
+    </span>
+  </div>
+  <div
+    *ngIf="passwordForm.errors?.['mismatch'] &&
+          (passwordForm.get('confirmPassword')?.dirty || passwordForm.get('confirmPassword')?.touched)"
+    class="text-danger"
+  >
+    Passwords must match.
+  </div>
+
+  <!-- Submit Button -->
+  <div class="d-flex justify-content-center w-75 mt-4">
+    <button
+      type="submit"
+      class="btn btn-primary w-100"
+      [disabled]="passwordForm.invalid"
+    >
+      Update Password
+    </button>
+  </div>
+</div>
+</form>
+
   </div>
 </div>

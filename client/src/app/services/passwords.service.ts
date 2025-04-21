@@ -35,4 +35,14 @@ export class PasswordsService {
       { payload: encryptedPayload }
     );
   }
+
+  verifyCurrentPassword(email: string, currentPassword: string) {
+    const encryptedPayload = this.cryptoService.Encrypt({ user_email: email, currentPassword });
+  
+    return this.http.post<{ success: boolean; message?: string }>(
+      `${environment.backendUrl}/auth/verify-password`,
+      { payload: encryptedPayload }
+    );
+  }
+  
 }
