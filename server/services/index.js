@@ -22,6 +22,8 @@ export { passwordResetService } from "./passwordReset.service.js";
 
 export { updateUserPasswordService } from "./updatePassword.service.js";
 
+export { verifyPasswordService } from "./verifyPassword.service.js";
+
 export { upload } from "./imageUpload.service.js";
 
 export { getDashboardStatsService } from "./stats.service.js";

@@ -24,6 +24,8 @@ export const messages = {
     USER_ALREADY_EXIST: 'User already exist',
     USER_ACCOUNT_DISABLE: 'Your account is disabled',
     PASSWORD_CHANGED: 'Password change successfully',
+    PASSWORD_NOT_MATCH: 'Password not match',
+    PASSWORD_VERIFIED: 'Password verified successfully',
     OLD_PASSWORD_INVALID: 'Old password invalid',
     NEW_PASSWORD_INVALID:
       'New password is similar to your old password please use different password',
