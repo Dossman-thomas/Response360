@@ -12,12 +12,24 @@
       </div>
     </div>
 
-    <!-- Display User Information -->
-    <div class="mt-4">
-      <p><strong>First Name:</strong> {{ userData.first_name || 'N/A' }}</p>
-      <p><strong>Last Name:</strong> {{ userData.last_name || 'N/A' }}</p>
-      <p><strong>Email:</strong> {{ userData.user_email || 'N/A' }}</p>
-      <p><strong>Phone Number:</strong> {{ userData.user_phone_number || 'N/A' }}</p>
+    <!-- Profile Info Row -->
+    <div class="d-flex align-items-start mt-4 gap-4">
+      <!-- Placeholder Logo -->
+      <div
+        class="rounded border bg-secondary"
+        style="width: 120px; height: 120px; opacity: 0.3"
+      >Prof Pic</div>
+
+      <!-- User Details -->
+      <div>
+        <p><strong>First Name:</strong> {{ userData.first_name || 'N/A' }}</p>
+        <p><strong>Last Name:</strong> {{ userData.last_name || 'N/A' }}</p>
+        <p><strong>Email:</strong> {{ userData.user_email || 'N/A' }}</p>
+        <p>
+          <strong>Phone Number:</strong>
+          {{ userData.user_phone_number || 'N/A' }}
+        </p>
+      </div>
     </div>
 
     <!-- Update Password Form -->
