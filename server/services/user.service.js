@@ -15,7 +15,7 @@ export const getUserByEmailService = async (payload) => {
     const foundUser = await UserModel.findOne({
       attributes: [
         'user_id',
-        ...decryptFields(['first_name', 'user_email'], pubkey),
+        ...decryptFields(['first_name', 'last_name', 'user_email', 'user_phone_number'], pubkey),
       ],
       where: sequelize.where(
         decryptedExpr,

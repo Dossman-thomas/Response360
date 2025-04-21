@@ -4,6 +4,7 @@ import { PasswordsService } from '../../services/passwords.service';
 import { CryptoService } from '../../services/crypto.service';
 import { CookieService } from 'ngx-cookie-service';
 import { ToastrService } from 'ngx-toastr';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-admin-my-account',
@@ -14,6 +15,7 @@ export class AdminMyAccountComponent implements OnInit {
   showPasswordForm = false;
   passwordForm!: FormGroup;
   userEmail: string | null = '';
+  userData: any = {};
   showNewPassword = false;
   showConfirmPassword = false;
 
@@ -22,7 +24,8 @@ export class AdminMyAccountComponent implements OnInit {
     private passwordsService: PasswordsService,
     private cryptoService: CryptoService,
     private cookieService: CookieService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -35,6 +38,19 @@ export class AdminMyAccountComponent implements OnInit {
       } catch (err) {
         console.error('Failed to decrypt user email from cookie:', err);
       }
+    }
+
+    // Call getUserByEmailService to fetch user info
+    if (this.userEmail) {
+      this.userService.getUserByEmail(this.userEmail).subscribe(
+        (user) => {
+          this.userData = user;
+        },
+        (error) => {
+          console.error('Error fetching user data:', error);
+          this.toastr.error('Failed to fetch user data');
+        }
+      );
     }
 
     this.passwordForm = this.fb.group(

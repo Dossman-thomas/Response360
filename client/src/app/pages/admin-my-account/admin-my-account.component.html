@@ -12,7 +12,13 @@
       </div>
     </div>
 
-    <p class="mt-2 mb-4">Email: {{ userEmail || 'N/A' }}</p>
+    <!-- Display User Information -->
+    <div class="mt-4">
+      <p><strong>First Name:</strong> {{ userData.first_name || 'N/A' }}</p>
+      <p><strong>Last Name:</strong> {{ userData.last_name || 'N/A' }}</p>
+      <p><strong>Email:</strong> {{ userData.user_email || 'N/A' }}</p>
+      <p><strong>Phone Number:</strong> {{ userData.user_phone_number || 'N/A' }}</p>
+    </div>
 
     <!-- Update Password Form -->
     <form
