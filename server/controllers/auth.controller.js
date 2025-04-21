@@ -1,6 +1,6 @@
-import { response } from "../utils/index.js";
-import { loginSuperAdminService } from "../services/index.js";
-import { messages } from "../messages/index.js";
+import { response } from '../utils/index.js';
+import { loginSuperAdminService } from '../services/index.js';
+import { messages } from '../messages/index.js';
 
 export const loginSuperAdminController = async (req, res) => {
   const { payload } = req.body;
@@ -9,7 +9,7 @@ export const loginSuperAdminController = async (req, res) => {
     if (!payload) {
       return response(res, {
         statusCode: 400,
-        message: "Controller: Encrypted payload string is required.",
+        message: messages.general.NO_PAYLOAD,
       });
     }
 
@@ -19,7 +19,7 @@ export const loginSuperAdminController = async (req, res) => {
     // Send success response with the encrypted token
     return response(res, {
       statusCode: 200,
-      message: user.message,
+      message: messages.auth.SIGNIN_SUCCESS,
       data: user.encryptedPayload,
     });
   } catch (error) {

@@ -3,6 +3,7 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { CryptoService } from '../../services/crypto.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +20,8 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private cookieService: CookieService,
-    private cryptoService: CryptoService
+    private cryptoService: CryptoService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -49,8 +51,43 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-    // Call login from the AuthService
-    this.authService.login(this.email, this.password, this.rememberMe);
+    this.authService
+      .login(this.email, this.password, this.rememberMe)
+      .subscribe({
+        next: (response) => {
+          const decrypted = this.cryptoService.Decrypt(response.data);
+
+          const { token, userId } = decrypted;
+
+          // Store token and user ID
+          localStorage.setItem('token', token);
+          localStorage.setItem('userId', userId);
+
+          const encryptedEmail = this.cryptoService.Encrypt(this.email);
+          const encryptedPassword = this.cryptoService.Encrypt(this.password);
+
+          // Handle "Remember Me" functionality
+          if (this.rememberMe) {
+            this.cookieService.set('email', String(encryptedEmail), 90);
+            this.cookieService.set('password', String(encryptedPassword), 90);
+            this.cookieService.set('rememberMe', 'true', 90);
+          } else {
+            this.cookieService.delete('email');
+            this.cookieService.delete('password');
+            this.cookieService.delete('rememberMe');
+          }
+
+          // Update authentication state
+          this.authService.setLoggedInState(true);
+
+          this.toastr.success('Logged in successfully!');
+          this.router.navigate(['/super-admin-dashboard']);
+        },
+        error: (err) => {
+          console.error('Login error:', err);
+          this.toastr.error('Invalid credentials. Please try again.');
+        },
+      });
   }
 
   togglePasswordVisibility() {

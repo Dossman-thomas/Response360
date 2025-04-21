@@ -40,68 +40,32 @@ export class AuthService {
     }
   }
 
+  setLoggedInState(state: boolean) {
+    this.isLoggedInSubject.next(state);
+  }
+
   login(user_email: string, user_password: string, rememberMe: boolean) {
-    // Encrypt the user's email, password, and rememberMe before sending it to the server
     const encryptedPayload = this.cryptoService.Encrypt({
       user_email,
       user_password,
       rememberMe,
     });
 
-    return this.http
-      .post<any>(`${environment.backendUrl}/auth/super-admin/login`, {
-        payload: encryptedPayload,
-      })
-      .subscribe({
-        next: (response) => {
-          // Decrypt the response data
-          const decryptedResponse = this.cryptoService.Decrypt(response.data);
-          const { token, userId, user_email, user_password } = decryptedResponse;
-
-          // Store the token and user in localStorage
-          localStorage.setItem('token', token);
-          localStorage.setItem('userId', userId);
-
-          // Handle "Remember Me" functionality
-          if (rememberMe) {
-            // Set encrypted cookies for email and password
-            this.cookieService.set('email', user_email, 90); // Save email for 90 days
-            this.cookieService.set('password', user_password, 90); // Save password for 90 days
-            this.cookieService.set('rememberMe', 'true', 90); // Save rememberMe flag
-          } else {
-            // Clear cookies if "Remember Me" is not selected
-            this.cookieService.delete('email');
-            this.cookieService.delete('password');
-            this.cookieService.delete('rememberMe');
-          }
-
-          // Update authentication state
-          this.isLoggedInSubject.next(true);
-          // this.userService.setCurrentUser(user);
-
-          // Notify user and navigate
-          this.toastr.success('Logged in successfully!');
-          this.router.navigate(['/super-admin-dashboard']);
-        },
-        error: (err) => {
-          console.error('Login error:', err); // Log error for debugging
-          this.toastr.error('Invalid credentials. Please try again.');
-        },
-        complete: () => {
-          console.log('Login request completed.');
-        },
-      });
+    return this.http.post<any>(
+      `${this.baseUrl}/login`,
+      { payload: encryptedPayload },
+      { headers: getHeaders() }
+    );
   }
 
   logout() {
     // Clear localStorage and cookies
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    // localStorage.removeItem('currentUser');
 
     // Update authentication state
     this.isLoggedInSubject.next(false);
-    // this.toastr.info('Logged out successfully!');
+    this.toastr.info('Logged out successfully!');
 
     // Navigate to login page after logout
     this.router.navigate(['/super-admin-login']);

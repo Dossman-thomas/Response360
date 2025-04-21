@@ -10,8 +10,8 @@ export const messages = {
     EMAIL_SENT: 'Email sent successfully',
     PAYMENT_REQUIRED: 'Payment required',
     PAYMENT_FAIL: 'Payment fail',
-    MINIMUM_PAYMENT: 'Please purchase a minimum of 2 Media Credits',
     OOPS: 'Oops! Something whet wrong. Please try again later',
+    NO_PAYLOAD: 'Encrypted payload string is required',
   },
   auth: {
     SIGNIN_SUCCESS: 'SignIn successfully',
