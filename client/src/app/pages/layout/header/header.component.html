@@ -13,6 +13,14 @@
             [ngClass]="{ show: isDropdownOpen }"
           >
             <li>
+              <button
+                class="dropdown-item"
+                [routerLink]="['/admin-my-account']"
+              >
+                My Account
+              </button>
+            </li>
+            <li>
               <button class="dropdown-item" (click)="logout()">Logout</button>
             </li>
           </ul>
