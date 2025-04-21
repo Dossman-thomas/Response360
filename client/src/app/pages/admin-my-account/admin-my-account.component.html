@@ -42,13 +42,15 @@
 class="mt-4"
 >
 <div class="form-group d-flex flex-column">
+
   <!-- Current Password Field -->
   <div class="input-group w-75 my-2">
     <label
       class="input-group-text w-25 justify-content-center"
       for="currentPassword"
-      >Current Password:</label
     >
+      Current Password:
+    </label>
     <input
       [type]="showCurrentPassword ? 'text' : 'password'"
       id="currentPassword"
@@ -67,11 +69,17 @@ class="mt-4"
     </span>
   </div>
   <div
-    *ngIf="passwordForm.get('currentPassword')?.invalid &&
-          (passwordForm.get('currentPassword')?.dirty || passwordForm.get('currentPassword')?.touched)"
+    *ngIf="
+      passwordForm.get('currentPassword')?.invalid &&
+      (passwordForm.get('currentPassword')?.dirty ||
+        passwordForm.get('currentPassword')?.touched)
+    "
     class="text-danger"
   >
     Current password is required.
+  </div>
+  <div *ngIf="incorrectCurrentPasswordError" class="text-danger">
+    Current password is incorrect. Could not update password.
   </div>
 
   <!-- New Password Field -->
@@ -79,8 +87,9 @@ class="mt-4"
     <label
       class="input-group-text w-25 justify-content-center"
       for="newPassword"
-      >New Password:</label
     >
+      New Password:
+    </label>
     <input
       [type]="showNewPassword ? 'text' : 'password'"
       id="newPassword"
@@ -99,8 +108,11 @@ class="mt-4"
     </span>
   </div>
   <div
-    *ngIf="passwordForm.get('newPassword')?.invalid &&
-          (passwordForm.get('newPassword')?.dirty || passwordForm.get('newPassword')?.touched)"
+    *ngIf="
+      passwordForm.get('newPassword')?.invalid &&
+      (passwordForm.get('newPassword')?.dirty ||
+        passwordForm.get('newPassword')?.touched)
+    "
     class="text-danger"
   >
     Password must be at least 6 characters.
@@ -111,8 +123,9 @@ class="mt-4"
     <label
       class="input-group-text w-25 justify-content-center"
       for="confirmPassword"
-      >Confirm Password:</label
     >
+      Confirm Password:
+    </label>
     <input
       [type]="showConfirmPassword ? 'text' : 'password'"
       id="confirmPassword"
@@ -131,8 +144,11 @@ class="mt-4"
     </span>
   </div>
   <div
-    *ngIf="passwordForm.errors?.['mismatch'] &&
-          (passwordForm.get('confirmPassword')?.dirty || passwordForm.get('confirmPassword')?.touched)"
+    *ngIf="
+      passwordForm.errors?.['mismatch'] &&
+      (passwordForm.get('confirmPassword')?.dirty ||
+        passwordForm.get('confirmPassword')?.touched)
+    "
     class="text-danger"
   >
     Passwords must match.

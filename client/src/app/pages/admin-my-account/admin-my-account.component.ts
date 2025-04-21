@@ -21,6 +21,9 @@ export class AdminMyAccountComponent implements OnInit {
   showCurrentPassword = false;
   currentPasswordVerified = false; 
   verifyingPassword = false; 
+  passwordMismatchError = false; // Flag to track password mismatch error
+  incorrectCurrentPasswordError = false; // Flag to track incorrect current password error
+  passwordUpdateError = ''; // Variable to store password update error message
 
   constructor(
     private fb: FormBuilder,
@@ -102,16 +105,18 @@ export class AdminMyAccountComponent implements OnInit {
         this.verifyingPassword = false;
         if (res.success) {
           this.currentPasswordVerified = true;
-          this.toastr.success('Current password confirmed');
+          this.incorrectCurrentPasswordError = false;
+          // this.toastr.success('Current password confirmed');
         } else {
           this.currentPasswordVerified = false;
-          this.toastr.error('Incorrect current password');
+          this.incorrectCurrentPasswordError = true;
+          // this.toastr.error('Incorrect current password');
         }
       },
       (err) => {
         this.verifyingPassword = false;
         this.currentPasswordVerified = false;
-        this.toastr.error('Password verification failed');
+        // this.toastr.error('Password verification failed');
         console.error('Error verifying password:', err);
       }
     );
@@ -140,7 +145,8 @@ export class AdminMyAccountComponent implements OnInit {
     this.passwordsService.verifyCurrentPassword(this.userEmail, currentPassword).subscribe(
       (verifyRes) => {
         if (!verifyRes.success) {
-          this.toastr.error('Current password is incorrect');
+          // this.toastr.error('Current password is incorrect');
+          this.incorrectCurrentPasswordError = true;
           return;
         }
   
@@ -165,6 +171,7 @@ export class AdminMyAccountComponent implements OnInit {
       },
       (verifyErr) => {
         console.error('Error verifying current password:', verifyErr);
+        this.incorrectCurrentPasswordError = true;
         this.toastr.error('Failed to verify current password');
       }
     );
