@@ -8,6 +8,8 @@ import {
   encryptFields,
   decryptFields,
   decryptUserFields,
+  checkDupEmailsOnCreateOrg,
+  checkDupEmailsOnUpdateOrg 
 } from '../utils/index.js';
 import { encryptService, decryptService } from '../services/index.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,6 +43,12 @@ export const createOrganizationService = async (payload) => {
       adminEmail,
       adminPhone,
     } = encryptFields(orgData, pubkey);
+
+    // Check for duplicate organization email
+    const dupErrors = await checkDupEmailsOnCreateOrg(orgEmail, adminEmail); 
+    if (dupErrors.length > 0) {
+      throw new Error(dupErrors.join(' ')); 
+    }
 
     // Create the organization
     const organization = await OrganizationModel.create(
@@ -222,11 +230,15 @@ export const updateOrganizationService = async (orgId, payload) => {
       );
     }
 
-    // console.log('logo path sent from frontend update: ', orgData.logo);
-
     // Encrypt sensitive data
     const { orgName, orgEmail, orgPhone, registeredAddress, website, logo } =
       encryptFields(orgData, pubkey);
+
+    // Check for duplicate email (excluding this org)
+    const dupErrors = await checkDupEmailsOnUpdateOrg(orgId, orgEmail); 
+    if (dupErrors.length > 0) {
+      throw new Error(dupErrors.join(' ')); 
+    }
 
     // Step 3: Update the organization
     const updatedOrganization = await OrganizationModel.update(

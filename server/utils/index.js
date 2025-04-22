@@ -8,3 +8,7 @@ export { encryptSensitiveData } from './pgp-encrypt.util.js';
 export { encryptFields } from './encrypt-fields.util.js';
 export { decryptSensitiveData } from './pgp-decrypt.util.js';
 export { decryptFields, decryptUserFields } from './decrypt-fields.util.js';
+export {
+  checkDupEmailsOnCreateOrg,
+  checkDupEmailsOnUpdateOrg,
+} from './checkDupEmails.util.js';
