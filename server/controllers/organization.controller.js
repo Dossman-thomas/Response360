@@ -16,7 +16,7 @@ export const createOrganizationController = async (req, res) => {
     const { payload } = req.body;
 
     if (!payload) {
-      return res.status(400).json({
+      return response(res, {
         status: 400,
         message: 'Missing encrypted data in the request',
       });
@@ -66,7 +66,7 @@ export const getOrganizationByIdController = async (req, res) => {
 
     if (!orgId || !validateUuid(orgId)) {
       // Ensure orgId is provided and valid
-      return res.status(400).json({
+      return response(res, {
         status: 400,
         message: 'Invalid or missing organization ID in the request',
       });
@@ -95,14 +95,15 @@ export const updateOrganizationController = async (req, res) => {
     const { orgId } = req.params; // Get the organization ID from the URL params
 
     if (!payload) {
-      return res.status(400).json({
-        status: 400,
+      return response(res, {
+        statusCode: 400,
         message: 'Missing encrypted data in the request',
       });
     }
+    
 
     if (!orgId) {
-      return res.status(400).json({
+      return response(res, {
         status: 400,
         message: 'Organization ID is required',
       });
@@ -133,14 +134,14 @@ export const deleteOrganizationController = async (req, res) => {
     const { orgId } = req.params; // Get the organization ID from the URL params
 
     if (!orgId) {
-      return res.status(400).json({
+      return response(res, {
         status: 400,
         message: 'Missing organization ID in the request',
       });
     }
 
     if (!payload) {
-      return res.status(400).json({
+      return response(res, {
         status: 400,
         message: 'Missing encrypted data in the request',
       });
