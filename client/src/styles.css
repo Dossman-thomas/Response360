@@ -8,6 +8,7 @@
 /* Root */
 :root {
   --primary-red: #FF4C4C;
+  --primary-red-hover: #fc6161;
   --action-blue: #3e83b4;
   --action-blue-hover: #6792b1;
   --primary-bg: #242424;

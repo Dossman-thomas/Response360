@@ -2,9 +2,9 @@
   <div class="row">
     <div class="col-md-12 col-lg-12 col-xl-12 px-4">
       <h6 class="secondary-text">Manage Organizations > Organization Details</h6>
-      <div class="card shadow-sm mt-3">
+      <div class="card gradient shadow-sm mt-3">
         <div class="card-body px-4 pt-4 pb-5">
-          <h6 class="card-title mb-4">Organization Details</h6>
+          <h5 class="card-title mb-4 primary-text">Organization Details</h5>
 
           <form [formGroup]="organizationForm">
             <div class="row">
@@ -42,15 +42,15 @@
                 <!-- Display these fields only if mode is 'update' -->
                 <div *ngIf="mode === 'update'">
                   <div class="d-flex align-items-center">
-                    <label class="me-2">Created:</label>
-                    <p class="form-control-plaintext">
+                    <label class="me-2 primary-text">Created:</label>
+                    <p class="form-control-plaintext primary-text">
                       {{ org_created_at || 'N/A' }}
                     </p>
                   </div>
 
                   <div class="d-flex align-items-center text-nowrap">
-                    <label class="me-2">Last Modified:</label>
-                    <p class="form-control-plaintext">
+                    <label class="me-2 primary-text">Last Modified:</label>
+                    <p class="form-control-plaintext primary-text">
                       {{ org_updated_at || 'N/A' }}
                     </p>
                   </div>
@@ -78,7 +78,7 @@
                 <div class="row">
                   <div class="col-md-6">
                     <div class="mb-3">
-                      <label class="form-label">Admin First Name</label>
+                      <label class="form-label primary-text">Admin First Name</label>
                       <input
                         type="text"
                         class="form-control"
@@ -96,7 +96,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Admin Email</label>
+                      <label class="form-label primary-text">Admin Email</label>
                       <input
                         type="email"
                         class="form-control"
@@ -134,7 +134,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Organization Name</label>
+                      <label class="form-label primary-text">Organization Name</label>
                       <input
                         type="text"
                         class="form-control"
@@ -151,7 +151,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Organization Email</label>
+                      <label class="form-label primary-text">Organization Email</label>
                       <input
                         type="email"
                         class="form-control"
@@ -183,7 +183,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Organization Phone</label>
+                      <label class="form-label primary-text">Organization Phone</label>
                       <input
                         type="text"
                         class="form-control"
@@ -200,7 +200,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Status</label>
+                      <label class="form-label primary-text">Status</label>
                       <select class="form-select" formControlName="org_status">
                         <option value="Enabled">Enabled</option>
                         <option value="Disabled">Disabled</option>
@@ -210,7 +210,7 @@
 
                   <div class="col-md-6">
                     <div class="mb-3">
-                      <label class="form-label">Admin Last Name</label>
+                      <label class="form-label primary-text">Admin Last Name</label>
                       <input
                         type="text"
                         class="form-control"
@@ -228,7 +228,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Admin Phone</label>
+                      <label class="form-label primary-text">Admin Phone</label>
                       <input
                         type="text"
                         class="form-control"
@@ -246,7 +246,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Organization Type</label>
+                      <label class="form-label primary-text">Organization Type</label>
                       <select class="form-select" formControlName="org_type">
                         <option value="" disabled>Organization Type</option>
                         <option value="Emergency Management">
@@ -262,7 +262,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Jurisdiction Size</label>
+                      <label class="form-label primary-text">Jurisdiction Size</label>
                       <select
                         class="form-select"
                         formControlName="jurisdiction_size"
@@ -275,7 +275,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Registered Address</label>
+                      <label class="form-label primary-text">Registered Address</label>
                       <input
                         type="text"
                         class="form-control"
@@ -284,7 +284,7 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Website</label>
+                      <label class="form-label primary-text">Website</label>
                       <input
                         type="text"
                         class="form-control"
@@ -300,7 +300,7 @@
             <div class="d-flex justify-content-center mt-4">
               <button
                 type="submit"
-                class="btn btn-primary"
+                class="btn action-btn"
                 (click)="onSubmit()"
               >
                 {{ mode === 'update' ? 'Update' : 'Create' }}
