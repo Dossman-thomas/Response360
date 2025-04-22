@@ -1,25 +1,25 @@
 <div class="container mt-4 px-4">
   <!-- Page Header -->
-  <h6>Dashboard ></h6>
+  <h6 class="secondary-text">Dashboard ></h6>
 
   <div class="d-flex gap-4 my-4">
-    <div class="card p-4 mb-3 w-25">
+    <div class="card p-4 mb-3 w-25 primary-red">
       <div class="mt-3">
-        <h5>{{ totalOrganizations }}</h5>
+        <h2 class="primary-text">{{ totalOrganizations }}</h2>
       </div>
-      <div>Total Organizations</div>
+      <div class="primary-text">Total Organizations</div>
     </div>
 
-    <div class="card p-4 mb-3 w-25">
+    <div class="card p-4 mb-3 w-25 primary-red">
       <div class="mt-3">
-        <h5>{{ totalUsers }}</h5>
+        <h2 class="primary-text">{{ totalUsers }}</h2>
       </div>
-      <div>Total Users</div>
+      <div class="primary-text">Total Users</div>
     </div>
   </div>
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="m-0">Recent Organizations</h5>
-    <button class="btn btn-secondary me-4" [routerLink]="['/manage-organizations']">View</button>
+    <h5 class="m-0 primary-text">Recent Organizations</h5>
+    <button class="btn me-4 action-btn" [routerLink]="['/manage-organizations']">View</button>
   </div>
   <!-- Grid -->
   <kendo-grid

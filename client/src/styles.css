@@ -10,7 +10,7 @@
   --primary-red: #FF4C4C;
   --action-blue: #3e83b4;
   --action-blue-hover: #6792b1;
-  --primary-bg: #1E1E1E;
+  --primary-bg: #242424;
   --secondary-bg: #3C3C3C;
   --primary-text: #FFFFFF;
   --secondary-text: #CACACA;
@@ -29,6 +29,28 @@ body {
   background-color: var(--action-blue-hover);
   color: var(--primary-text);
 }
+
+.gradient {
+  background: linear-gradient(165.92deg, #3C3C3C 55.73%, #9A9797 121.24%);
+}
+
+.primary-text {
+  color: var(--primary-text);
+}
+
+.secondary-text {
+  color: var(--secondary-text);
+}
+
+.primary-red {
+  background-color: var(--primary-red);
+}
+
+.action-blue {
+  color: var(--action-blue);
+}
+
+
 
 /* Grid styles */
 kendo-grid-filter-menu-container {
