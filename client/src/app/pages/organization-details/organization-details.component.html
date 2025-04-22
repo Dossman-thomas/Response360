@@ -44,14 +44,14 @@
                   <div class="d-flex align-items-center">
                     <label class="me-2">Created:</label>
                     <p class="form-control-plaintext">
-                      {{ org_created_at || "N/A" }}
+                      {{ org_created_at || 'N/A' }}
                     </p>
                   </div>
 
                   <div class="d-flex align-items-center text-nowrap">
                     <label class="me-2">Last Modified:</label>
                     <p class="form-control-plaintext">
-                      {{ org_updated_at || "N/A" }}
+                      {{ org_updated_at || 'N/A' }}
                     </p>
                   </div>
 
@@ -68,7 +68,7 @@
                       [class.text-success]="org_status === 'Enabled'"
                       [class.text-danger]="org_status === 'Disabled'"
                     >
-                      {{ org_status || "N/A" }}
+                      {{ org_status || 'N/A' }}
                     </p>
                   </div>
                 </div>
@@ -91,7 +91,7 @@
                           organizationForm.get('admin_first_name')?.invalid &&
                           organizationForm.get('admin_first_name')?.touched
                         "
-                        >{{ getErrorMessage("admin_first_name") }}</small
+                        >{{ getErrorMessage('admin_first_name') }}</small
                       >
                     </div>
 
@@ -102,15 +102,21 @@
                         class="form-control"
                         formControlName="admin_email"
                         [readonly]="mode === 'update'"
+                        [ngClass]="{
+                          'is-invalid':
+                            organizationForm.get('admin_email')?.touched &&
+                            organizationForm.get('admin_email')?.invalid
+                        }"
                       />
                       <small
                         class="text-danger"
                         *ngIf="
-                          organizationForm.get('admin_email')?.invalid &&
-                          organizationForm.get('admin_email')?.touched
+                          organizationForm.get('admin_email')?.touched &&
+                          organizationForm.get('admin_email')?.invalid
                         "
-                        >{{ getErrorMessage("admin_email") }}</small
                       >
+                        {{ getErrorMessage('admin_email') }}
+                      </small>
                     </div>
 
                     <div class="mb-3">
@@ -126,25 +132,37 @@
                           organizationForm.get('org_name')?.invalid &&
                           organizationForm.get('org_name')?.touched
                         "
-                        >{{ getErrorMessage("org_name") }}</small
+                        >{{ getErrorMessage('org_name') }}</small
                       >
                     </div>
 
                     <div class="mb-3">
                       <label class="form-label">Organization Email</label>
                       <input
-                        type="text"
+                        type="email"
                         class="form-control"
                         formControlName="org_email"
+                        [ngClass]="{
+                          'is-invalid':
+                            organizationForm.get('org_email')?.touched &&
+                            organizationForm.get('org_email')?.invalid
+                        }"
                       />
                       <small
-                        class="text-danger"
-                        *ngIf="
-                          organizationForm.get('org_email')?.invalid &&
-                          organizationForm.get('org_email')?.touched
-                        "
-                        >{{ getErrorMessage("org_email") }}</small
-                      >
+                      class="text-danger"
+                      *ngIf="
+                        organizationForm.get('org_email')?.touched &&
+                        (organizationForm.get('org_email')?.invalid ||
+                          organizationForm.get('org_email')?.hasError('custom'))
+                      "
+                    >
+                      {{
+                        organizationForm.get('org_email')?.hasError('custom')
+                          ? organizationForm.get('org_email')?.getError('custom')
+                          : getErrorMessage('org_email')
+                      }}
+                    </small>
+                    
                     </div>
 
                     <div class="mb-3">
@@ -160,7 +178,7 @@
                           organizationForm.get('org_phone_number')?.invalid &&
                           organizationForm.get('org_phone_number')?.touched
                         "
-                        >{{ getErrorMessage("org_phone_number") }}</small
+                        >{{ getErrorMessage('org_phone_number') }}</small
                       >
                     </div>
 
@@ -188,7 +206,7 @@
                           organizationForm.get('admin_last_name')?.invalid &&
                           organizationForm.get('admin_last_name')?.touched
                         "
-                        >{{ getErrorMessage("admin_last_name") }}</small
+                        >{{ getErrorMessage('admin_last_name') }}</small
                       >
                     </div>
 
@@ -206,7 +224,7 @@
                           organizationForm.get('admin_phone_number')?.invalid &&
                           organizationForm.get('admin_phone_number')?.touched
                         "
-                        >{{ getErrorMessage("admin_phone_number") }}</small
+                        >{{ getErrorMessage('admin_phone_number') }}</small
                       >
                     </div>
 
@@ -268,7 +286,7 @@
                 class="btn btn-primary"
                 (click)="onSubmit()"
               >
-                {{ mode === "update" ? "Update" : "Create" }}
+                {{ mode === 'update' ? 'Update' : 'Create' }}
               </button>
             </div>
           </form>

@@ -94,7 +94,6 @@ export class OrganizationDetailsComponent implements OnInit {
 
   fetchOrganizationDetails(orgId: string): void {
     this.organizationService.getOrganizationById(orgId).subscribe((data) => {
-
       console.log('fetch Org:logo path:', data.logo);
       // Patch organization data
       this.organizationForm.patchValue({
@@ -165,7 +164,9 @@ export class OrganizationDetailsComponent implements OnInit {
 
     const formValues = this.organizationForm.value;
     const orgId = this.route.snapshot.queryParamMap.get('orgId');
-    const relativeLogoPath = formValues.logo?.replace(environment.backendHost, '').trim();
+    const relativeLogoPath = formValues.logo
+      ?.replace(environment.backendHost, '')
+      .trim();
 
     console.log('Form values:', formValues);
     console.log('Relative logo path:', relativeLogoPath);
@@ -191,10 +192,15 @@ export class OrganizationDetailsComponent implements OnInit {
           },
           error: (err) => {
             console.error('Failed to update organization:', err);
+
+            if (err?.error?.field === 'orgEmail' && err?.error?.message) {
+              this.organizationForm
+                .get('org_email')
+                ?.setErrors({ custom: err.error.message });
+            }
           },
         });
     } else {
-
       this.organizationService
         .createOrganization(
           formValues.org_name,
@@ -245,7 +251,7 @@ export class OrganizationDetailsComponent implements OnInit {
         next: (response) => {
           console.log('Image uploaded:', response);
           this.toastr.success('Logo uploaded successfully!');
-          
+
           // Save encrypted path in form
           this.organizationForm.patchValue({ logo: response.path });
 

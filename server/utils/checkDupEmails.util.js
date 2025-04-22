@@ -1,15 +1,23 @@
 import { OrganizationModel, UserModel } from '../database/models/index.js';
-// import { sequelize } from '../config/index.js';
 import { Sequelize } from 'sequelize';
+import { env } from '../config/index.js';
+
+const pubkey = env.encryption.pubkey;
 
 // Check for duplicate emails on CREATE
 export const checkDupEmailsOnCreateOrg = async (orgEmail, adminEmail) => {
+
+  
   const orgMatch = await OrganizationModel.findOne({
-    where: { org_email: orgEmail },
+    where: Sequelize.literal(
+      `PGP_SYM_DECRYPT(org_email::bytea, '${pubkey}') = '${orgEmail}'`
+    ),
   });
 
   const adminMatch = await UserModel.findOne({
-    where: { user_email: adminEmail },
+    where: Sequelize.literal(
+      `PGP_SYM_DECRYPT(user_email::bytea, '${pubkey}') = '${adminEmail}'`
+    ),
   });
 
   const errors = {
@@ -21,17 +29,32 @@ export const checkDupEmailsOnCreateOrg = async (orgEmail, adminEmail) => {
 };
 
 // Check for duplicate org email on UPDATE
-export const checkDupEmailsOnUpdateOrg = async (orgId, orgEmail) => {
-  const orgMatch = await OrganizationModel.findOne({
-    where: {
-      org_email: orgEmail,
-      org_id: { [Sequelize.Op.ne]: orgId },
-    },
-  });
+export const checkDupEmailsOnUpdateOrg = async (orgId, decryptedOrgEmail) => {
+  try {
 
-  const errors = {
-    orgEmail: orgMatch ? 'Organization email is already in use.' : null,
-  };
+    const orgMatch = await OrganizationModel.findOne({
+      where: {
+        [Sequelize.Op.and]: [
+          Sequelize.literal(
+            `PGP_SYM_DECRYPT(org_email::bytea, '${pubkey}') = '${decryptedOrgEmail}'`
+          ),
+          { org_id: { [Sequelize.Op.ne]: orgId } },
+        ],
+      },
+    });
 
-  return errors;
+    if (orgMatch) {
+      console.log('Duplicate org email found!');
+    }
+
+    const errors = {
+      orgEmail: orgMatch ? 'Organization email is already in use.' : null,
+    };
+
+    return errors;
+  } catch (error) {
+    console.error('Error checking for duplicate org email:', error);
+    throw error;
+  }
 };
+

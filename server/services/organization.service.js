@@ -9,7 +9,7 @@ import {
   decryptFields,
   decryptUserFields,
   checkDupEmailsOnCreateOrg,
-  checkDupEmailsOnUpdateOrg 
+  checkDupEmailsOnUpdateOrg,
 } from '../utils/index.js';
 import { encryptService, decryptService } from '../services/index.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -45,11 +45,11 @@ export const createOrganizationService = async (payload) => {
     } = encryptFields(orgData, pubkey);
 
     // Check for duplicate organization email
-    const dupErrors = await checkDupEmailsOnCreateOrg(orgEmail, adminEmail); 
+    const dupErrors = await checkDupEmailsOnCreateOrg(orgEmail, adminEmail);
     // If there are errors, throw them
     for (const key in dupErrors) {
       if (dupErrors[key]) {
-        throw new Error(dupErrors[key]); 
+        throw new Error(dupErrors[key]);
       }
     }
 
@@ -233,19 +233,26 @@ export const updateOrganizationService = async (orgId, payload) => {
       );
     }
 
+    const decryptedOrgEmail = orgData.orgEmail;
+
+    console.log(
+      'Checking for duplicate org email:',
+      decryptedOrgEmail,
+      'excluding orgId:',
+      orgId
+    );
+
+    // Check for duplicate email (excluding this org)
+    const dupErrors = await checkDupEmailsOnUpdateOrg(orgId, decryptedOrgEmail);
+
+    // If there are errors, throw them
+    if (dupErrors.orgEmail) {
+      throw new Error(dupErrors.orgEmail); // This will trigger an error
+    }
+
     // Encrypt sensitive data
     const { orgName, orgEmail, orgPhone, registeredAddress, website, logo } =
       encryptFields(orgData, pubkey);
-
-    // Check for duplicate email (excluding this org)
-    const dupErrors = await checkDupEmailsOnUpdateOrg(orgId, orgEmail); 
-    
-    // If there are errors, throw them
-    for (const key in dupErrors) {
-      if (dupErrors[key]) {
-        throw new Error(dupErrors[key]); 
-      }
-    }
 
     // Step 3: Update the organization
     const updatedOrganization = await OrganizationModel.update(

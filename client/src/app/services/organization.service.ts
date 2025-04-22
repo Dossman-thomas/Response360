@@ -4,19 +4,62 @@ import { getHeaders } from '../utils/getHeaders.util';
 import { Observable, throwError } from 'rxjs';
 import { CryptoService } from './crypto.service';
 import { map, catchError } from 'rxjs/operators';
-import { environment } from '../shared/environments/environment'
+import { environment } from '../shared/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrganizationService {
-
-  constructor(
-    private http: HttpClient,
-    private cryptoService: CryptoService,
-  ) {}
+  constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
   // Create a new organization
+  // createOrganization(
+  //   orgName: string,
+  //   orgEmail: string,
+  //   orgPhone: string,
+  //   registeredAddress: string,
+  //   orgType: string,
+  //   jurisdictionSize: string,
+  //   website: string,
+  //   adminFirstName: string,
+  //   adminLastName: string,
+  //   adminEmail: string,
+  //   adminPhone: string,
+  //   logo?: string
+  // ) {
+  //   // retrieve logged in user's ID from local storage
+  //   const userId = localStorage.getItem('userId');
+  //   const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
+
+  //   // Encrypt the form data into a single payload
+  //   const payload: any = {
+  //     orgName,
+  //     orgEmail,
+  //     orgPhone,
+  //     registeredAddress,
+  //     orgType,
+  //     jurisdictionSize,
+  //     website,
+  //     adminFirstName,
+  //     adminLastName,
+  //     adminEmail,
+  //     adminPhone,
+  //     decryptedUserId,
+  //   };
+
+  //   if (logo !== undefined) {
+  //     payload.logo = logo;
+  //   }
+
+  //   const encryptedPayload = this.cryptoService.Encrypt(payload);
+
+  //   // Send the encrypted payload to the backend
+  //   return this.http.post<any>(
+  //     `${environment.backendUrl}/organization/create`,
+  //     { payload: encryptedPayload },
+  //     { headers: getHeaders() }
+  //   );
+  // }
   createOrganization(
     orgName: string,
     orgEmail: string,
@@ -30,7 +73,7 @@ export class OrganizationService {
     adminEmail: string,
     adminPhone: string,
     logo?: string
-  ) {
+  ): Observable<any> {
     // retrieve logged in user's ID from local storage
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
@@ -50,30 +93,57 @@ export class OrganizationService {
       adminPhone,
       decryptedUserId,
     };
-    
+
     if (logo !== undefined) {
       payload.logo = logo;
     }
-    
-    const encryptedPayload = this.cryptoService.Encrypt(payload);
-    
 
-    // Send the encrypted payload to the backend
-    return this.http.post<any>(
-      `${environment.backendUrl}/organization/create`,
-      { payload: encryptedPayload },
-      { headers: getHeaders() }
-    );
+    const encryptedPayload = this.cryptoService.Encrypt(payload);
+
+    // Send the encrypted payload to the backend and handle errors
+    return this.http
+      .post<any>(
+        `${environment.backendUrl}/organization/create`,
+        { payload: encryptedPayload },
+        { headers: getHeaders() }
+      )
+      .pipe(
+        catchError((error) => {
+          // Check if the error is related to duplicate emails and return them
+          if (error.error && error.error.message) {
+            if (
+              error.error.message.includes(
+                'Organization email is already in use'
+              )
+            ) {
+              return throwError({
+                orgEmail: 'Organization email is already in use.',
+              });
+            }
+            if (error.error.message.includes('Admin email is already in use')) {
+              return throwError({
+                adminEmail: 'Admin email is already in use.',
+              });
+            }
+          }
+          // For other errors, throw the error
+          return throwError(error);
+        })
+      );
   }
 
   // Read all organizations
   getAllOrganizations(body: any): Observable<any> {
     const encryptedPayload = this.cryptoService.Encrypt(body);
-  
+
     return this.http
-      .post<any>(`${environment.backendUrl}/organization/read`, { payload: encryptedPayload }, {
-        headers: getHeaders(),
-      })
+      .post<any>(
+        `${environment.backendUrl}/organization/read`,
+        { payload: encryptedPayload },
+        {
+          headers: getHeaders(),
+        }
+      )
       .pipe(
         map((res) => {
           const decryptedData = this.cryptoService.Decrypt(res.data);
@@ -85,7 +155,7 @@ export class OrganizationService {
         })
       );
   }
-  
+
   // Read a single organization by ID
   getOrganizationById(orgId: string): Observable<any> {
     // Encode encrypted orgId to make it safe for URL
@@ -108,6 +178,51 @@ export class OrganizationService {
   }
 
   // Update an organization
+  // updateOrganization(
+  //   orgId: string,
+  //   orgName: string,
+  //   orgEmail: string,
+  //   orgPhone: string,
+  //   registeredAddress: string,
+  //   orgType: string,
+  //   jurisdictionSize: string,
+  //   website: string,
+  //   status: string,
+  //   logo?: string
+  // ) {
+  //   // retrieve logged in user's ID from local storage
+  //   const userId = localStorage.getItem('userId');
+  //   const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
+
+  //   // Encrypt the form data into a single payload
+  //   const payload: any = {
+  //     orgName,
+  //     orgEmail,
+  //     orgPhone,
+  //     registeredAddress,
+  //     orgType,
+  //     jurisdictionSize,
+  //     website,
+  //     status,
+  //     decryptedUserId,
+  //   };
+
+  //   if (logo !== undefined) {
+  //     payload.logo = logo;
+  //   }
+
+  //   const encryptedPayload = this.cryptoService.Encrypt(payload);
+
+  //   // Encode encrypted orgId to make it safe for URL
+  //   const encodedOrgId = encodeURIComponent(orgId);
+
+  //   // Send the encrypted payload to the backend and return the observable
+  //   return this.http.put<any>(
+  //     `${environment.backendUrl}/organization/update/${encodedOrgId}`,
+  //     { payload: encryptedPayload },
+  //     { headers: getHeaders() }
+  //   );
+  // }
   updateOrganization(
     orgId: string,
     orgName: string,
@@ -119,7 +234,7 @@ export class OrganizationService {
     website: string,
     status: string,
     logo?: string
-  ) {
+  ): Observable<any> {
     // retrieve logged in user's ID from local storage
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
@@ -136,23 +251,44 @@ export class OrganizationService {
       status,
       decryptedUserId,
     };
-    
+
     if (logo !== undefined) {
       payload.logo = logo;
     }
-    
+
     const encryptedPayload = this.cryptoService.Encrypt(payload);
-    
 
     // Encode encrypted orgId to make it safe for URL
     const encodedOrgId = encodeURIComponent(orgId);
 
-    // Send the encrypted payload to the backend and return the observable
-    return this.http.put<any>(
-      `${environment.backendUrl}/organization/update/${encodedOrgId}`,
-      { payload: encryptedPayload },
-      { headers: getHeaders() }
-    );
+    // Send the encrypted payload to the backend and handle errors
+    return this.http
+      .put<any>(
+        `${environment.backendUrl}/organization/update/${encodedOrgId}`,
+        { payload: encryptedPayload },
+        { headers: getHeaders() }
+      )
+      .pipe(
+        catchError((error) => {
+          // Check if the error is related to duplicate emails and return a structured error
+          if (error.error && error.error.message) {
+            if (
+              error.error.message.includes(
+                'Organization email is already in use'
+              )
+            ) {
+              return throwError(() => ({
+                error: {
+                  message: 'Organization email is already in use.',
+                  field: 'orgEmail',
+                },
+              }));
+            }
+          }
+          // For other errors, throw the error as-is
+          return throwError(() => error);
+        })
+      );
   }
 
   // Delete an organization (soft delete)
@@ -160,27 +296,32 @@ export class OrganizationService {
     // Retrieve logged-in user's encrypted ID from local storage
     const userId = localStorage.getItem('userId');
     const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
-  
+
     // Encrypt the orgId for the URL
     const encryptedOrgId = this.cryptoService.Encrypt(orgId);
-  
+
     // Ensure that encryptedOrgId is a string (if it's not, extract the string part)
-    const orgIdString = typeof encryptedOrgId === 'string' ? encryptedOrgId : encryptedOrgId.payload;
-  
+    const orgIdString =
+      typeof encryptedOrgId === 'string'
+        ? encryptedOrgId
+        : encryptedOrgId.payload;
+
     // Encrypt the payload properly, but keep orgId plain (decrypted) for the body
     const encryptedPayload = this.cryptoService.Encrypt({
       orgId, // Plain orgId in the payload, since backend expects the decrypted ID here
       userId: decryptedUserId,
     });
-  
+
     // Encode encrypted orgId to make it safe for URL
     const encodedOrgId = encodeURIComponent(orgIdString);
-  
+
     // Send the encrypted orgId in the URL and the encrypted payload in the body
-    return this.http.delete<any>(`${environment.backendUrl}/organization/delete/${encodedOrgId}`, {
-      headers: getHeaders(),
-      body: { payload: encryptedPayload },
-    });
+    return this.http.delete<any>(
+      `${environment.backendUrl}/organization/delete/${encodedOrgId}`,
+      {
+        headers: getHeaders(),
+        body: { payload: encryptedPayload },
+      }
+    );
   }
-  
 }
