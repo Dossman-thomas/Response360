@@ -5,6 +5,31 @@
   box-sizing: border-box;
 }
 
+/* Root */
+:root {
+  --primary-red: #FF4C4C;
+  --action-blue: #3e83b4;
+  --action-blue-hover: #6792b1;
+  --primary-bg: #1E1E1E;
+  --secondary-bg: #3C3C3C;
+  --primary-text: #FFFFFF;
+  --secondary-text: #CACACA;
+}
+
+body {
+  background-color: var(--primary-bg);
+}
+
+.action-btn {
+  background-color: var(--action-blue);
+  color: var(--primary-text);;
+}
+
+.action-btn:hover {
+  background-color: var(--action-blue-hover);
+  color: var(--primary-text);
+}
+
 /* Grid styles */
 kendo-grid-filter-menu-container {
     :is(kendo-dropdownlist.k-filter-and) {
@@ -17,3 +42,4 @@ kendo-grid-filter-menu-container {
       display: none !important;
     }
     }
+
