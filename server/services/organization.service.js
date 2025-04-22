@@ -46,8 +46,11 @@ export const createOrganizationService = async (payload) => {
 
     // Check for duplicate organization email
     const dupErrors = await checkDupEmailsOnCreateOrg(orgEmail, adminEmail); 
-    if (dupErrors.length > 0) {
-      throw new Error(dupErrors.join(' ')); 
+    // If there are errors, throw them
+    for (const key in dupErrors) {
+      if (dupErrors[key]) {
+        throw new Error(dupErrors[key]); 
+      }
     }
 
     // Create the organization
@@ -236,8 +239,12 @@ export const updateOrganizationService = async (orgId, payload) => {
 
     // Check for duplicate email (excluding this org)
     const dupErrors = await checkDupEmailsOnUpdateOrg(orgId, orgEmail); 
-    if (dupErrors.length > 0) {
-      throw new Error(dupErrors.join(' ')); 
+    
+    // If there are errors, throw them
+    for (const key in dupErrors) {
+      if (dupErrors[key]) {
+        throw new Error(dupErrors[key]); 
+      }
     }
 
     // Step 3: Update the organization

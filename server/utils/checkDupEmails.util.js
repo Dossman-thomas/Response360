@@ -1,5 +1,5 @@
 import { OrganizationModel, UserModel } from '../database/models/index.js';
-import { sequelize } from '../config/index.js';
+// import { sequelize } from '../config/index.js';
 import { Sequelize } from 'sequelize';
 
 // Check for duplicate emails on CREATE
@@ -12,15 +12,10 @@ export const checkDupEmailsOnCreateOrg = async (orgEmail, adminEmail) => {
     where: { user_email: adminEmail },
   });
 
-  const errors = [];
-
-  if (orgMatch) {
-    errors.push('Organization email is already in use.');
-  }
-
-  if (adminMatch) {
-    errors.push('Admin email is already in use.');
-  }
+  const errors = {
+    orgEmail: orgMatch ? 'Organization email is already in use.' : null,
+    adminEmail: adminMatch ? 'Admin email is already in use.' : null,
+  };
 
   return errors;
 };
@@ -34,9 +29,9 @@ export const checkDupEmailsOnUpdateOrg = async (orgId, orgEmail) => {
     },
   });
 
-  if (orgMatch) {
-    return ['Organization email is already in use.'];
-  }
+  const errors = {
+    orgEmail: orgMatch ? 'Organization email is already in use.' : null,
+  };
 
-  return [];
+  return errors;
 };
