@@ -1,16 +1,16 @@
-<div class="sidebar" [ngClass]="{ collapsed: isCollapsed }">
+<div class="sidebar gradient" [ngClass]="{ collapsed: isCollapsed }">
   <button class="toggle-btn" (click)="toggleSidebar()">
     <i
-      class="fa"
+      class="fa primary-text"
       [ngClass]="isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"
     ></i>
   </button>
 
-  <h2 *ngIf="!isCollapsed" class="px-4 mb-4 text-white">Super Admin</h2>
+  <h2 *ngIf="!isCollapsed" class="px-4 mb-4 primary-text">Super Admin</h2>
 
   <ul class="menu-items">
     <li>
-      <button routerLink="/dashboard" routerLinkActive="active">
+      <button routerLink="/super-admin-dashboard" routerLinkActive="active">
         <i *ngIf="isCollapsed" class="fa-solid fa-table-columns"></i>
         <span *ngIf="!isCollapsed">Super Admin Dashboard</span>
       </button>

@@ -1,8 +1,8 @@
 .sidebar {
     width: 270px;
-    background-color: #c5c5c5;
+    /* background-color: var(--secondary-bg); */
     color: rgb(0, 0, 0);
-    height: 100vh;
+    height: 100%;
     /* padding: 20px; */
     transition: width 0.3s ease;
   }
@@ -24,10 +24,6 @@
     padding: 0;
   }
   
-  /* .menu-items li {
-    margin-bottom: 20px;
-  } */
-  
   .menu-items button {
     background-color: transparent;
     /* border: none; */
@@ -43,20 +39,18 @@
     display: flex;
     align-items: center;
     /* border-radius: 15px; */
-    transition: .5s;
+    transition: .2s;
   }
   
-  /* .menu-items button i {
-    margin-right: 10px;
-  } */
-  
   .menu-items button.active {
-    /* background-color: #4B49AC; */
-    color: rgb(0, 0, 0);
+    background-color: var(--primary-red);
+    color: var(--primary-text);
+    border-color: var(--primary-red);
+    transition: .2s;
   }
 
   .menu-items button:hover {
     /* background-color: #F3797E; */
-    color: white;
+    color: var(--action-blue);
   }
   
