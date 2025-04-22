@@ -105,17 +105,31 @@
                         [ngClass]="{
                           'is-invalid':
                             organizationForm.get('admin_email')?.touched &&
-                            organizationForm.get('admin_email')?.invalid
+                            (organizationForm.get('admin_email')?.invalid ||
+                              organizationForm
+                                .get('admin_email')
+                                ?.hasError('custom'))
                         }"
                       />
                       <small
                         class="text-danger"
                         *ngIf="
                           organizationForm.get('admin_email')?.touched &&
-                          organizationForm.get('admin_email')?.invalid
+                          (organizationForm.get('admin_email')?.invalid ||
+                            organizationForm
+                              .get('admin_email')
+                              ?.hasError('custom'))
                         "
                       >
-                        {{ getErrorMessage('admin_email') }}
+                        {{
+                          organizationForm
+                            .get('admin_email')
+                            ?.hasError('custom')
+                            ? organizationForm
+                                .get('admin_email')
+                                ?.getError('custom')
+                            : getErrorMessage('admin_email')
+                        }}
                       </small>
                     </div>
 
@@ -149,20 +163,23 @@
                         }"
                       />
                       <small
-                      class="text-danger"
-                      *ngIf="
-                        organizationForm.get('org_email')?.touched &&
-                        (organizationForm.get('org_email')?.invalid ||
-                          organizationForm.get('org_email')?.hasError('custom'))
-                      "
-                    >
-                      {{
-                        organizationForm.get('org_email')?.hasError('custom')
-                          ? organizationForm.get('org_email')?.getError('custom')
-                          : getErrorMessage('org_email')
-                      }}
-                    </small>
-                    
+                        class="text-danger"
+                        *ngIf="
+                          organizationForm.get('org_email')?.touched &&
+                          (organizationForm.get('org_email')?.invalid ||
+                            organizationForm
+                              .get('org_email')
+                              ?.hasError('custom'))
+                        "
+                      >
+                        {{
+                          organizationForm.get('org_email')?.hasError('custom')
+                            ? organizationForm
+                                .get('org_email')
+                                ?.getError('custom')
+                            : getErrorMessage('org_email')
+                        }}
+                      </small>
                     </div>
 
                     <div class="mb-3">

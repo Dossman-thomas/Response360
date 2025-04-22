@@ -109,24 +109,23 @@ export class OrganizationService {
       )
       .pipe(
         catchError((error) => {
-          // Check if the error is related to duplicate emails and return them
-          if (error.error && error.error.message) {
-            if (
-              error.error.message.includes(
-                'Organization email is already in use'
-              )
-            ) {
-              return throwError({
-                orgEmail: 'Organization email is already in use.',
-              });
-            }
-            if (error.error.message.includes('Admin email is already in use')) {
-              return throwError({
-                adminEmail: 'Admin email is already in use.',
-              });
-            }
+          const msg = error?.error?.message || '';
+  
+          // Check for both orgEmail and adminEmail errors
+          const errors: any = {};
+          if (msg.includes('Organization email is already in use')) {
+            errors.orgEmail = 'Organization email is already in use.';
           }
-          // For other errors, throw the error
+          if (msg.includes('Admin email is already in use')) {
+            errors.adminEmail = 'Admin email is already in use.';
+          }
+  
+          // If there are errors, return them in the observable
+          if (Object.keys(errors).length > 0) {
+            return throwError({ error: errors });
+          }
+  
+          // If no specific errors, pass through the original error
           return throwError(error);
         })
       );

@@ -21,6 +21,7 @@ export class OrganizationDetailsComponent implements OnInit {
   org_updated_at?: string;
   org_status?: string;
 
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   previewUrl: string | null = null;
   selectedLogoFile: File | null = null;
@@ -168,8 +169,8 @@ export class OrganizationDetailsComponent implements OnInit {
       ?.replace(environment.backendHost, '')
       .trim();
 
-    console.log('Form values:', formValues);
-    console.log('Relative logo path:', relativeLogoPath);
+    // console.log('Form values:', formValues);
+    // console.log('Relative logo path:', relativeLogoPath);
 
     if (this.mode === 'update' && orgId) {
       this.organizationService
@@ -222,7 +223,23 @@ export class OrganizationDetailsComponent implements OnInit {
           },
           error: (err) => {
             console.error('Failed to create organization:', err);
+  
+            const errorMessages: { [key: string]: string } = {};
+  
+            // Accumulate all errors
+            if (err?.error?.orgEmail) {
+              errorMessages['org_email'] = err.error.orgEmail;
+            }
+            if (err?.error?.adminEmail) {
+              errorMessages['admin_email'] = err.error.adminEmail;
+            }
+  
+            // Set all errors at once
+            Object.keys(errorMessages).forEach((field) => {
+              this.organizationForm.get(field)?.setErrors({ custom: errorMessages[field] });
+            });
           },
+          
         });
     }
   }

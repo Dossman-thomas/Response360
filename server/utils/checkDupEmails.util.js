@@ -20,12 +20,20 @@ export const checkDupEmailsOnCreateOrg = async (orgEmail, adminEmail) => {
     ),
   });
 
-  const errors = {
-    orgEmail: orgMatch ? 'Organization email is already in use.' : null,
-    adminEmail: adminMatch ? 'Admin email is already in use.' : null,
-  };
+  // Initialize errors object
+  const errors = {};
 
-  return errors;
+  // Add errors if any email is found
+  if (orgMatch) {
+    errors.orgEmail = 'Organization email is already in use.';
+  }
+  
+  if (adminMatch) {
+    errors.adminEmail = 'Admin email is already in use.';
+  }
+
+  // Return errors if any, else return an empty object
+  return Object.keys(errors).length > 0 ? errors : null;
 };
 
 // Check for duplicate org email on UPDATE

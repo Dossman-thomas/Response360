@@ -30,6 +30,25 @@ export const createOrganizationService = async (payload) => {
       );
     }
 
+    const decryptedOrgEmail = orgData.orgEmail;
+    const decryptedUserEmail = orgData.adminEmail;
+
+    // Check for duplicate email (excluding this org)
+    const dupErrorsCreate = await checkDupEmailsOnCreateOrg(
+      decryptedOrgEmail,
+      decryptedUserEmail
+    );
+
+    // If there are errors for the organization or admin email, throw them
+    if (dupErrorsCreate?.orgEmail || dupErrorsCreate?.adminEmail) {
+      // Throwing both errors if both are found
+      throw new Error(
+        `${dupErrorsCreate?.orgEmail ? dupErrorsCreate.orgEmail : ''} ${
+          dupErrorsCreate?.adminEmail ? dupErrorsCreate.adminEmail : ''
+        }`.trim()
+      );
+    }
+
     // Encrypt destructured sensitive data using the utility function
     const {
       orgName,
@@ -43,15 +62,6 @@ export const createOrganizationService = async (payload) => {
       adminEmail,
       adminPhone,
     } = encryptFields(orgData, pubkey);
-
-    // Check for duplicate organization email
-    const dupErrors = await checkDupEmailsOnCreateOrg(orgEmail, adminEmail);
-    // If there are errors, throw them
-    for (const key in dupErrors) {
-      if (dupErrors[key]) {
-        throw new Error(dupErrors[key]);
-      }
-    }
 
     // Create the organization
     const organization = await OrganizationModel.create(
@@ -234,13 +244,6 @@ export const updateOrganizationService = async (orgId, payload) => {
     }
 
     const decryptedOrgEmail = orgData.orgEmail;
-
-    console.log(
-      'Checking for duplicate org email:',
-      decryptedOrgEmail,
-      'excluding orgId:',
-      orgId
-    );
 
     // Check for duplicate email (excluding this org)
     const dupErrors = await checkDupEmailsOnUpdateOrg(orgId, decryptedOrgEmail);
