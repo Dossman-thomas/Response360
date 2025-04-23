@@ -1,18 +1,33 @@
-import { encryptService, decryptService } from "../services/index.js";
+import { encryptService, decryptService } from '../services/index.js';
+import { messages } from '../messages/index.js';
+import { response } from '../utils/index.js';
 
 // Encrypt Data
 export const encryptController = (req, res) => {
   try {
     const { data } = req.body;
+
     if (!data) {
-      return res.status(400).json({ error: "No data provided for encryption" });
+      return response(res, {
+        status: 400,
+        message: messages.general.DATA_NOT_FOUND,
+      });
     }
     const encrypted = encryptService(data);
-    return res.json(encrypted);
+
+    return response(res, {
+      statusCode: 200,
+      message: messages.encryption.ENCRYPTION_SUCCESS,
+      data: encrypted,
+    });
+
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Encryption failed", details: error.message });
+    console.error(error);
+    return response(res, {
+      statusCode: 500,
+      message: messages.encryption.ENCRYPTION_FAILED,
+      error: error.message,
+    });
   }
 };
 
@@ -22,21 +37,33 @@ export const decryptController = (req, res) => {
     const { payload } = req.body;
 
     if (!payload) {
-      return res.status(400).json({ error: "Encrypted text missing" });
+      return response(res, {
+        status: 400,
+        message: messages.encryption.ENCRYPTED_TEXT_MISSING,
+      });
     }
 
     // Call the decryption service with the full encryptedText
     const decrypted = decryptService(payload);
 
     if (!decrypted) {
-      return res.status(400).json({ error: "Decryption failed" });
+      return response(res, {
+        status: 400,
+        message: messages.encryption.DECRYPTION_FAILED,
+      });
     }
 
-    return res.json({ decrypted });
+    return response(res, {
+      statusCode: 200,
+      message: messages.encryption.DECRYPTION_SUCCESS,
+      data: decrypted,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Decryption error", details: error.message });
+    console.error(error);
+    return response(res, {
+      statusCode: 500,
+      message: messages.encryption.DECRYPTION_FAILED,
+      error: error.message,
+    });
   }
 };
-

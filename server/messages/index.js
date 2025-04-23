@@ -38,4 +38,11 @@ export const messages = {
     ORGANIZATION_UPDATED: 'Organization updated successfully',
     ORGANIZATION_DELETED: 'Organization soft-deleted successfully',
   },
+  encryption: {
+    ENCRYPTION_SUCCESS: 'Encryption successful',
+    DECRYPTION_SUCCESS: 'Decryption successful',
+    ENCRYPTION_FAILED: 'Encryption failed',
+    DECRYPTION_FAILED: 'Decryption failed',
+    ENCRYPTED_TEXT_MISSING: 'Encrypted text missing',
+  }
 };
