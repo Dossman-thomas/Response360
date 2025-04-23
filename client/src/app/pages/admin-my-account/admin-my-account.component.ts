@@ -5,6 +5,7 @@ import { CryptoService } from '../../services/crypto.service';
 import { CookieService } from 'ngx-cookie-service';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-my-account',
@@ -31,7 +32,8 @@ export class AdminMyAccountComponent implements OnInit {
     private cryptoService: CryptoService,
     private cookieService: CookieService,
     private toastr: ToastrService,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -155,8 +157,9 @@ export class AdminMyAccountComponent implements OnInit {
           (updateRes) => {
             if (updateRes.success) {
               this.toastr.success('Password updated successfully');
-              this.passwordForm.reset();
-              this.togglePasswordForm();
+              // this.passwordForm.reset();
+              // this.togglePasswordForm();
+              this.authService.logout();
             } else {
               console.error('Error updating password:', updateRes.message);
               this.toastr.error(updateRes.message || 'Failed to update password');

@@ -65,7 +65,7 @@ export class AuthService {
 
     // Update authentication state
     this.isLoggedInSubject.next(false);
-    this.toastr.info('Logged out successfully!');
+    // this.toastr.info('Logged out successfully!');
 
     // Navigate to login page after logout
     this.router.navigate(['/super-admin-login']);
