@@ -187,8 +187,7 @@ export class OrganizationDetailsComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Failed to fetch org details:', err);
-        this.toastr.error('Invalid or expired organization link.');
-        this.router.navigate(['/super-admin-dashboard']); // or `/not-found`, etc.
+        this.router.navigate(['/not-found']); // or `/not-found`, etc.
       },
     });
   }

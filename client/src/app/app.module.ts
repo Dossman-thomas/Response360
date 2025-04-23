@@ -26,6 +26,7 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
 import { AdminMyAccountComponent } from './pages/admin-my-account/admin-my-account.component';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { AdminMyAccountComponent } from './pages/admin-my-account/admin-my-accou
     LayoutComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
+    NotFoundComponent,
   ],
   imports: [
     BrowserModule,
