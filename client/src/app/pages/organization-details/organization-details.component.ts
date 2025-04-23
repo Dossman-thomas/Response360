@@ -83,7 +83,6 @@ export class OrganizationDetailsComponent implements OnInit {
   checkMode(): void {
     const modeParam = this.route.snapshot.queryParamMap.get('mode');
     const orgIdParam = this.route.snapshot.queryParamMap.get('orgId');
-    // const decryptedOrgId = orgIdParam ? this.cryptoService.Decrypt(orgIdParam) : null;
 
     if (modeParam === 'update' && orgIdParam) {
       this.mode = 'update';
@@ -93,54 +92,109 @@ export class OrganizationDetailsComponent implements OnInit {
     }
   }
 
-  fetchOrganizationDetails(orgId: string): void {
-    this.organizationService.getOrganizationById(orgId).subscribe((data) => {
-      console.log('fetch Org:logo path:', data.logo);
-      // Patch organization data
-      this.organizationForm.patchValue({
-        org_name: data.orgName,
-        org_email: data.orgEmail,
-        org_phone_number: data.orgPhone,
-        org_type: data.orgType,
-        jurisdiction_size: data.jurisdictionSize,
-        org_address: data.registeredAddress,
-        org_website: data.website,
-        org_status: data.status ? 'Enabled' : 'Disabled',
-        logo: data.logo ? `${environment.backendHost}${data.logo}` : '',
-      });
+  // fetchOrganizationDetails(orgId: string): void {
+  //   this.organizationService.getOrganizationById(orgId).subscribe((data) => {
+  //     console.log('fetch Org:logo path:', data.logo);
+  //     // Patch organization data
+  //     this.organizationForm.patchValue({
+  //       org_name: data.orgName,
+  //       org_email: data.orgEmail,
+  //       org_phone_number: data.orgPhone,
+  //       org_type: data.orgType,
+  //       jurisdiction_size: data.jurisdictionSize,
+  //       org_address: data.registeredAddress,
+  //       org_website: data.website,
+  //       org_status: data.status ? 'Enabled' : 'Disabled',
+  //       logo: data.logo ? `${environment.backendHost}${data.logo}` : '',
+  //     });
 
-      // Patch admin user data
-      if (data.adminUser) {
-        this.organizationForm.patchValue({
-          admin_first_name: data.adminUser.firstName,
-          admin_last_name: data.adminUser.lastName,
-          admin_email: data.adminUser.userEmail,
-          admin_phone_number: data.adminUser.userPhoneNumber,
-        });
-      }
+  //     // Patch admin user data
+  //     if (data.adminUser) {
+  //       this.organizationForm.patchValue({
+  //         admin_first_name: data.adminUser.firstName,
+  //         admin_last_name: data.adminUser.lastName,
+  //         admin_email: data.adminUser.userEmail,
+  //         admin_phone_number: data.adminUser.userPhoneNumber,
+  //       });
+  //     }
 
-      // Set other fields
+  //     // Set other fields
 
-      // Format date fields to display in a user-friendly format
-      const formatOptions: Intl.DateTimeFormatOptions = {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      };
+  //     // Format date fields to display in a user-friendly format
+  //     const formatOptions: Intl.DateTimeFormatOptions = {
+  //       day: 'numeric',
+  //       month: 'short',
+  //       year: 'numeric',
+  //     };
 
-      this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString(
-        'en-GB',
-        formatOptions
-      );
-      this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString(
-        'en-GB',
-        formatOptions
-      );
-      this.org_status = data.status ? 'Enabled' : 'Disabled';
-    });
-  }
+  //     this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString(
+  //       'en-GB',
+  //       formatOptions
+  //     );
+  //     this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString(
+  //       'en-GB',
+  //       formatOptions
+  //     );
+  //     this.org_status = data.status ? 'Enabled' : 'Disabled';
+  //   });
+  // }
 
   // Display error messages
+  fetchOrganizationDetails(orgId: string): void {
+    this.organizationService.getOrganizationById(orgId).subscribe({
+      next: (data) => {
+        console.log('fetch Org:logo path:', data.logo);
+  
+        // Patch organization data
+        this.organizationForm.patchValue({
+          org_name: data.orgName,
+          org_email: data.orgEmail,
+          org_phone_number: data.orgPhone,
+          org_type: data.orgType,
+          jurisdiction_size: data.jurisdictionSize,
+          org_address: data.registeredAddress,
+          org_website: data.website,
+          org_status: data.status ? 'Enabled' : 'Disabled',
+          logo: data.logo ? `${environment.backendHost}${data.logo}` : '',
+        });
+  
+        // Patch admin user data
+        if (data.adminUser) {
+          this.organizationForm.patchValue({
+            admin_first_name: data.adminUser.firstName,
+            admin_last_name: data.adminUser.lastName,
+            admin_email: data.adminUser.userEmail,
+            admin_phone_number: data.adminUser.userPhoneNumber,
+          });
+        }
+  
+        // Format date fields
+        const formatOptions: Intl.DateTimeFormatOptions = {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        };
+  
+        this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString(
+          'en-GB',
+          formatOptions
+        );
+        this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString(
+          'en-GB',
+          formatOptions
+        );
+        this.org_status = data.status ? 'Enabled' : 'Disabled';
+      },
+      error: (err) => {
+        console.error('❌ Failed to fetch org details:', err);
+        this.toastr.error('Invalid or expired organization link.');
+        this.router.navigate(['/super-admin-dashboard']); // or `/not-found`, etc.
+      },
+    });
+  }
+  
+  
+  
   getErrorMessage(controlName: string): string {
     const control = this.organizationForm.get(controlName);
     if (control?.hasError('required')) return 'This field is required.';

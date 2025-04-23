@@ -48,55 +48,6 @@ export const encryptService = (data) => {
   }
 };
 
-// Decrypt function
-// export const decryptService = (payload) => {
-//   if (!payload) {
-//     console.error('❌ Error: No encrypted text provided for decryption.');
-//     return null;
-//   }
-
-//   const [encryptedPayload, ivBase64] = payload.split(':');
-
-//   if (!ivBase64) {
-//     console.error('❌ Error: No IV found in encrypted text.');
-//     return null;
-//   }
-
-//   const iv = CryptoJS.enc.Base64.parse(ivBase64);
-
-//   // First decryption attempt
-//   let decrypted;
-//   try {
-//     decrypted = CryptoJS.AES.decrypt(encryptedPayload, parsedPubKey, {
-//       iv,
-//     }).toString(CryptoJS.enc.Utf8);
-//   } catch (error) {
-//     console.error('❌ decryptService: First decryption failed.', error);
-//     return null;
-//   }
-
-//   if (!decrypted.includes('###')) {
-//     console.error('❌ decryptService: Malformed decrypted data.');
-//     return null;
-//   }
-
-//   const [uuid, firstEncryptedData] = decrypted.split('###');
-
-//   const firstKey = CryptoJS.enc.Utf8.parse(uuid);
-
-//   // Second decryption attempt
-//   try {
-//     const decryptedPayload = CryptoJS.AES.decrypt(
-//       firstEncryptedData,
-//       firstKey,
-//       { iv }
-//     ).toString(CryptoJS.enc.Utf8);
-//     return JSON.parse(decryptedPayload);
-//   } catch (error) {
-//     console.error('❌ decryptService: Failed second decryption.', error);
-//     return null;
-//   }
-// };
 export const decryptService = (payload) => {
   try {
     if (!payload) {

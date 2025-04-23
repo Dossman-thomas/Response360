@@ -12,54 +12,7 @@ import { environment } from '../shared/environments/environment';
 export class OrganizationService {
   constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
-  // Create a new organization
-  // createOrganization(
-  //   orgName: string,
-  //   orgEmail: string,
-  //   orgPhone: string,
-  //   registeredAddress: string,
-  //   orgType: string,
-  //   jurisdictionSize: string,
-  //   website: string,
-  //   adminFirstName: string,
-  //   adminLastName: string,
-  //   adminEmail: string,
-  //   adminPhone: string,
-  //   logo?: string
-  // ) {
-  //   // retrieve logged in user's ID from local storage
-  //   const userId = localStorage.getItem('userId');
-  //   const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
-
-  //   // Encrypt the form data into a single payload
-  //   const payload: any = {
-  //     orgName,
-  //     orgEmail,
-  //     orgPhone,
-  //     registeredAddress,
-  //     orgType,
-  //     jurisdictionSize,
-  //     website,
-  //     adminFirstName,
-  //     adminLastName,
-  //     adminEmail,
-  //     adminPhone,
-  //     decryptedUserId,
-  //   };
-
-  //   if (logo !== undefined) {
-  //     payload.logo = logo;
-  //   }
-
-  //   const encryptedPayload = this.cryptoService.Encrypt(payload);
-
-  //   // Send the encrypted payload to the backend
-  //   return this.http.post<any>(
-  //     `${environment.backendUrl}/organization/create`,
-  //     { payload: encryptedPayload },
-  //     { headers: getHeaders() }
-  //   );
-  // }
+  // Create an organization
   createOrganization(
     orgName: string,
     orgEmail: string,
@@ -177,51 +130,6 @@ export class OrganizationService {
   }
 
   // Update an organization
-  // updateOrganization(
-  //   orgId: string,
-  //   orgName: string,
-  //   orgEmail: string,
-  //   orgPhone: string,
-  //   registeredAddress: string,
-  //   orgType: string,
-  //   jurisdictionSize: string,
-  //   website: string,
-  //   status: string,
-  //   logo?: string
-  // ) {
-  //   // retrieve logged in user's ID from local storage
-  //   const userId = localStorage.getItem('userId');
-  //   const decryptedUserId = userId ? this.cryptoService.Decrypt(userId) : null;
-
-  //   // Encrypt the form data into a single payload
-  //   const payload: any = {
-  //     orgName,
-  //     orgEmail,
-  //     orgPhone,
-  //     registeredAddress,
-  //     orgType,
-  //     jurisdictionSize,
-  //     website,
-  //     status,
-  //     decryptedUserId,
-  //   };
-
-  //   if (logo !== undefined) {
-  //     payload.logo = logo;
-  //   }
-
-  //   const encryptedPayload = this.cryptoService.Encrypt(payload);
-
-  //   // Encode encrypted orgId to make it safe for URL
-  //   const encodedOrgId = encodeURIComponent(orgId);
-
-  //   // Send the encrypted payload to the backend and return the observable
-  //   return this.http.put<any>(
-  //     `${environment.backendUrl}/organization/update/${encodedOrgId}`,
-  //     { payload: encryptedPayload },
-  //     { headers: getHeaders() }
-  //   );
-  // }
   updateOrganization(
     orgId: string,
     orgName: string,

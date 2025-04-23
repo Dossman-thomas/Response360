@@ -8,8 +8,6 @@ export const messages = {
     VALIDATION_ERROR: 'Validation error',
     DATA_NOT_FOUND: 'Data not found',
     EMAIL_SENT: 'Email sent successfully',
-    PAYMENT_REQUIRED: 'Payment required',
-    PAYMENT_FAIL: 'Payment fail',
     OOPS: 'Oops! Something whet wrong. Please try again later',
     NO_PAYLOAD: 'Encrypted payload string is required',
   },
@@ -44,5 +42,7 @@ export const messages = {
     ENCRYPTION_FAILED: 'Encryption failed',
     DECRYPTION_FAILED: 'Decryption failed',
     ENCRYPTED_TEXT_MISSING: 'Encrypted text missing',
+    MISSING_ENCRYPTED_ID: 'Missing encrypted ID in the request',
+    INVALID_ENCRYPTED_ID: 'Invalid encrypted ID',
   }
 };
