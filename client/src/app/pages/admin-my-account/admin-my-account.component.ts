@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./admin-my-account.component.css'],
 })
 export class AdminMyAccountComponent implements OnInit {
-  showPasswordForm = false;
+  showPasswordModal = false;
   passwordForm!: FormGroup;
   userEmail: string | null = '';
   userData: any = {};
@@ -72,8 +72,8 @@ export class AdminMyAccountComponent implements OnInit {
     
   }
 
-  togglePasswordForm() {
-    this.showPasswordForm = !this.showPasswordForm;
+  togglePasswordModal() {
+    this.showPasswordModal = !this.showPasswordModal;
     this.passwordForm.reset();
   }
   
@@ -157,8 +157,6 @@ export class AdminMyAccountComponent implements OnInit {
           (updateRes) => {
             if (updateRes.success) {
               this.toastr.success('Password updated successfully');
-              // this.passwordForm.reset();
-              // this.togglePasswordForm();
               this.authService.logout();
             } else {
               console.error('Error updating password:', updateRes.message);
