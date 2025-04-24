@@ -8,6 +8,7 @@ import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 
 // Utils
 import { loadOrgDetails } from '../../utils/utils/organization.utils';
+import { buildOrgReqBody } from '../../utils/utils/table.utils';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -29,6 +30,7 @@ export class AdminDashboardComponent implements OnInit {
 
   // Kendo Grid settings
   gridData: any = { data: [], total: 0 };
+
   body: any = {
     page: 1,
     sorts: null,
@@ -48,11 +50,10 @@ export class AdminDashboardComponent implements OnInit {
 
   public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
-    this.body.page = Math.floor(state.skip / state.take) + 1; // Page number
-    this.body.limit = state.take; // Items per page
-
-    this.loadOrgDetails(); // Fetch data
+    this.body = buildOrgReqBody(state, this.body);
+    this.loadOrgDetails();
   }
+  
 
   // Fetch organization details
   private loadOrgDetails(): void {
