@@ -3,10 +3,6 @@
     border-radius: 24px;
 }
 
-#forgot-password {
-    color: var(--primary-red);
-}
-
 #remember-me:checked {
     background-color: var(--action-blue);
     color: var(--primary-text);
