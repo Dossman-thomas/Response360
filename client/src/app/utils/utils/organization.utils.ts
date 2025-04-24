@@ -33,13 +33,54 @@ export function loadOrgDetails(
 }
 
 export function navToEditOrg(
+  orgId: string,
+  cryptoService: CryptoService,
+  router: Router
+): void {
+  const encryptedOrgId = cryptoService.Encrypt(orgId);
+
+  router.navigate(['/organization-details'], {
+    queryParams: { mode: 'update', orgId: encryptedOrgId },
+  });
+}
+
+export function handleDeleteOrg(
     orgId: string,
-    cryptoService: CryptoService,
-    router: Router
+    setShowModal: (val: boolean) => void,
+    setDeleteId: (id: string) => void
   ): void {
-    const encryptedOrgId = cryptoService.Encrypt(orgId);
+    setShowModal(true);
+    setDeleteId(orgId);
+  }
   
-    router.navigate(['/organization-details'], {
-      queryParams: { mode: 'update', orgId: encryptedOrgId },
+  export function handleCancelDelete(
+    resetModal: () => void
+  ): void {
+    resetModal();
+  }
+  
+  export function handleConfirmDelete(
+    deleteOrgId: string,
+    organizationService: OrganizationService,
+    currentData: any[],
+    updateGridData: (data: any[]) => void,
+    resetModal: () => void
+  ): void {
+    if (!deleteOrgId) return;
+  
+    organizationService.deleteOrganization(deleteOrgId).subscribe({
+      next: (response) => {
+        console.log('Organization deleted successfully:', response);
+  
+        const updatedData = currentData.filter(
+          (org: any) => org.org_id !== deleteOrgId
+        );
+        updateGridData(updatedData);
+        resetModal();
+      },
+      error: (err) => {
+        console.error('Failed to delete organization:', err);
+      },
     });
   }
+  

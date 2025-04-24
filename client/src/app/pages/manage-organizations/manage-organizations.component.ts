@@ -9,6 +9,9 @@ import { CryptoService } from '../../services/crypto.service';
 import {
   loadOrgDetails,
   navToEditOrg,
+  handleDeleteOrg,
+  handleCancelDelete,
+  handleConfirmDelete,
 } from '../../utils/utils/organization.utils';
 import { buildOrgReqBody } from '../../utils/utils/table.utils';
 
@@ -107,8 +110,11 @@ export class ManageOrganizationsComponent implements OnInit {
 
   // Delete organization (get org_id from row data)
   onDeleteOrganization(orgId: string): void {
-    this.showDeleteModal = true;
-    this.deleteOrganizationId = orgId;
+    handleDeleteOrg(
+      orgId,
+      (val) => (this.showDeleteModal = val),
+      (id) => (this.deleteOrganizationId = id)
+    );
   }
 
   private resetDeleteModal(): void {
@@ -117,31 +123,19 @@ export class ManageOrganizationsComponent implements OnInit {
   }
 
   onConfirmDelete(): void {
-    if (this.deleteOrganizationId !== null) {
-      // Call the delete service and subscribe to the response
-      this.organizationService
-        .deleteOrganization(this.deleteOrganizationId)
-        .subscribe({
-          next: (response) => {
-            console.log('Organization deleted successfully:', response);
-
-            // Remove the deleted organization from the gridData array
-            this.gridData.data = this.gridData.data.filter(
-              (org: any) => org.org_id !== this.deleteOrganizationId
-            );
-
-            this.resetDeleteModal(); // Close the delete modal
-          },
-          error: (err) => {
-            console.error('Failed to delete organization:', err);
-            // Optionally, show an error message to the user
-          },
-        });
+    if (typeof this.deleteOrganizationId === 'string') {
+      handleConfirmDelete(
+        this.deleteOrganizationId,
+        this.organizationService,
+        this.gridData.data,
+        (newData) => (this.gridData.data = newData),
+        () => this.resetDeleteModal()
+      );
     }
   }
 
   // Cancel delete
   onCancelDelete(): void {
-    this.resetDeleteModal();
+    handleCancelDelete(() => this.resetDeleteModal());
   }
 }
