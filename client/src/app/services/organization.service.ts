@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { getHeaders } from '../utils/getHeaders.util';
+import { getHeaders } from '../utils/utils/getHeaders.util';
 import { Observable, throwError } from 'rxjs';
 import { CryptoService } from './crypto.service';
 import { map, catchError } from 'rxjs/operators';

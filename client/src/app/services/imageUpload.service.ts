@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CryptoService } from './crypto.service';
 import { environment } from '../shared/environments/environment';
-import { getHeaders } from '../utils/getHeaders.util';
+import { getHeaders } from '../utils/utils/getHeaders.util';
 
 @Injectable({
   providedIn: 'root',

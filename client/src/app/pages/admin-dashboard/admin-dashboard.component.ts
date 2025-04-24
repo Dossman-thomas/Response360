@@ -55,7 +55,6 @@ export class AdminDashboardComponent implements OnInit {
   private loadOrgDetails(): void {
     this.organizationService.getAllOrganizations(this.body).subscribe({
       next: (response: any) => {
-        // console.log('response: ', response);
 
         if (Array.isArray(response.rows)) {
           this.gridData = {

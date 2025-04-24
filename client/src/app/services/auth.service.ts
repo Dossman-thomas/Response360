@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../shared/environments/environment';
 import { CryptoService } from './crypto.service';
-import { getHeaders } from '../utils/getHeaders.util';
+import { getHeaders } from '../utils/utils/getHeaders.util';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
