@@ -6,6 +6,8 @@ export const messages = {
     BAD_REQUEST: 'Bad request',
     UNAUTHORIZED: 'Unauthorized',
     VALIDATION_ERROR: 'Validation error',
+    NOT_FOUND: 'Not found',
+    FORBIDDEN: 'Forbidden',
     DATA_NOT_FOUND: 'Data not found',
     EMAIL_SENT: 'Email sent successfully',
     OOPS: 'Oops! Something whet wrong. Please try again later',

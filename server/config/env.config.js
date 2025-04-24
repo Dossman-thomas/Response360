@@ -30,6 +30,5 @@ export const env = { // Environment configuration object
     staticFilePath: process.env.STATIC_FILE_PATH,
     relativePath: process.env.RELATIVE_PATH,
   },
-  frontendUrl: process.env.FRONTEND_URL,
-
+  frontEndUrl: process.env.FRONTEND_URL,
 };
