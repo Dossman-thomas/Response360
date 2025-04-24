@@ -31,7 +31,6 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // check if email and password cookies are set
     // Check for stored credentials in cookies and populate the fields
     const storedEmail = this.cookieService.get('email');
     const storedPassword = this.cookieService.get('password');

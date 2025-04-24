@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CryptoService } from '../../services/crypto.service';
 import { ImageUploadService } from '../../services/imageUpload.service';
 import { ViewChild, ElementRef } from '@angular/core';
 import { OrganizationService } from '../../services/organization.service';
@@ -30,7 +29,6 @@ export class OrganizationDetailsComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private cryptoService: CryptoService,
     private organizationService: OrganizationService,
     private imageUploadService: ImageUploadService,
     private toastr: ToastrService
@@ -92,58 +90,10 @@ export class OrganizationDetailsComponent implements OnInit {
     }
   }
 
-  // fetchOrganizationDetails(orgId: string): void {
-  //   this.organizationService.getOrganizationById(orgId).subscribe((data) => {
-  //     console.log('fetch Org:logo path:', data.logo);
-  //     // Patch organization data
-  //     this.organizationForm.patchValue({
-  //       org_name: data.orgName,
-  //       org_email: data.orgEmail,
-  //       org_phone_number: data.orgPhone,
-  //       org_type: data.orgType,
-  //       jurisdiction_size: data.jurisdictionSize,
-  //       org_address: data.registeredAddress,
-  //       org_website: data.website,
-  //       org_status: data.status ? 'Enabled' : 'Disabled',
-  //       logo: data.logo ? `${environment.backendHost}${data.logo}` : '',
-  //     });
-
-  //     // Patch admin user data
-  //     if (data.adminUser) {
-  //       this.organizationForm.patchValue({
-  //         admin_first_name: data.adminUser.firstName,
-  //         admin_last_name: data.adminUser.lastName,
-  //         admin_email: data.adminUser.userEmail,
-  //         admin_phone_number: data.adminUser.userPhoneNumber,
-  //       });
-  //     }
-
-  //     // Set other fields
-
-  //     // Format date fields to display in a user-friendly format
-  //     const formatOptions: Intl.DateTimeFormatOptions = {
-  //       day: 'numeric',
-  //       month: 'short',
-  //       year: 'numeric',
-  //     };
-
-  //     this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString(
-  //       'en-GB',
-  //       formatOptions
-  //     );
-  //     this.org_updated_at = new Date(data.orgUpdatedAt).toLocaleDateString(
-  //       'en-GB',
-  //       formatOptions
-  //     );
-  //     this.org_status = data.status ? 'Enabled' : 'Disabled';
-  //   });
-  // }
-
-  // Display error messages
+  // Fetch organization details for update mode
   fetchOrganizationDetails(orgId: string): void {
     this.organizationService.getOrganizationById(orgId).subscribe({
       next: (data) => {
-        console.log('fetch Org:logo path:', data.logo);
   
         // Patch organization data
         this.organizationForm.patchValue({

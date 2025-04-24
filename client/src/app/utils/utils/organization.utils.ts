@@ -45,42 +45,40 @@ export function navToEditOrg(
 }
 
 export function handleDeleteOrg(
-    orgId: string,
-    setShowModal: (val: boolean) => void,
-    setDeleteId: (id: string) => void
-  ): void {
-    setShowModal(true);
-    setDeleteId(orgId);
-  }
-  
-  export function handleCancelDelete(
-    resetModal: () => void
-  ): void {
-    resetModal();
-  }
-  
-  export function handleConfirmDelete(
-    deleteOrgId: string,
-    organizationService: OrganizationService,
-    currentData: any[],
-    updateGridData: (data: any[]) => void,
-    resetModal: () => void
-  ): void {
-    if (!deleteOrgId) return;
-  
-    organizationService.deleteOrganization(deleteOrgId).subscribe({
-      next: (response) => {
-        console.log('Organization deleted successfully:', response);
-  
-        const updatedData = currentData.filter(
-          (org: any) => org.org_id !== deleteOrgId
-        );
-        updateGridData(updatedData);
-        resetModal();
-      },
-      error: (err) => {
-        console.error('Failed to delete organization:', err);
-      },
-    });
-  }
-  
+  orgId: string,
+  setShowModal: (val: boolean) => void,
+  setDeleteId: (id: string) => void
+): void {
+  setShowModal(true);
+  setDeleteId(orgId);
+}
+
+export function handleCancelDelete(resetModal: () => void): void {
+  resetModal();
+}
+
+export function handleConfirmDelete(
+  deleteOrgId: string,
+  organizationService: OrganizationService,
+  currentData: any[],
+  updateGridData: (data: any[]) => void,
+  resetModal: () => void
+): void {
+  if (!deleteOrgId) return;
+
+  organizationService.deleteOrganization(deleteOrgId).subscribe({
+    next: (response) => {
+      console.log('Organization deleted successfully:', response);
+
+      const updatedData = currentData.filter(
+        (org: any) => org.org_id !== deleteOrgId
+      );
+      updateGridData(updatedData);
+      resetModal();
+    },
+    error: (err) => {
+      console.error('Failed to delete organization:', err);
+    },
+  });
+}
+
