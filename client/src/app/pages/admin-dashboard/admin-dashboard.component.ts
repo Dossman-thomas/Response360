@@ -6,6 +6,9 @@ import { OrganizationService } from '../../services/organization.service';
 import { State } from '@progress/kendo-data-query';
 import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 
+// Utils
+import { loadOrgDetails } from '../../utils/utils/organization.utils';
+
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
@@ -24,11 +27,6 @@ export class AdminDashboardComponent implements OnInit {
   totalUsers: number = 0;
   totalOrganizations: number = 0;
 
-  ngOnInit(): void {
-    this.getDashboardStats();
-    this.loadOrgDetails();
-  }
-
   // Kendo Grid settings
   gridData: any = { data: [], total: 0 };
   body: any = {
@@ -43,6 +41,11 @@ export class AdminDashboardComponent implements OnInit {
     take: 5,
   };
 
+  ngOnInit(): void {
+    this.getDashboardStats();
+    this.loadOrgDetails();
+  }
+
   public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
     this.body.page = Math.floor(state.skip / state.take) + 1; // Page number
@@ -53,27 +56,17 @@ export class AdminDashboardComponent implements OnInit {
 
   // Fetch organization details
   private loadOrgDetails(): void {
-    this.organizationService.getAllOrganizations(this.body).subscribe({
-      next: (response: any) => {
-
-        if (Array.isArray(response.rows)) {
-          this.gridData = {
-            data: response.rows,
-            total: response.count || response.rows.length,
-          };
-        } else {
-          console.error('Failed to fetch organization details:', response);
-        }
+    loadOrgDetails(
+      this.organizationService,
+      this.body,
+      (gridData: any) => {
+        this.gridData = gridData;
       },
-      error: (err) => {
+      (err: { message: any }) => {
         console.error('Failed to fetch organization details: ', err);
         console.log('Error: ', err.message);
-
-        if (err.message === 'Failed to fetch organizations') {
-          console.log('Error: Failed to fetch organizations: ', err.message);
-        }
-      },
-    });
+      }
+    );
   }
 
   // Fetch dashboard stats

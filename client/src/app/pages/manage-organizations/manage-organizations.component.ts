@@ -5,6 +5,9 @@ import { State } from '@progress/kendo-data-query';
 import { OrganizationService } from '../../services/organization.service';
 import { CryptoService } from '../../services/crypto.service';
 
+// Utils
+import { loadOrgDetails } from '../../utils/utils/organization.utils';
+
 @Component({
   selector: 'app-manage-organizations',
   templateUrl: './manage-organizations.component.html',
@@ -20,10 +23,6 @@ export class ManageOrganizationsComponent implements OnInit {
   showDeleteModal = false;
   deleteOrganizationId: string | null = null;
   searchQuery: string = '';
-
-  ngOnInit() {
-    this.loadOrgDetails();
-  }
 
   // Kendo Grid Settings
   gridData: any = { data: [], total: 0 };
@@ -46,6 +45,10 @@ export class ManageOrganizationsComponent implements OnInit {
       filters: [],
     },
   };
+
+  ngOnInit() {
+    this.loadOrgDetails();
+  }
 
   public dataStateChange(state: DataStateChangeEvent): void {
     this.state = state;
@@ -76,34 +79,22 @@ export class ManageOrganizationsComponent implements OnInit {
 
   // Fetch organization details
   private loadOrgDetails(): void {
-    this.organizationService.getAllOrganizations(this.body).subscribe({
-      next: (response: any) => {
-
-        if (Array.isArray(response.rows)) {
-
-          this.gridData = {
-            data: response.rows,
-            total: response.count || response.rows.length,
-          };
-
-        } else {
-          console.error('Failed to fetch organization details:', response);
-        }
+    loadOrgDetails(
+      this.organizationService,
+      this.body,
+      (gridData: any) => {
+        this.gridData = gridData;
       },
-      error: (err) => {
+      (err: { message: any }) => {
         console.error('Failed to fetch organization details: ', err);
         console.log('Error: ', err.message);
-
-        if (err.message === 'Failed to fetch organizations') {
-          console.log('Error: Failed to fetch organizations: ', err.message);
-        }
-      },
-    });
+      }
+    );
   }
 
   onSearch(): void {
     const normalizedQuery = this.searchQuery.trim().toLowerCase();
-  
+
     if (!normalizedQuery) {
       // If input is cleared, remove search filter
       this.body.searchQuery = '';
@@ -114,11 +105,10 @@ export class ManageOrganizationsComponent implements OnInit {
     } else {
       this.body.searchQuery = this.searchQuery;
     }
-  
+
     this.body.page = 1;
     this.loadOrgDetails();
   }
-  
 
   // For "New" button
   onNewOrganization(): void {
