@@ -10,6 +10,8 @@ import { environment } from '../shared/environments/environment';
   providedIn: 'root',
 })
 export class OrganizationService {
+  private baseUrl = `${environment.backendUrl}/organization`;
+
   constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
   // Create an organization
@@ -56,14 +58,14 @@ export class OrganizationService {
     // Send the encrypted payload to the backend and handle errors
     return this.http
       .post<any>(
-        `${environment.backendUrl}/organization/create`,
+        `${this.baseUrl}/create`,
         { payload: encryptedPayload },
         { headers: getHeaders() }
       )
       .pipe(
         catchError((error) => {
           const msg = error?.error?.message || '';
-  
+
           // Check for both orgEmail and adminEmail errors
           const errors: any = {};
           if (msg.includes('Organization email is already in use')) {
@@ -72,12 +74,12 @@ export class OrganizationService {
           if (msg.includes('Admin email is already in use')) {
             errors.adminEmail = 'Admin email is already in use.';
           }
-  
+
           // If there are errors, return them in the observable
           if (Object.keys(errors).length > 0) {
             return throwError({ error: errors });
           }
-  
+
           // If no specific errors, pass through the original error
           return throwError(error);
         })
@@ -90,7 +92,7 @@ export class OrganizationService {
 
     return this.http
       .post<any>(
-        `${environment.backendUrl}/organization/read`,
+        `${this.baseUrl}/read`,
         { payload: encryptedPayload },
         {
           headers: getHeaders(),
@@ -115,7 +117,7 @@ export class OrganizationService {
 
     // Send the encrypted ID to the backend
     return this.http
-      .get<any>(`${environment.backendUrl}/organization/read/${encodedOrgId}`, {
+      .get<any>(`${this.baseUrl}/read/${encodedOrgId}`, {
         headers: getHeaders(),
       })
       .pipe(
@@ -171,7 +173,7 @@ export class OrganizationService {
     // Send the encrypted payload to the backend and handle errors
     return this.http
       .put<any>(
-        `${environment.backendUrl}/organization/update/${encodedOrgId}`,
+        `${this.baseUrl}/update/${encodedOrgId}`,
         { payload: encryptedPayload },
         { headers: getHeaders() }
       )
@@ -224,7 +226,7 @@ export class OrganizationService {
 
     // Send the encrypted orgId in the URL and the encrypted payload in the body
     return this.http.delete<any>(
-      `${environment.backendUrl}/organization/delete/${encodedOrgId}`,
+      `${this.baseUrl}/delete/${encodedOrgId}`,
       {
         headers: getHeaders(),
         body: { payload: encryptedPayload },

@@ -1,12 +1,10 @@
-// src/app/services/user.service.ts
-
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CryptoService } from './crypto.service';
 import { getHeaders } from '../utils/utils/getHeaders.util';
 import { environment } from '../shared/environments/environment';
-import { from, Observable } from 'rxjs';
-import { map, switchAll, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',

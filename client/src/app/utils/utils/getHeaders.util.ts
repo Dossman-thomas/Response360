@@ -1,15 +1,17 @@
-// src/app/utils/get-headers.util.ts
 import { HttpHeaders } from '@angular/common/http';
 // import { CryptoService } from '../../services/crypto.service';
 
-export function getHeaders(): HttpHeaders {
-  const encryptedToken = localStorage.getItem('token');
+export function getHeaders(useJson: boolean = true): HttpHeaders {
+  let headers = new HttpHeaders();
 
-  // When auth is wired, I'll decrypt here
+  // Future-proof: add Auth when ready
+  // const encryptedToken = localStorage.getItem('token');
   // const token = CryptoService.Decrypt(encryptedToken);
+  // headers = headers.set('Authorization', `Bearer ${token}`);
 
-  return new HttpHeaders({
-    'Content-Type': 'application/json',
-    // Authorization: `Bearer ${token}`,
-  });
+  if (useJson) {
+    headers = headers.set('Content-Type', 'application/json');
+  }
+
+  return headers;
 }

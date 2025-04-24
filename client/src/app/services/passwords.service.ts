@@ -2,18 +2,22 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../shared/environments/environment';
 import { CryptoService } from './crypto.service';
+import { getHeaders } from '../utils/utils/getHeaders.util';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PasswordsService {
+
+  private baseUrl = `${environment.backendUrl}`;
+
   constructor(private http: HttpClient, private cryptoService: CryptoService) {}
 
   forgotPassword(email: string) {
     const encryptedPayload = this.cryptoService.Encrypt({ user_email: email });
 
     return this.http.post<{ success: boolean; message?: string }>(
-      `${environment.backendUrl}/auth/forgot-password`,
+      `${this.baseUrl}/auth/forgot-password`,
       { payload: encryptedPayload }
     );
   }
@@ -22,7 +26,7 @@ export class PasswordsService {
     const encryptedPayload = this.cryptoService.Encrypt({ token, newPassword });
 
     return this.http.post<{ success: boolean; message?: string }>(
-      `${environment.backendUrl}/auth/reset-password`,
+      `${this.baseUrl}/auth/reset-password`,
       { payload: encryptedPayload }
     );
   }
@@ -31,8 +35,9 @@ export class PasswordsService {
     const encryptedPayload = this.cryptoService.Encrypt({ userId, newPassword });
 
     return this.http.post<{ success: boolean; message?: string }>(
-      `${environment.backendUrl}/user/update-password`,
-      { payload: encryptedPayload }
+      `${this.baseUrl}/user/update-password`,
+      { payload: encryptedPayload },
+      { headers: getHeaders() }
     );
   }
 
@@ -40,8 +45,9 @@ export class PasswordsService {
     const encryptedPayload = this.cryptoService.Encrypt({ user_email: email, currentPassword });
   
     return this.http.post<{ success: boolean; message?: string }>(
-      `${environment.backendUrl}/auth/verify-password`,
-      { payload: encryptedPayload }
+      `${this.baseUrl}/auth/verify-password`,
+      { payload: encryptedPayload },
+      { headers: getHeaders() }
     );
   }
   

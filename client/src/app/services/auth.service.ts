@@ -5,8 +5,6 @@ import { CryptoService } from './crypto.service';
 import { getHeaders } from '../utils/utils/getHeaders.util';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
-import { CookieService } from 'ngx-cookie-service';
-import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -14,14 +12,14 @@ import { ToastrService } from 'ngx-toastr';
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
-  private baseUrl = `${environment.backendUrl}/auth/super-admin`; // Base URL for the authentication API
+
+  // The URL for the authentication API
+  private baseUrl = `${environment.backendUrl}/auth/super-admin`;
 
   constructor(
     private http: HttpClient,
     private cryptoService: CryptoService,
     private router: Router,
-    private cookieService: CookieService,
-    private toastr: ToastrService
   ) {
     this.checkInitialAuthState();
     window.addEventListener('popstate', this.handlePopStateEvent.bind(this));
@@ -65,7 +63,6 @@ export class AuthService {
 
     // Update authentication state
     this.isLoggedInSubject.next(false);
-    // this.toastr.info('Logged out successfully!');
 
     // Navigate to login page after logout
     this.router.navigate(['/super-admin-login']);
