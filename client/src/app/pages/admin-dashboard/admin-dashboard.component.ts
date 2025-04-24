@@ -7,7 +7,10 @@ import { State } from '@progress/kendo-data-query';
 import { DataStateChangeEvent } from '@progress/kendo-angular-grid';
 
 // Utils
-import { loadOrgDetails } from '../../utils/utils/organization.utils';
+import {
+  loadOrgDetails,
+  navToEditOrg,
+} from '../../utils/utils/organization.utils';
 import { buildOrgReqBody } from '../../utils/utils/table.utils';
 
 @Component({
@@ -85,12 +88,7 @@ export class AdminDashboardComponent implements OnInit {
 
   // Edit organization (get org_id from row data)
   onEditOrganization(orgId: string): void {
-    const encryptedOrgId = this.cryptoService.Encrypt(orgId);
-    // console.log('Encrypted Org ID:', encryptedOrgId);
-
-    this.router.navigate(['/organization-details'], {
-      queryParams: { mode: 'update', orgId: encryptedOrgId }, // Pass orgId in query params
-    });
+    navToEditOrg(orgId, this.cryptoService, this.router);
   }
 
   // Delete organization (get org_id from row data)
