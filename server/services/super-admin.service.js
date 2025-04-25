@@ -6,6 +6,10 @@ import { env } from '../config/index.js';
 export const createSuperAdminService = async (superAdminData) => {
   const pubkey = env.encryption.pubkey;
 
+  if (!pubkey) {
+    throw new Error('Public key is not defined in the environment variables.');
+  }
+
   try {
     const {
       first_name,
@@ -13,7 +17,6 @@ export const createSuperAdminService = async (superAdminData) => {
       user_email,
       user_phone_number,
       user_password,
-      user_created_by, // Optional
     } = superAdminData;
 
     // Create Super Admin in DB
@@ -28,11 +31,10 @@ export const createSuperAdminService = async (superAdminData) => {
         pubkey
       ),
       user_password: user_password,
-      user_role: 'Super Admin', // Role set explicitly
+      user_role: env.roles.s_a, 
       org_id: null,
-      user_created_by: user_created_by || null,
-      is_super_admin: true,
-      user_status: true,
+      is_super_admin: env.booleans.t,
+      user_status: env.booleans.t,
     });
 
     return {

@@ -40,4 +40,12 @@ export const env = { // Environment configuration object
     fileSize: process.env.MULTER_FILE_SIZE
   },
   frontEndUrl: process.env.FRONTEND_URL,
+  roles: {
+    s_a: process.env.SUPER_ADMIN_ROLE,
+    a: process.env.ADMIN_ROLE
+  },
+  booleans: {
+    t: process.env.TRUE,
+    f: process.env.FALSE
+  }
 };
