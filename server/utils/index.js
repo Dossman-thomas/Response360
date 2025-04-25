@@ -12,3 +12,5 @@ export {
   checkDupEmailsOnCreateOrg,
   checkDupEmailsOnUpdateOrg,
 } from './checkDupEmails.util.js';
+export { checkRateLimit, resetRateLimit } from './rateLimiter.util.js';
+export { logServiceError } from './errorLogger.util.js';

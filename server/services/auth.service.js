@@ -1,6 +1,11 @@
 import { UserModel } from '../database/models/index.js';
 import { encryptService, decryptService } from '../services/index.js';
-import { decryptSensitiveData } from '../utils/index.js';
+import {
+  decryptSensitiveData,
+  logServiceError,
+  checkRateLimit,
+  resetRateLimit,
+} from '../utils/index.js';
 import bcrypt from 'bcrypt';
 import { env } from '../config/index.js';
 
@@ -16,11 +21,6 @@ if (!pubkey) {
   throw new Error('❌ Missing public key for encryption/decryption.');
 }
 
-const loginAttempts = new Map(); 
-
-const MAX_ATTEMPTS = 5; 
-const WINDOW_MINUTES = 15;
-
 export const loginSuperAdminService = async (payload) => {
   try {
     // Decrypt the payload first (decryptService should return { user_email, user_password })
@@ -33,23 +33,7 @@ export const loginSuperAdminService = async (payload) => {
     const { user_email, user_password, rememberMe } = decryptedData;
 
     // rate limiting logic
-    const now = Date.now();
-    const attemptData = loginAttempts.get(user_email) || { count: 0, lastAttempt: now };
-    
-    if (now - attemptData.lastAttempt > WINDOW_MINUTES * 60 * 1000) {
-      // Reset if window has passed
-      loginAttempts.set(user_email, { count: 1, lastAttempt: now });
-    } else if (attemptData.count >= MAX_ATTEMPTS) {
-      const error = new Error(`Too many login attempts. Try again in ${WINDOW_MINUTES} minutes.`);
-      error.status = 429;
-      throw error;
-    } else {
-      // Increment attempt count
-      loginAttempts.set(user_email, {
-        count: attemptData.count + 1,
-        lastAttempt: now,
-      });
-    }
+    checkRateLimit(user_email);
 
     // Query the database to find a matching user
     const sequelize = UserModel.sequelize;
@@ -106,19 +90,15 @@ export const loginSuperAdminService = async (payload) => {
     const encryptedPayload = encryptService(responsePayload);
 
     // on successful login, reset the attempt count
-    loginAttempts.delete(user_email); 
+    resetRateLimit(user_email);
 
     // Return success message along with the token and user details
     return {
       encryptedPayload,
     };
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] loginSuperAdminService Error:`, {
-      message: error.message,
-      stack: error.stack,
-      ...(error.status && { status: error.status })
-    });
+    // Handle errors and log them for debugging
+    logServiceError('loginSuperAdminService', error);
     throw error;
   }
-  
 };
