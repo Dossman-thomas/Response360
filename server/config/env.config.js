@@ -33,7 +33,11 @@ export const env = { // Environment configuration object
   },
   filePaths: {
     staticFilePath: process.env.STATIC_FILE_PATH,
+    uploadPath: process.env.UPLOAD_PATH,
     relativePath: process.env.RELATIVE_PATH,
+  },
+  multer: {
+    fileSize: process.env.MULTER_FILE_SIZE
   },
   frontEndUrl: process.env.FRONTEND_URL,
 };

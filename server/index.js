@@ -2,7 +2,7 @@ import { env } from './config/index.js';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import compression from 'compression'; 
+import compression from 'compression';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -29,15 +29,17 @@ app.use(compression());
 
 // Restrict CORS to trusted domains
 const allowedOrigins = [env.frontEndUrl];
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
 
 app.use(morgan('dev'));
 
@@ -76,7 +78,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-
 // Sync database and start the server after successful connection
 (async () => {
   try {
@@ -88,7 +89,10 @@ app.use((err, req, res, next) => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] ❌ Unable to sync database:`, error);
-    process.exit(1); 
+    console.error(
+      `[${new Date().toISOString()}] ❌ Unable to sync database:`,
+      error
+    );
+    process.exit(1);
   }
 })();
