@@ -1,49 +1,73 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import {
   getUserByEmailService,
   sendResetPasswordEmailService,
   encryptService,
   decryptService,
-} from "./index.js";
-import { env } from "../config/index.js";
+} from './index.js';
+import { logServiceError } from '../utils/index.js';
+import { env } from '../config/index.js';
 
 export const forgotPasswordService = async (payload) => {
-  // pass encrypted payload to getUserByEmailService
-  const foundUser = await getUserByEmailService(payload);
-  // decrypt the foundUser
-  const decryptedUser = await decryptService(foundUser);
-  // extract user_id, email, first_name from decryptedPayload
-  const { user_id, user_email, first_name } = decryptedUser;
+  try {
+    // pass encrypted payload to getUserByEmailService
+    const foundUser = await getUserByEmailService(payload);
 
-  // Generate a JWT token that lasts for 15 minutes
-  const token = jwt.sign({ userId: user_id }, env.server.jwtSecret, {
-    expiresIn: "15m",
-  });
+    // Check if the user was found
+    if (!foundUser) {
+      throw new Error('User not found.');
+    }
 
-  // Encrypt the token to securely pass in the email URL
-  const encryptedToken = await encryptService(token);
-  // Encode the token to make it URL-safe
-  const encodedToken = encodeURIComponent(encryptedToken);
-  // resetLink includes encryptedToken so as not to be exposed in the URL
-  const resetLink = `${env.frontendUrl}/reset-password?token=${encodedToken}`;
+    // decrypt the foundUser
+    const decryptedUser = await decryptService(foundUser);
 
-  const to = user_email; // The recipient's email address
+    // extract user_id, email, first_name from decryptedPayload
+    const { user_id, user_email, first_name } = decryptedUser;
 
-  // encrypt the payload to pass to sendResetPasswordEmailService, which expects this
-  const newPayload = await encryptService({
-    to,
-    resetLink,
-    first_name,
-  });
+    // Validate structure of decryptedUser
+    if (!user_id || !user_email || !first_name) {
+      throw new Error('Missing user information in decrypted payload.');
+    }
 
-  // call sendResetPasswordEmailService with the encrypted payload
-  const emailSent = await sendResetPasswordEmailService(newPayload);
+    // Generate a JWT token that lasts for 15 minutes
+    const token = jwt.sign({ userId: user_id }, env.jwt.secret, {
+      expiresIn: env.jwt.forgotPass,
+    });
 
-  // Check if the email was sent successfully
-  if (!emailSent) {
-    throw new Error("Failed to send reset email.");
+    // Encrypt the token to securely pass in the email URL
+    const encryptedToken = await encryptService(token);
+
+    // Check if the encryption was successful
+    if (!encryptedToken) {
+      throw new Error('Failed to encrypt token.');
+    }
+
+    // Encode the token to make it URL-safe
+    const encodedToken = encodeURIComponent(encryptedToken);
+    // resetLink includes encryptedToken so as not to be exposed in the URL
+    const resetLink = `${env.frontEndUrl}/reset-password?token=${encodedToken}`;
+
+    const to = user_email; // The recipient's email address
+
+    // encrypt the payload to pass to sendResetPasswordEmailService, which expects this
+    const newPayload = await encryptService({
+      to,
+      resetLink,
+      first_name,
+    });
+
+    // call sendResetPasswordEmailService with the encrypted payload
+    const emailSent = await sendResetPasswordEmailService(newPayload);
+
+    // Check if the email was sent successfully
+    if (!emailSent) {
+      throw new Error('Failed to send reset email.');
+    }
+
+    // Return success
+    return true;
+  } catch (error) {
+    logServiceError('forgotPasswordService', error);
+    throw new Error('An error occurred while processing the request.');
   }
-
-  // Return success
-  return true;
 };

@@ -21,6 +21,7 @@ export const env = { // Environment configuration object
   jwt: {
     secret: process.env.JWT_SECRET,
     rememberMe: process.env.JWT_EXPIRATION_REMEMBER_ME,
+    forgotPass: process.env.JWT_EXPIRATION_FORGOT_PASSWORD,
     expires: process.env.JWT_EXPIRATION
   },
   encryption: {
