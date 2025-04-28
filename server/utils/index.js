@@ -15,3 +15,5 @@ export {
 export { checkRateLimit, resetRateLimit } from './rateLimiter.util.js';
 export { logServiceError } from './errorLogger.util.js';
 export { validatePasswordStrength } from './passwordValidator.util.js';
+export { createError } from './errorHandler.util.js';
+export { emailRegex } from './regex.util.js';
