@@ -10,23 +10,42 @@ import {
   decryptUserFields,
   checkDupEmailsOnCreateOrg,
   checkDupEmailsOnUpdateOrg,
+  generatePassword,
+  createError
 } from '../utils/index.js';
 import { encryptService, decryptService } from '../services/index.js';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, validate as isUuid } from 'uuid';
+
 
 const pubkey = env.encryption.pubkey;
+
+// Validate pubkey
+if(!pubkey){
+  createError('Public key is missing in the environment variables.', 500, {
+    code: 'MISSING_PUBKEY',
+  });
+}
 
 // Create Organization Service
 export const createOrganizationService = async (payload) => {
   const transaction = await sequelize.transaction();
   try {
+    // Validate payload before decryption
+    if (!payload || typeof payload !== 'string') {
+      throw createError('Invalid payload. Please provide valid data.', 400, {
+        code: 'INVALID_PAYLOAD',
+      });
+    }
+
     // Decrypt the incoming payload
     const orgData = await decryptService(payload);
 
-    // Check if the decrypted data is valid
-    if (!orgData) {
-      throw new Error(
-        'Service: Decryption failed or missing organization data.'
+    // Validate decrypted data
+    if (!orgData || typeof orgData !== 'object') {
+      throw createError(
+        'Decryption failed or missing organization data.',
+        400,
+        { code: 'DECRYPTION_FAILED' }
       );
     }
 
@@ -47,6 +66,13 @@ export const createOrganizationService = async (payload) => {
           dupErrorsCreate?.adminEmail ? dupErrorsCreate.adminEmail : ''
         }`.trim()
       );
+    }
+
+    // Validate admin user data before creation
+    if (!orgData.adminFirstName || !orgData.adminLastName || !orgData.adminEmail || !orgData.adminPhone) {
+      throw createError('Admin user data is incomplete.', 400, {
+        code: 'INVALID_ADMIN_DATA',
+      });
     }
 
     // Encrypt destructured sensitive data using the utility function
@@ -91,7 +117,7 @@ export const createOrganizationService = async (payload) => {
         user_phone_number: adminPhone,
         user_role: 'Admin',
         org_id: organization.org_id,
-        user_password: 'Admin@123!', // Temporary password
+        user_password: generatePassword(), // Temporary password
         user_created_by: orgData.decryptedUserId, // Created by the same user who created the organization
       },
       { transaction }
@@ -105,7 +131,10 @@ export const createOrganizationService = async (payload) => {
   } catch (error) {
     console.error('Error in createOrganizationService:', error);
     await transaction.rollback();
-    throw error;
+    throw createError('Failed to create organization and admin user.', 500, {
+      code: 'CREATION_FAILED',
+      log: true,
+    });
   }
 };
 
