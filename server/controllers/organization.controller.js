@@ -12,7 +12,7 @@ import { validate as validateUuid } from 'uuid';
 // Controller to handle the creation of an organization
 export const createOrganizationController = async (req, res) => {
   try {
-    // Step 1: Validate the incoming request data
+    // Validate the incoming request data
     const { payload } = req.body;
 
     if (!payload) {
@@ -22,13 +22,13 @@ export const createOrganizationController = async (req, res) => {
       });
     }
 
-    // Step 2: Call the createOrganizationService to handle the creation logic
-    const newOrg = await createOrganizationService(payload);
+    // Call the createOrganizationService to handle the creation logic
+    const createdOrg = await createOrganizationService(payload);
 
-    // Step 3: Return the successful response
+    // Return the successful response
     return response(res, {
       statusCode: 201,
-      message: newOrg.message,
+      message: createdOrg,
     });
   } catch (error) {
     console.error(error);
@@ -114,8 +114,8 @@ export const updateOrganizationController = async (req, res) => {
 
     // Step 3: Return the successful response
     return response(res, {
-      statusCode: updatedOrg.statusCode,
-      message: updatedOrg.message,
+      statusCode: 200,
+      message: updatedOrg
     });
   } catch (error) {
     console.error(error);
@@ -152,8 +152,8 @@ export const deleteOrganizationController = async (req, res) => {
 
     // Step 3: Return the successful response
     return response(res, {
-      statusCode: result.statusCode,
-      message: result.message,
+      statusCode: 200,
+      message: result,
     });
   } catch (error) {
     console.error(error);
