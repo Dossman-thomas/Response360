@@ -2,12 +2,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserModel } from '../database/models/index.js';
 import { Sequelize } from 'sequelize';
 import { env } from '../config/index.js';
+import { createError } from '../utils/index.js';
 
 export const createSuperAdminService = async (superAdminData) => {
   const pubkey = env.encryption.pubkey;
 
   if (!pubkey) {
-    throw new Error('Public key is not defined in the environment variables.');
+    throw createError(
+      'Public key is missing in the environment variables.',
+      500,
+      {
+        code: 'MISSING_PUBKEY',
+      }
+    );
   }
 
   try {
@@ -43,6 +50,12 @@ export const createSuperAdminService = async (superAdminData) => {
     };
   } catch (error) {
     console.error('Error creating Super Admin:', error);
-    throw new Error('Failed to create Super Admin.');
+    throw createError(
+      'Failed to create Super Admin. Please try again later.',
+      500,
+      {
+        code: 'CREATE_SUPER_ADMIN_FAILED',
+      }
+    );
   }
 };

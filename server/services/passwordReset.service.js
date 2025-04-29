@@ -2,13 +2,22 @@ import jwt from 'jsonwebtoken';
 import { UserModel } from '../database/models/index.js';
 import { env } from '../config/index.js';
 import { decryptService } from './index.js';
-import { validatePasswordStrength } from '../utils/index.js';
+import { validatePasswordStrength, createError } from '../utils/index.js';
 
 export const passwordResetService = async (payload) => {
   try {
+    // Validate payload before decryption
+    if (!payload || typeof payload !== 'string') {
+      throw createError('Invalid payload. Please provide valid data.', 400, {
+        code: 'INVALID_PAYLOAD',
+      });
+    }
+
     // Validate presence of environment variables
-    if(!env.jwt.secret) {
-      throw new Error('JWT secret is not defined in the environment variables.');
+    if (!env.jwt.secret) {
+      throw createError('Missing JWT secret in environment variables.', 500, {
+        code: 'MISSING_JWT_SECRET',
+      });
     }
 
     // Decrypt the payload
@@ -17,15 +26,25 @@ export const passwordResetService = async (payload) => {
     const { token, newPassword } = decryptedPayload;
     // validate structure of decrypted payload
     if (!token || !newPassword) {
-      const error = new Error('Invalid payload structure.');
-      error.status = 400;
-      throw error;
+      throw createError(
+        'Invalid payload structure. Missing token or newPassword.',
+        400,
+        {
+          code: 'INVALID_PAYLOAD_STRUCTURE',
+        }
+      );
     }
 
     // Validate password strength
     const passwordValidationResult = validatePasswordStrength(newPassword);
     if (!passwordValidationResult.isValid) {
-      throw new Error(passwordValidationResult.message);
+      throw createError(
+        'Password does not meet the required strength criteria.',
+        400,
+        {
+          code: 'PASSWORD_STRENGTH_INVALID',
+        }
+      );
     }
 
     // Decode URL-safe token
@@ -33,7 +52,9 @@ export const passwordResetService = async (payload) => {
     try {
       decodedToken = decodeURIComponent(token);
     } catch (error) {
-      throw new Error('Token is not properly URL-encoded');
+      throw createError('Malformed token. Failed to decode.', 400, {
+        code: 'MALFORMED_TOKEN',
+      });
     }
 
     // Decrypt the token
@@ -41,7 +62,9 @@ export const passwordResetService = async (payload) => {
     try {
       decryptedToken = await decryptService(decodedToken);
     } catch (error) {
-      throw new Error('Malformed token. Failed to decrypt.');
+      throw createError('Decryption failed. Invalid token.', 400, {
+        code: 'DECRYPTION_FAILED',
+      });
     }
 
     // Now verify the decrypted token
@@ -49,14 +72,20 @@ export const passwordResetService = async (payload) => {
     try {
       verifiedToken = jwt.verify(decryptedToken, env.jwt.secret);
     } catch (error) {
-      throw new Error('Invalid or expired token');
+      throw createError('Token verification failed.', 400, {
+        code: 'TOKEN_VERIFICATION_FAILED',
+      });
     }
 
     // Validate the structure of the decrypted token
     if (!verifiedToken || !verifiedToken.userId) {
-      const error = new Error('Invalid token structure.');
-      error.status = 400;
-      throw error;
+      throw createError(
+        'Invalid payload structure. Missing userId in token.',
+        400,
+        {
+          code: 'INVALID_PAYLOAD_STRUCTURE',
+        }
+      );
     }
 
     // Find the user based on the decoded userId
@@ -66,9 +95,9 @@ export const passwordResetService = async (payload) => {
 
     // Check if the user exists
     if (!foundUser) {
-      const error = new Error('User not found.');
-      error.status = 404;
-      throw error;
+      throw createError('User not found.', 404, {
+        code: 'USER_NOT_FOUND',
+      });
     }
 
     // Step 3: Update the user's password (no need to hash it manually due to the hooks)
@@ -82,7 +111,10 @@ export const passwordResetService = async (payload) => {
       return { success: false, message: 'Reset token expired' };
     } else if (error instanceof jwt.JsonWebTokenError) {
       return { success: false, message: 'Invalid token' };
-    } else if (error instanceof Error && error.message.includes('Invalid payload structure')) {
+    } else if (
+      error instanceof Error &&
+      error.message.includes('Invalid payload structure')
+    ) {
       return { success: false, message: 'Payload structure is invalid' };
     }
 

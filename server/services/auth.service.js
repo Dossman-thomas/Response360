@@ -5,29 +5,48 @@ import {
   logServiceError,
   checkRateLimit,
   resetRateLimit,
+  createError,
 } from '../utils/index.js';
 import bcrypt from 'bcrypt';
 import { env } from '../config/index.js';
 
 if (!env.jwt.secret || !env.jwt.expires || !env.jwt.rememberMe) {
-  throw new Error('❌ Missing one or more required JWT environment variables.');
+  throw createError(
+    'Missing one or more required JWT environment variables.',
+    500,
+    {
+      code: 'JWT_ENV_VARIABLES_MISSING',
+    }
+  );
 }
 
 import jwt from 'jsonwebtoken';
 
 const pubkey = env.encryption.pubkey;
 
+// Validate pubkey
 if (!pubkey) {
-  throw new Error('❌ Missing public key for encryption/decryption.');
+  createError('Public key is missing in the environment variables.', 500, {
+    code: 'MISSING_PUBKEY',
+  });
 }
 
 export const loginSuperAdminService = async (payload) => {
   try {
+    // Validate payload before decryption
+    if (!payload || typeof payload !== 'string') {
+      throw createError('Invalid payload. Please provide valid data.', 400, {
+        code: 'INVALID_PAYLOAD',
+      });
+    }
+
     // Decrypt the payload first (decryptService should return { user_email, user_password })
     const decryptedData = await decryptService(payload);
     // Check if decryption was successful and contains the required fields
     if (!decryptedData.user_email || !decryptedData.user_password) {
-      throw new Error('Service: Decryption failed or missing credentials.');
+      throw createError('Service: Decryption failed or missing credentials.', 400, {
+        code: 'DECRYPTION_FAILED',
+      });
     }
     // Extract user_email, user_password, and rememberMe from decrypted data
     const { user_email, user_password, rememberMe } = decryptedData;
@@ -45,11 +64,9 @@ export const loginSuperAdminService = async (payload) => {
 
     // Check if user exists
     if (!user || user.length === 0) {
-      const error = new Error(
-        'Invalid credentials. Please check your email and password, then try again.'
-      );
-      error.status = 404;
-      throw error;
+      throw createError('User not found.', 404, {
+        code: 'USER_NOT_FOUND',
+      });
     }
 
     // Compare the decrypted password with the hashed password in the db
@@ -60,11 +77,9 @@ export const loginSuperAdminService = async (payload) => {
 
     // check if password is valid
     if (!isPasswordValid) {
-      const error = new Error(
-        'Invalid credentials. Please check your email and password, then try again.'
-      );
-      error.status = 404;
-      throw error;
+      throw createError('Invalid credentials.', 401, {
+        code: 'INVALID_CREDENTIALS',
+      });
     }
 
     // Set token expiration based on "Remember Me" flag
@@ -83,7 +98,9 @@ export const loginSuperAdminService = async (payload) => {
 
     // validate encrypted payload structure
     if (!responsePayload.token || !responsePayload.userId) {
-      throw new Error('Service: Encryption failed or missing token/userId.');
+      throw createError('Invalid payload structure.', 400, {
+        code: 'INVALID_PAYLOAD_STRUCTURE',
+      });
     }
 
     // Encrypt the response payload
@@ -99,6 +116,12 @@ export const loginSuperAdminService = async (payload) => {
   } catch (error) {
     // Handle errors and log them for debugging
     logServiceError('loginSuperAdminService', error);
-    throw error;
+    throw createError(
+      error.message || 'An error occurred during login.',
+      error.status || 500,
+      {
+        code: error.code || 'LOGIN_SERVICE_ERROR',
+      }
+    );
   }
 };

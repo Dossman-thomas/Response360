@@ -1,13 +1,15 @@
 import CryptoJS from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
-import { logServiceError } from '../utils/index.js';
+import { logServiceError, createError } from '../utils/index.js';
 import { env } from '../config/index.js'; 
 
 const pubkey = env.encryption.pubkey; 
 
-if(!pubkey) {
-  console.error('❌ Error: Public key is not defined in the environment variables.');
-  throw new Error('Public key is required for encryption/decryption.');
+// Validate pubkey
+if (!pubkey) {
+  createError('Public key is missing in the environment variables.', 500, {
+    code: 'MISSING_PUBKEY',
+  });
 }
 
 const parsedPubKey = CryptoJS.SHA256(pubkey); // Parse key to always produce a 256-bit (32-bytes) key
@@ -19,8 +21,9 @@ const generateIV = () => CryptoJS.lib.WordArray.random(16);
 export const encryptService = (data) => {
   try {
     if (!data || typeof data !== 'object' && typeof data !== 'string') {
-      console.warn('⚠️ Warning: Invalid data provided for encryption.');
-      throw new Error('Data must be an object or string for encryption.');
+      throw createError('Invalid data. Please provide a valid object or string.', 400, {
+        code: 'INVALID_DATA',
+      });
     }
 
     const uuid = uuidv4().replace(/-/g, ''); // Generate UUID and remove dashes
@@ -50,22 +53,26 @@ export const encryptService = (data) => {
     return encryptedString;
   } catch (error) {
     logServiceError('encryptService', error);
-    throw new Error('Encryption failed');
+    throw createError(`Encryption failed: ${error.message}`, 500, {
+      code: 'ENCRYPTION_FAILED',
+    });
   }
 };
 
 export const decryptService = (payload) => {
   try {
     if (!payload || typeof payload !== 'string') {
-      console.error('❌ decryptService: Invalid encrypted payload.');
-      throw new Error('Encrypted payload must be a non-empty string.');
+      throw createError('Invalid payload. Please provide a valid string.', 400, {
+        code: 'INVALID_PAYLOAD',
+      });
     }
 
     const [encryptedPayload, ivBase64] = payload.split(':');
 
     if (!ivBase64) {
-      console.error('❌ decryptService: Missing IV in encrypted payload.');
-      throw new Error('Missing IV in encrypted payload.');
+      throw createError('Invalid payload format. IV is missing.', 400, {
+        code: 'INVALID_PAYLOAD_FORMAT',
+      });
     }
 
     const iv = CryptoJS.enc.Base64.parse(ivBase64);
@@ -80,15 +87,18 @@ export const decryptService = (payload) => {
     ).toString(CryptoJS.enc.Utf8);
 
     if (!firstDecryption) {
-      console.error('❌ decryptService: First decryption failed and produced an empty result.');
-      throw new Error('First decryption failed');
+      throw createError('Decryption failed. Invalid payload.', 400, {
+        code: 'DECRYPTION_FAILED',
+      });
     }
 
     if (!firstDecryption.includes('###')) {
       console.error(
         '❌ decryptService: Malformed decrypted data — delimiter not found.'
       );
-      throw new Error('Malformed decrypted data — delimiter not found');
+      throw createError('Malformed decrypted data.', 400, {
+        code: 'MALFORMED_DATA',
+      });
     }
 
     const [uuid, firstEncryptedData] = firstDecryption.split('###');
@@ -102,6 +112,8 @@ export const decryptService = (payload) => {
     return JSON.parse(finalDecryption);
   } catch (error) {
     logServiceError('decryptService', error);
-    throw new Error(`Decryption failed: ${error.message}`);
+    throw createError(`Decryption failed: ${error.message}`, 500, {
+      code: 'DECRYPTION_FAILED',
+    });
   }
 };
