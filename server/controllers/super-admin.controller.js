@@ -14,7 +14,7 @@ export const createSuperAdminController = async (req, res) => {
     return response(res, {
       statusCode: 201,
       message: messages.superAdmin.SUPER_ADMIN_ADDED,
-      data: result.data,
+      data: result,
     });
   } catch (error) {
     console.error('Error in createSuperAdminController:', error);

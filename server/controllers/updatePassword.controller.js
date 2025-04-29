@@ -25,6 +25,7 @@ export const updateUserPasswordController = async (req, res) => {
     console.error('Error in updateUserPasswordController:', error);
     return response(res, {
       statusCode: error.status || 500,
+      success: false,
       message: error.message || messages.general.INTERNAL_SERVER_ERROR,
     });
   }

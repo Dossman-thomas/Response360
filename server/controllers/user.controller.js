@@ -5,13 +5,6 @@ import { messages } from '../messages/index.js';
 export const getUserByEmailController = async (req, res) => {
   const { payload } = req.body;
 
-  if (!payload) {
-    return response(res, {
-      statusCode: 400,
-      message: messages.general.NO_PAYLOAD,
-    });
-  }
-
   try {
     const foundUser = await getUserByEmailService(payload);
 
@@ -22,7 +15,6 @@ export const getUserByEmailController = async (req, res) => {
       });
     }
 
-    // TEMP: return full user for testing; remove sensitive data later
     return response(res, {
       statusCode: 200,
       message: messages.general.SUCCESS,

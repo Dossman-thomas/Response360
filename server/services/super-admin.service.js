@@ -44,10 +44,7 @@ export const createSuperAdminService = async (superAdminData) => {
       user_status: env.booleans.t,
     });
 
-    return {
-      message: 'Super Admin created successfully!',
-      data: newSuperAdmin,
-    };
+    return newSuperAdmin;
   } catch (error) {
     console.error('Error creating Super Admin:', error);
     throw createError(
