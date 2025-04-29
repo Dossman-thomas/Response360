@@ -279,6 +279,7 @@ export class OrganizationDetailsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Image upload failed:', err);
+          this.toastr.error('Something went wrong. Please try again later.');
         },
       });
     }
