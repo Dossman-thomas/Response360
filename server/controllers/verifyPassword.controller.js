@@ -6,13 +6,6 @@ export const verifyPasswordController = async (req, res) => {
   try {
     const { payload } = req.body;
 
-    if (!payload) {
-      return response(res, {
-        statusCode: 400,
-        message: messages.general.BAD_REQUEST,
-      });
-    }
-
     const result = await verifyPasswordService(payload);
 
     if (!result.success) {

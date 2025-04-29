@@ -12,7 +12,12 @@ export const forgotPasswordController = async (req, res) => {
       message: messages.general.EMAIL_SENT,
     });
   } catch (error) {
-    console.error('Forgot password controller error:', error.message);
+    console.error(
+      'Forgot password controller error:',
+      error.message,
+      error.stack
+    );
+
     return response(res, {
       statusCode: error.status || 500,
       message: error.message || messages.general.OOPS,

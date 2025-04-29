@@ -32,7 +32,10 @@ export const decryptOrgIdParam = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error('❌ decryptOrgIdParam: Error decrypting organization ID.', err.message);
+    console.error(
+      '❌ decryptOrgIdParam: Error decrypting organization ID.',
+      err.message
+    );
     return response(res, {
       statusCode: 400,
       error: messages.encryption.INVALID_ENCRYPTED_ID,

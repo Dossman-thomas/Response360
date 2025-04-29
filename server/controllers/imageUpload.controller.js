@@ -3,11 +3,12 @@ import { messages } from '../messages/index.js';
 import { response } from '../utils/index.js';
 
 // Wrap the upload logic to use in your routes
-export const uploadLogoController = (req, res, next) => {
+export const uploadLogoController = (req, res) => {
   // Single file with field name 'logo'
   upload.single('logo')(req, res, (err) => {
     if (err) {
-      console.error('Error uploading file:', err);
+      console.error('Error uploading file:', err.message, err.stack);
+
       return response(res, {
         statusCode: 500,
         message: messages.general.INTERNAL_SERVER_ERROR,
@@ -37,9 +38,5 @@ export const uploadLogoController = (req, res, next) => {
         path: encryptedPath,
       },
     });
-    // res.status(200).json({
-    //   message: 'File uploaded successfully',
-    //   path: encryptedPath,
-    // });
   });
 };

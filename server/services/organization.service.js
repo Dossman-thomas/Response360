@@ -128,7 +128,7 @@ export const createOrganizationService = async (payload) => {
     );
 
     await transaction.commit();
-    return 'Organization and Admin created successfully';
+    return;
   } catch (error) {
     console.error('Error in createOrganizationService:', error);
     await transaction.rollback();
@@ -151,6 +151,7 @@ export const getAllOrganizationsService = async (payload) => {
 
     // decrypt the payload
     const decryptedPayload = await decryptService(payload);
+
     // Validate decrypted data
     if (!decryptedPayload || typeof decryptedPayload !== 'object') {
       throw createError('Decryption failed or missing data.', 400, {
@@ -349,7 +350,7 @@ export const updateOrganizationService = async (orgId, payload) => {
       });
     }
 
-    return 'Organization updated successfully';
+    return;
   } catch (error) {
     console.error('Error in updateOrganizationService:', error);
     if (error.parent) {
@@ -407,7 +408,7 @@ export const deleteOrganizationService = async (orgId, payload) => {
       });
     }
 
-    return 'Organization soft-deleted successfully';
+    return;
   } catch (error) {
     console.error('Error in deleteOrganizationService:', error);
     if (error.parent) {

@@ -15,20 +15,13 @@ export const createOrganizationController = async (req, res) => {
     // Validate the incoming request data
     const { payload } = req.body;
 
-    if (!payload) {
-      return response(res, {
-        status: 400,
-        message: 'Missing encrypted data in the request',
-      });
-    }
-
     // Call the createOrganizationService to handle the creation logic
-    const createdOrg = await createOrganizationService(payload);
+    await createOrganizationService(payload);
 
     // Return the successful response
     return response(res, {
       statusCode: 201,
-      message: createdOrg,
+      message: messages.organization.ORGANIZATION_ADDED,
     });
   } catch (error) {
     console.error(error);
@@ -46,8 +39,16 @@ export const getAllOrganizationsController = async (req, res) => {
 
     const encryptedOrgData = await getAllOrganizationsService(payload);
 
+    if (!encryptedOrgData) {
+      return response(res, {
+        statusCode: 404,
+        message: messages.organization.ORGANIZATION_NOT_FOUND,
+      });
+    }
+
     return response(res, {
       statusCode: 200,
+      message: messages.organization.ORGANIZATION_FOUND,
       data: encryptedOrgData,
     });
   } catch (error) {
@@ -64,18 +65,19 @@ export const getOrganizationByIdController = async (req, res) => {
   try {
     const { orgId } = req.params;
 
-    if (!orgId || !validateUuid(orgId)) {
-      // Ensure orgId is provided and valid
+    const encryptedOrgData = await getOrganizationByIdService(orgId);
+
+    // Check if organization was found
+    if (!encryptedOrgData) {
       return response(res, {
-        status: 400,
-        message: 'Invalid or missing organization ID in the request',
+        statusCode: 404,
+        message: messages.organization.ORGANIZATION_NOT_FOUND,
       });
     }
 
-    const encryptedOrgData = await getOrganizationByIdService(orgId);
-
     return response(res, {
       statusCode: 200,
+      message: messages.organization.ORGANIZATION_FOUND,
       data: encryptedOrgData,
     });
   } catch (error) {
@@ -90,32 +92,17 @@ export const getOrganizationByIdController = async (req, res) => {
 // Controller to handle the updating of an organization
 export const updateOrganizationController = async (req, res) => {
   try {
-    // Step 1: Validate the incoming request data
+    // Validate the incoming request data
     const { payload } = req.body;
     const { orgId } = req.params; // Get the organization ID from the URL params
 
-    if (!payload) {
-      return response(res, {
-        statusCode: 400,
-        message: 'Missing encrypted data in the request',
-      });
-    }
-    
+    // Call the updateOrganizationService to handle the update logic
+    await updateOrganizationService(orgId, payload);
 
-    if (!orgId) {
-      return response(res, {
-        status: 400,
-        message: 'Organization ID is required',
-      });
-    }
-
-    // Step 2: Call the updateOrganizationService to handle the update logic
-    const updatedOrg = await updateOrganizationService(orgId, payload);
-
-    // Step 3: Return the successful response
+    // Return the successful response
     return response(res, {
       statusCode: 200,
-      message: updatedOrg
+      message: messages.organization.ORGANIZATION_UPDATED,
     });
   } catch (error) {
     console.error(error);
@@ -129,31 +116,17 @@ export const updateOrganizationController = async (req, res) => {
 // Controller to handle the deletion of an organization
 export const deleteOrganizationController = async (req, res) => {
   try {
-    // Step 1: Validate the incoming request data
+    // Validate the incoming request data
     const { payload } = req.body;
     const { orgId } = req.params; // Get the organization ID from the URL params
 
-    if (!orgId) {
-      return response(res, {
-        status: 400,
-        message: 'Missing organization ID in the request',
-      });
-    }
-
-    if (!payload) {
-      return response(res, {
-        status: 400,
-        message: 'Missing encrypted data in the request',
-      });
-    }
-
-    // Step 2: Call the deleteOrganizationService to handle the soft deletion
-    const result = await deleteOrganizationService(orgId, payload);
+    // Call the deleteOrganizationService to handle the soft deletion
+    await deleteOrganizationService(orgId, payload);
 
     // Step 3: Return the successful response
     return response(res, {
       statusCode: 200,
-      message: result,
+      message: messages.organization.ORGANIZATION_DELETED,
     });
   } catch (error) {
     console.error(error);

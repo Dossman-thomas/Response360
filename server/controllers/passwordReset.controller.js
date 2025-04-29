@@ -5,14 +5,6 @@ import { response } from '../utils/index.js';
 export const passwordResetController = async (req, res) => {
   const { payload } = req.body;
 
-  if (!payload) {
-    return response(res, {
-      statusCode: 400,
-      success: false,
-      message: messages.general.NO_PAYLOAD,
-    });
-  }
-
   try {
     const result = await passwordResetService(payload);
 

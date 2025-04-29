@@ -33,7 +33,10 @@ export const messages = {
       'New password is similar to your old password please use different password',
   },
   organization: {
-    ORGANIZATION_NOT_FOUND: 'Organization not found',
+    ORGANIZATION_FOUND: 'Organizations found',
+    ORGANIZATION_NOT_FOUND: 'No Organizations found',
+    MISSING_ORGANIZATION_ID: 'Missing organization ID in the request',
+    INVALID_ORGANIZATION_ID: 'Invalid organization ID',
     ORGANIZATION_ALREADY_EXIST: 'Organization already exist',
     ORGANIZATION_ACCOUNT_DISABLE: 'Your account is disabled',
     ORGANIZATION_ADDED: 'Organization added successfully',
