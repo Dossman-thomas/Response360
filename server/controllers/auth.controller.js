@@ -1,6 +1,6 @@
-import { response } from '../utils/index.js';
 import { loginSuperAdminService } from '../services/index.js';
 import { messages } from '../messages/index.js';
+import { response } from '../utils/index.js';
 
 export const loginSuperAdminController = async (req, res) => {
   const { payload } = req.body;

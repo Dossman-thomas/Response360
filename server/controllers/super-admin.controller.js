@@ -1,4 +1,6 @@
-import { createSuperAdminService } from "../services/index.js";
+import { createSuperAdminService } from '../services/index.js';
+import { messages } from '../messages/index.js';
+import { response } from '../utils/index.js';
 
 export const createSuperAdminController = async (req, res) => {
   try {
@@ -9,16 +11,18 @@ export const createSuperAdminController = async (req, res) => {
     const result = await createSuperAdminService(superAdminData);
 
     // Send a successful response
-    return res.status(201).json({
-      message: result.message,
+    return response(res, {
+      statusCode: 201,
+      message: messages.superAdmin.SUPER_ADMIN_ADDED,
       data: result.data,
     });
   } catch (error) {
-    console.error("Error in createSuperAdminController:", error);
+    console.error('Error in createSuperAdminController:', error);
 
     // Send an error response
-    return res.status(500).json({
-      message: "Failed to create Super Admin.",
+    return response(res, {
+      statusCode: error.status || 500,
+      message: error.message || messages.superAdmin.SUPER_ADMIN_CREATION_FAILED,
       error: error.message,
     });
   }

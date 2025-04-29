@@ -6,20 +6,33 @@ export const getUserByEmailController = async (req, res) => {
   const { payload } = req.body;
 
   if (!payload) {
-    return res.status(400).json({ message: 'Email is required.' });
+    return response(res, {
+      statusCode: 400,
+      message: messages.general.NO_PAYLOAD,
+    });
   }
 
   try {
     const foundUser = await getUserByEmailService(payload);
 
     if (!foundUser) {
-      return res.status(404).json({ message: 'User not found.' });
+      return response(res, {
+        statusCode: 404,
+        message: messages.user.USER_NOT_FOUND,
+      });
     }
 
     // TEMP: return full user for testing; remove sensitive data later
-    return res.status(200).json({ message: 'User found', foundUser });
+    return response(res, {
+      statusCode: 200,
+      message: messages.general.SUCCESS,
+      data: foundUser,
+    });
   } catch (error) {
     console.error('Error in getUserByEmailController:', error);
-    return res.status(500).json({ message: 'Server error.' });
+    return response(res, {
+      statusCode: error.status || 500,
+      message: error.message || messages.general.INTERNAL_SERVER_ERROR,
+    });
   }
 };

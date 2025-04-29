@@ -7,6 +7,8 @@ export const messages = {
     UNAUTHORIZED: 'Unauthorized',
     VALIDATION_ERROR: 'Validation error',
     NOT_FOUND: 'Not found',
+    NO_PAYLOAD: 'No payload found',
+    INVALID_REQUEST: 'Invalid request',
     FORBIDDEN: 'Forbidden',
     DATA_NOT_FOUND: 'Data not found',
     EMAIL_SENT: 'Email sent successfully',
@@ -46,5 +48,14 @@ export const messages = {
     ENCRYPTED_TEXT_MISSING: 'Encrypted text missing',
     MISSING_ENCRYPTED_ID: 'Missing encrypted ID in the request',
     INVALID_ENCRYPTED_ID: 'Invalid encrypted ID',
+  },
+  superAdmin: {
+    SUPER_ADMIN_NOT_FOUND: 'Super admin not found',
+    SUPER_ADMIN_CREATION_FAILED: 'Super admin creation failed',
+    SUPER_ADMIN_ALREADY_EXIST: 'Super admin already exist',
+    SUPER_ADMIN_ACCOUNT_DISABLE: 'Your account is disabled',
+    SUPER_ADMIN_ADDED: 'Super admin added successfully',
+    SUPER_ADMIN_UPDATED: 'Super admin updated successfully',
+    SUPER_ADMIN_DELETED: 'Super admin soft-deleted successfully',
   }
 };

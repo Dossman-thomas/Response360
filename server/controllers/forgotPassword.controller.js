@@ -1,13 +1,21 @@
-import { forgotPasswordService } from "../services/index.js";
+import { forgotPasswordService } from '../services/index.js';
+import { messages } from '../messages/index.js';
+import { response } from '../utils/index.js';
 
 export const forgotPasswordController = async (req, res) => {
   const { payload } = req.body;
 
   try {
     await forgotPasswordService(payload);
-    return res.status(200).json({ message: "Password reset link sent." });
+    return response(res, {
+      statusCode: 200,
+      message: messages.general.EMAIL_SENT,
+    });
   } catch (error) {
-    console.error("Forgot password controller error:", error.message);
-    return res.status(500).json({ message: error.message || "Something went wrong." });
+    console.error('Forgot password controller error:', error.message);
+    return response(res, {
+      statusCode: error.status || 500,
+      message: error.message || messages.general.OOPS,
+    });
   }
 };

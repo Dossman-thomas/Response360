@@ -26,7 +26,7 @@ export class UserService {
       .pipe(
         map((response) => {
           // Access the encrypted data from the response
-          const decryptedData = this.cryptoService.Decrypt(response.foundUser.data);
+          const decryptedData = this.cryptoService.Decrypt(response.data);
           return decryptedData;
         })
       );

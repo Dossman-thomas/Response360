@@ -19,7 +19,7 @@ export class ImageUploadService {
     formData: FormData
   ): Observable<{ message: string; path: string }> {
     return this.http
-      .post<{ message: string; path: string }>(
+      .post<any>(
         `${this.baseUrl}/upload-logo`,
         formData,
         {
@@ -29,7 +29,7 @@ export class ImageUploadService {
       .pipe(
         map((response) => ({
           message: response.message,
-          path: this.cryptoService.Decrypt(response.path),
+          path: this.cryptoService.Decrypt(response.data.path),
         }))
       );
   }

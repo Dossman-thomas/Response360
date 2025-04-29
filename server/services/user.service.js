@@ -63,10 +63,7 @@ export const getUserByEmailService = async (payload) => {
       throw createError('User not found.', 404, { code: 'USER_NOT_FOUND' });
     }
 
-    return {
-      success: true,
-      data: encryptService(foundUser),
-    };
+    return encryptService(foundUser);
   } catch (error) {
     console.error('Error fetching user by email:', error);
     if (error.status) throw error; // pass through known errors
