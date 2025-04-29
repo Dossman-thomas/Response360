@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../shared/environments/environment';
 import { CryptoService } from './crypto.service';
 import { getHeaders } from '../utils/utils/getHeaders.util';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -48,13 +48,26 @@ export class AuthService {
       user_password,
       rememberMe,
     });
-
+  
     return this.http.post<any>(
       `${this.baseUrl}/login`,
       { payload: encryptedPayload },
       { headers: getHeaders() }
+    ).pipe(
+      catchError((error) => {
+        const backendError = error?.error;
+  
+        // Check for specific rate-limit code
+        if (backendError?.code === 'TOO_MANY_ATTEMPTS') {
+          return throwError(() => new Error('Too many login attempts. Please try again in 15 minutes.'));
+        }
+  
+        // Handle other errors generically
+        return throwError(() => new Error(backendError?.message || 'Login failed. Please try again.'));
+      })
     );
   }
+  
 
   logout() {
     // Clear localStorage and cookies

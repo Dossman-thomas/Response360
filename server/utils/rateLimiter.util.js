@@ -1,4 +1,5 @@
-// Utility functions for rate limiting login attempts
+import { createError } from './index.js';
+
 const loginAttempts = new Map();
 
 const MAX_ATTEMPTS = 5;
@@ -15,9 +16,14 @@ export const checkRateLimit = (key) => {
   }
 
   if (attemptData.count >= MAX_ATTEMPTS) {
-    const error = new Error(`Too many login attempts. Try again in ${WINDOW_MINUTES} minutes.`);
-    error.status = 429;
-    throw error;
+    // If the user has exceeded the max attempts, throw an error
+    throw createError(
+      `Too many login attempts. Try again in ${WINDOW_MINUTES} minutes.`,
+      429,
+      {
+        code: 'TOO_MANY_ATTEMPTS',
+      }
+    );
   }
 
   // Otherwise, increment count

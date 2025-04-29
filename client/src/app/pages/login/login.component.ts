@@ -84,7 +84,22 @@ export class LoginComponent implements OnInit {
         },
         error: (err) => {
           console.error('Login error:', err);
-          this.toastr.error('Invalid credentials. Please try again.');
+        
+          if (err.message.includes('Too many login attempts')) {
+            this.toastr.error(
+              'Too many login attempts. Try again in 15 minutes.',
+              'Login Blocked', // ← required to pass the options as third param
+              {
+                timeOut: 4000,
+                closeButton: true,
+                progressBar: true,
+                extendedTimeOut: 1000,
+              }
+            );
+            
+          } else {
+            this.toastr.error('Invalid credentials. Please try again.');
+          }
         },
       });
   }
