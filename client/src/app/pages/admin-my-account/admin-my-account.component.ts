@@ -16,6 +16,7 @@ export class AdminMyAccountComponent implements OnInit {
   showPasswordModal = false;
   passwordForm!: FormGroup;
   userEmail: string | null = '';
+  userId: string | null = null;
   userData: any = {};
   showNewPassword = false;
   showConfirmPassword = false;
@@ -37,20 +38,19 @@ export class AdminMyAccountComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const storedEmail = this.cookieService.get('email');
+    const storedUserId = localStorage.getItem('userId');
 
-    // Decrypt userEmail from cookies
-    if (storedEmail) {
+    if (storedUserId) {
       try {
-        this.userEmail = this.cryptoService.Decrypt(storedEmail);
+        this.userId = this.cryptoService.Decrypt(storedUserId);
       } catch (err) {
-        console.error('Failed to decrypt user email from cookie:', err);
+        console.error('Failed to decrypt user ID from local storage:', err);
       }
     }
 
     // Call getUserByEmailService to fetch user info
-    if (this.userEmail) {
-      this.userService.getUserByEmail(this.userEmail).subscribe(
+    if (this.userId) {
+      this.userService.getUserById(this.userId).subscribe(
         (user) => {
           this.userData = user;
         },
@@ -99,10 +99,10 @@ export class AdminMyAccountComponent implements OnInit {
   verifyCurrentPassword() {
     const currentPassword = this.passwordForm.get('currentPassword')?.value;
   
-    if (!this.userEmail || !currentPassword) return;
+    if (!this.userData.user_email || !currentPassword) return;
   
     this.verifyingPassword = true;
-    this.passwordsService.verifyCurrentPassword(this.userEmail, currentPassword).subscribe(
+    this.passwordsService.verifyCurrentPassword(this.userData.user_email, currentPassword).subscribe(
       (res) => {
         this.verifyingPassword = false;
         if (res.success) {
@@ -138,13 +138,13 @@ export class AdminMyAccountComponent implements OnInit {
     const currentPassword = this.passwordForm.get('currentPassword')?.value;
     const newPassword = this.passwordForm.get('newPassword')?.value;
   
-    if (!this.userEmail || !currentPassword || !newPassword) {
+    if (!this.userData.user_email || !currentPassword || !newPassword) {
       this.toastr.error('Please fill out all password fields');
       return;
     }
   
     // Step 1: Verify current password
-    this.passwordsService.verifyCurrentPassword(this.userEmail, currentPassword).subscribe(
+    this.passwordsService.verifyCurrentPassword(this.userData.user_email, currentPassword).subscribe(
       (verifyRes) => {
         if (!verifyRes.success) {
           // this.toastr.error('Current password is incorrect');
