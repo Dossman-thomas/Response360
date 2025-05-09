@@ -31,4 +31,24 @@ export class UserService {
         })
       );
   }
+
+  getUserById(userId: string): Observable<any> {
+  const payload = { user_id: userId };
+  const encryptedPayload = this.cryptoService.Encrypt(payload);
+
+  return this.http
+    .post<any>(
+      `${this.baseUrl}/get-by-id`,
+      { payload: encryptedPayload },
+      { headers: getHeaders() }
+    )
+    .pipe(
+      map((response) => {
+        // Access the encrypted data from the response
+        const decryptedData = this.cryptoService.Decrypt(response.data);
+        return decryptedData;
+      })
+    );
+}
+
 }
