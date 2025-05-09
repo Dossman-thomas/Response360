@@ -18,7 +18,7 @@ const parsedPubKey = CryptoJS.SHA256(pubkey); // Parse key to always produce a 2
 const generateIV = () => CryptoJS.lib.WordArray.random(16);
 
 // Encrypt function
-export const encryptService = async (data) => {
+export const encryptService = (data) => {
   try {
     if (!data || typeof data !== 'object' && typeof data !== 'string') {
       throw createError('Invalid data. Please provide a valid object or string.', 400, {
@@ -59,7 +59,7 @@ export const encryptService = async (data) => {
   }
 };
 
-export const decryptService = async (payload) => {
+export const decryptService = (payload) => {
   try {
     if (!payload || typeof payload !== 'string') {
       throw createError('Invalid payload. Please provide a valid string.', 400, {
