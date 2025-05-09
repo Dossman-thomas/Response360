@@ -20,7 +20,6 @@ export class OrganizationDetailsComponent implements OnInit {
   org_updated_at?: string;
   org_status?: string;
 
-
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   previewUrl: string | null = null;
   selectedLogoFile: File | null = null;
@@ -94,7 +93,6 @@ export class OrganizationDetailsComponent implements OnInit {
   fetchOrganizationDetails(orgId: string): void {
     this.organizationService.getOrganizationById(orgId).subscribe({
       next: (data) => {
-  
         // Patch organization data
         this.organizationForm.patchValue({
           org_name: data.orgName,
@@ -107,7 +105,7 @@ export class OrganizationDetailsComponent implements OnInit {
           org_status: data.status ? 'Enabled' : 'Disabled',
           logo: data.logo ? `${environment.backendHost}${data.logo}` : '',
         });
-  
+
         // Patch admin user data
         if (data.adminUser) {
           this.organizationForm.patchValue({
@@ -117,14 +115,14 @@ export class OrganizationDetailsComponent implements OnInit {
             admin_phone_number: data.adminUser.userPhoneNumber,
           });
         }
-  
+
         // Format date fields
         const formatOptions: Intl.DateTimeFormatOptions = {
           day: 'numeric',
           month: 'short',
           year: 'numeric',
         };
-  
+
         this.org_created_at = new Date(data.orgCreatedAt).toLocaleDateString(
           'en-GB',
           formatOptions
@@ -141,9 +139,8 @@ export class OrganizationDetailsComponent implements OnInit {
       },
     });
   }
-  
-  
-  
+
+  // Get error message for form controls
   getErrorMessage(controlName: string): string {
     const control = this.organizationForm.get(controlName);
     if (control?.hasError('required')) return 'This field is required.';
@@ -226,9 +223,9 @@ export class OrganizationDetailsComponent implements OnInit {
           },
           error: (err) => {
             console.error('Failed to create organization:', err);
-  
+
             const errorMessages: { [key: string]: string } = {};
-  
+
             // Accumulate all errors
             if (err?.error?.orgEmail) {
               errorMessages['org_email'] = err.error.orgEmail;
@@ -236,13 +233,14 @@ export class OrganizationDetailsComponent implements OnInit {
             if (err?.error?.adminEmail) {
               errorMessages['admin_email'] = err.error.adminEmail;
             }
-  
+
             // Set all errors at once
             Object.keys(errorMessages).forEach((field) => {
-              this.organizationForm.get(field)?.setErrors({ custom: errorMessages[field] });
+              this.organizationForm
+                .get(field)
+                ?.setErrors({ custom: errorMessages[field] });
             });
           },
-          
         });
     }
   }
@@ -277,9 +275,20 @@ export class OrganizationDetailsComponent implements OnInit {
 
           console.log('logo path in form:', response.path);
         },
-        error: (err) => {
-          console.error('Image upload failed:', err);
-          this.toastr.error('Something went wrong. Please try again later.');
+        error: (error) => {
+          console.error('Image upload failed:', error);
+
+          const errorMessage = error?.error?.error || '';
+
+          if (errorMessage.includes('Only image files')) {
+            this.toastr.error(errorMessage, 'Invalid File Type', {
+              timeOut: 3000,
+              closeButton: true,
+              progressBar: true,
+            });
+          } else {
+            this.toastr.error('Something went wrong. Please try again later.');
+          }
         },
       });
     }

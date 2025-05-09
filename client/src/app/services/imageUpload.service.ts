@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { CryptoService } from './crypto.service';
 import { environment } from '../shared/environments/environment';
 import { getHeaders } from '../utils/utils/getHeaders.util';
@@ -30,7 +30,16 @@ export class ImageUploadService {
         map((response) => ({
           message: response.message,
           path: this.cryptoService.Decrypt(response.data.path),
-        }))
+        })),
+      catchError((error) => {
+        if (
+          error?.error?.code === 'INVALID_FILE_TYPE' ||
+          error?.error?.message?.includes('Only image files')
+        ) {
+          throw new Error('Only image files (jpeg, jpg, png, gif) are allowed.');
+        }
+        throw error;
+      })
       );
   }
 }

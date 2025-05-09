@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { env } from '../config/index.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { response } from '../utils/index.js';
+import { response, createError } from '../utils/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,9 +29,9 @@ const storage = multer.diskStorage({
     } catch (err) {
       console.error(`❌ Error creating directory at ${uploadPath}:`, err);
       return cb(
-        new Error(
-          'Failed to create the upload directory at ${uploadPath}. Please ensure the directory is writable.'
-        )
+        createError(errorMessage, 400, {
+          code: 'INVALID_FILE_TYPE',
+        })
       );
     }
 
