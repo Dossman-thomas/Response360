@@ -12,7 +12,10 @@ export {
   deleteOrganizationController,
 } from './organization.controller.js';
 
-export { getUserByEmailController } from './user.controller.js';
+export {
+  getUserByEmailController,
+  getUserByIdController,
+} from './user.controller.js';
 
 export { forgotPasswordController } from './forgotPassword.controller.js';
 
